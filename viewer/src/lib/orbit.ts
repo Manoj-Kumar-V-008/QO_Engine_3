@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium';
 import * as satellite from 'satellite.js';
-import type { TleEntry } from '../types/engine';
+import type { AntennaConfig, TleEntry } from '../types/engine';
 
 export function buildSatellitePositionProperty(
   tle: TleEntry,
@@ -38,4 +38,32 @@ export function buildSatellitePositionProperty(
   }
 
   return property;
+}
+
+/**
+ * Compute the ground visibility footprint radius (in meters along Earth's surface)
+ * for a satellite at `satAltitudeKm` above an antenna with `minElevationDeg`.
+ */
+export function computeFootprintRadiusMeters(
+  minElevationDeg: number,
+  satAltitudeKm = 786.0
+): number {
+  const earthRadiusKm = 6371.0;
+  const elRad = Cesium.Math.toRadians(minElevationDeg);
+  const ratio = (earthRadiusKm / (earthRadiusKm + satAltitudeKm)) * Math.cos(elRad);
+  const clamped = Math.min(1.0, Math.max(-1.0, ratio));
+  const nadirAngleRad = Math.asin(clamped);
+  const centralAngleRad = Math.PI / 2 - elRad - nadirAngleRad;
+  return Math.max(100_000, earthRadiusKm * 1000 * centralAngleRad);
+}
+
+/**
+ * Convert an AntennaConfig into its 3D ECEF Cartesian3 coordinate.
+ */
+export function antennaCartesian(antenna: AntennaConfig): Cesium.Cartesian3 {
+  return Cesium.Cartesian3.fromDegrees(
+    antenna.lon_deg,
+    antenna.lat_deg,
+    antenna.alt_m
+  );
 }

@@ -4,4 +4,5 @@ __pycache__/
 .vscode/
 .env
 data/cache/
+node_modules
 rough.py

@@ -18,6 +18,8 @@ from engine.scenario import load_scenario
 
 
 def build_document(scenario, tles):
+    passes = find_all_passes(scenario, tles)
+    setup_s = {antenna.id: antenna.setup_s for antenna in scenario.antennas}
     return {
         "schema_version": "0.1",
         "scenario_id": scenario.scenario_id,
@@ -30,7 +32,8 @@ def build_document(scenario, tles):
             }
             for sat in scenario.satellites
         ],
-        "passes": find_all_passes(scenario, tles),
+        "passes": passes,
+        "conflicts": find_conflicts(passes, setup_s),
     }
 
 
@@ -42,6 +45,22 @@ def main(scenario_path, output_path):
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(document, indent=2), encoding="utf-8")
+
+    # Write tles.json and scenario.json into the same folder as passes.json
+    tles_doc = {
+        sat.id: {
+            "satellite_id": sat.id,
+            "norad_id": sat.norad_id,
+            "name": tles[sat.norad_id][0],
+            "line1": tles[sat.norad_id][1],
+            "line2": tles[sat.norad_id][2],
+        }
+        for sat in scenario.satellites
+    }
+    (output.parent / "tles.json").write_text(json.dumps(tles_doc, indent=2), encoding="utf-8")
+    (output.parent / "scenario.json").write_text(
+        Path(scenario_path).read_text(encoding="utf-8"), encoding="utf-8"
+    )
 
     for source in document["tle_sources"]:
         print(f"{source['satellite_id']}: TLE '{source['tle_name']}' epoch {source['tle_epoch_utc']}")

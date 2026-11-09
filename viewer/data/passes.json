@@ -687,5 +687,322 @@
       "max_volume_gb": 44.0,
       "expected_volume_gb": 20.1
     }
+  ],
+  "conflicts": [
+    {
+      "pass_a": "p007",
+      "pass_b": "p008",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p007",
+      "pass_b": "p009",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p009",
+      "pass_b": "p010",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p011",
+      "pass_b": "p012",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p011",
+      "pass_b": "p013",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p012",
+      "pass_b": "p014",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p012",
+      "pass_b": "p015",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p013",
+      "pass_b": "p015",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p015",
+      "pass_b": "p016",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p017",
+      "pass_b": "p018",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p017",
+      "pass_b": "p019",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p017",
+      "pass_b": "p020",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p018",
+      "pass_b": "p019",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p018",
+      "pass_b": "p021",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p019",
+      "pass_b": "p022",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p020",
+      "pass_b": "p021",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p020",
+      "pass_b": "p022",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p021",
+      "pass_b": "p022",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p023",
+      "pass_b": "p024",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p023",
+      "pass_b": "p025",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p023",
+      "pass_b": "p026",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p024",
+      "pass_b": "p026",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p024",
+      "pass_b": "p027",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p025",
+      "pass_b": "p027",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p025",
+      "pass_b": "p028",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p027",
+      "pass_b": "p028",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p029",
+      "pass_b": "p030",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p029",
+      "pass_b": "p031",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p030",
+      "pass_b": "p032",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p031",
+      "pass_b": "p032",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p033",
+      "pass_b": "p034",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p033",
+      "pass_b": "p035",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p034",
+      "pass_b": "p036",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p035",
+      "pass_b": "p036",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p037",
+      "pass_b": "p038",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p037",
+      "pass_b": "p039",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p038",
+      "pass_b": "p040",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p039",
+      "pass_b": "p040",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p041",
+      "pass_b": "p042",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p041",
+      "pass_b": "p043",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p042",
+      "pass_b": "p044",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p043",
+      "pass_b": "p044",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p045",
+      "pass_b": "p046",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p045",
+      "pass_b": "p047",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p045",
+      "pass_b": "p048",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p046",
+      "pass_b": "p047",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p046",
+      "pass_b": "p049",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p047",
+      "pass_b": "p050",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p048",
+      "pass_b": "p049",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p048",
+      "pass_b": "p050",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p049",
+      "pass_b": "p050",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p051",
+      "pass_b": "p052",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p051",
+      "pass_b": "p053",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p051",
+      "pass_b": "p054",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p052",
+      "pass_b": "p054",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p052",
+      "pass_b": "p055",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p053",
+      "pass_b": "p055",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p053",
+      "pass_b": "p056",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p054",
+      "pass_b": "p056",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p055",
+      "pass_b": "p056",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p058",
+      "pass_b": "p059",
+      "reason": "same_satellite"
+    },
+    {
+      "pass_a": "p059",
+      "pass_b": "p061",
+      "reason": "same_antenna"
+    },
+    {
+      "pass_a": "p060",
+      "pass_b": "p061",
+      "reason": "same_satellite"
+    }
   ]
 }

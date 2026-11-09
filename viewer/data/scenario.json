@@ -1,0 +1,32 @@
+{
+  "schema_version": "0.1",
+  "scenario_id": "demo-001",
+  "start_utc": "2026-11-09T00:00:00Z",
+  "duration_hours": 24,
+  "satellites": [
+    {
+      "id": "sentinel-2a",
+      "norad_id": 40697,
+      "buffer_capacity_gb": 300,
+      "initial_buffer_gb": 0,
+      "generation_gb_per_hour": 62.5,
+      "downlink_rate_mbps": 560
+    },
+    {
+      "id": "sentinel-2b",
+      "norad_id": 42063,
+      "buffer_capacity_gb": 300,
+      "initial_buffer_gb": 0,
+      "generation_gb_per_hour": 62.5,
+      "downlink_rate_mbps": 560
+    }
+  ],
+  "antennas": [
+    {"id": "svalbard-1", "name": "Svalbard", "lat_deg": 78.23, "lon_deg": 15.41,
+     "alt_m": 450, "min_elevation_deg": 5, "dishes": 1, "setup_s": 120},
+    {"id": "kiruna-1", "name": "Kiruna", "lat_deg": 67.86, "lon_deg": 20.96,
+     "alt_m": 400, "min_elevation_deg": 5, "dishes": 1, "setup_s": 120},
+    {"id": "matera-1", "name": "Matera", "lat_deg": 40.65, "lon_deg": 16.70,
+     "alt_m": 540, "min_elevation_deg": 5, "dishes": 1, "setup_s": 120}
+  ]
+}

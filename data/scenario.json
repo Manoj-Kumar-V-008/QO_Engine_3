@@ -7,9 +7,9 @@
     {
       "id": "sentinel-2a",
       "norad_id": 40697,
-      "buffer_capacity_gb": 64,
+      "buffer_capacity_gb": 300,
       "initial_buffer_gb": 0,
-      "generation_gb_per_hour": 2.0
+      "generation_gb_per_hour": 62.5
     }
   ],
   "antennas": [

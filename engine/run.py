@@ -1,4 +1,4 @@
-"""Phases 2-3: read a scenario, find every pass, build a greedy schedule, write JSON files.
+"""Phases 2-5: find passes, build greedy and optimized schedules, write the JSON files.
 
 Usage: python -m engine.run data/scenario.json [viewer/data/passes.json]
 """
@@ -10,8 +10,10 @@ from engine.buffer import simulate_buffer
 from engine.celestrak import fetch_tle
 from engine.conflicts import find_conflicts
 from engine.greedy import greedy_schedule
+from engine.optimizer import optimize_schedule
 from engine.pass_finder import find_all_passes, iso_z, tle_epoch_utc
 from engine.schedule import evaluate_schedule
+from engine.scoreboard import build_scoreboard, format_scoreboard
 from engine.scenario import load_scenario
 
 
@@ -78,21 +80,20 @@ def main(scenario_path, output_path):
         by_reason[conflict["reason"]] = by_reason.get(conflict["reason"], 0) + 1
     print(f"\nConflicting pass pairs: {len(conflicts)} {by_reason}")
 
-    chosen = greedy_schedule(scenario, document["passes"])
-    schedule = evaluate_schedule(scenario, document["passes"], chosen, "greedy")
-    schedule_path = output.parent / "schedule_greedy.json"
-    schedule_path.write_text(json.dumps(schedule, indent=2), encoding="utf-8")
+    schedules = []
+    for method, choose in (("greedy", greedy_schedule), ("optimizer", optimize_schedule)):
+        chosen = choose(scenario, document["passes"])
+        schedule = evaluate_schedule(scenario, document["passes"], chosen, method)
+        schedule_path = output.parent / f"schedule_{method}.json"
+        schedule_path.write_text(json.dumps(schedule, indent=2), encoding="utf-8")
+        schedules.append(schedule)
+        print(f"{method}: schedule written to {schedule_path}")
 
-    generated = sum(sat.generation_gb_per_hour * scenario.duration_hours for sat in scenario.satellites)
-    summary = schedule["summary"]
-    print(
-        f"Greedy schedule: {summary['passes_used']} of {summary['passes_available']} passes used"
-    )
-    print(
-        f"  delivered {summary['gb_delivered']:.0f} GB of {generated:.0f} GB generated, "
-        f"overflow {summary['overflow_gb']:.0f} GB ({summary['overflow_events']} events)"
-    )
-    print(f"  written to {schedule_path}")
+    board = build_scoreboard(scenario, schedules)
+    (output.parent / "scoreboard.json").write_text(json.dumps(board, indent=2), encoding="utf-8")
+    print()
+    for line in format_scoreboard(board):
+        print(line)
 
 
 if __name__ == "__main__":

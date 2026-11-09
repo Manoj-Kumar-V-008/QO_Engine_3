@@ -1,0 +1,24 @@
+{
+  "scenario_id": "demo-001",
+  "generated_gb": 3000.0,
+  "methods": [
+    {
+      "method": "greedy",
+      "passes_used": 30,
+      "gb_delivered": 691.4,
+      "overflow_gb": 1708.6,
+      "overflow_events": 24,
+      "share_of_generated_pct": 23.0
+    },
+    {
+      "method": "optimizer",
+      "passes_used": 30,
+      "gb_delivered": 695.8,
+      "overflow_gb": 1704.2,
+      "overflow_events": 25,
+      "share_of_generated_pct": 23.2
+    }
+  ],
+  "gain_gb": 4.4,
+  "gain_pct": 0.6
+}

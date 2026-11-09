@@ -17,6 +17,7 @@ VALID = {
             "buffer_capacity_gb": 64,
             "initial_buffer_gb": 0,
             "generation_gb_per_hour": 2.0,
+            "downlink_rate_mbps": 560
         }
     ],
     "antennas": [
@@ -64,4 +65,10 @@ def test_start_time_without_timezone_fails():
 
 def test_real_scenario_file_loads():
     s = load_scenario("data/scenario.json")
-    assert s.duration_hours > 0
+    assert len(s.satellites) == 2 and len(s.antennas) == 3
+
+def test_zero_downlink_rate_fails():
+    d = valid()
+    d["satellites"][0]["downlink_rate_mbps"] = 0
+    with pytest.raises(ValidationError):
+        Scenario.model_validate(d)

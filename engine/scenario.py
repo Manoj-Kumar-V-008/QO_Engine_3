@@ -11,6 +11,7 @@ class Satellite(BaseModel):
     buffer_capacity_gb: float = Field(gt=0)
     initial_buffer_gb: float = Field(ge=0)
     generation_gb_per_hour: float = Field(ge=0)
+    downlink_rate_mbps: float = Field(gt=0)
 
     @model_validator(mode="after")
     def check_initial_fits(self):

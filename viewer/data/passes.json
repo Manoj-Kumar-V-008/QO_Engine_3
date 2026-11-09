@@ -1,0 +1,630 @@
+{
+  "schema_version": "0.1",
+  "scenario_id": "demo-001",
+  "tle_sources": [
+    {
+      "satellite_id": "sentinel-2a",
+      "norad_id": 40697,
+      "tle_name": "SENTINEL-2A",
+      "tle_epoch_utc": "2026-11-08T06:29:32Z"
+    },
+    {
+      "satellite_id": "sentinel-2b",
+      "norad_id": 42063,
+      "tle_name": "SENTINEL-2B",
+      "tle_epoch_utc": "2026-11-08T06:19:23Z"
+    }
+  ],
+  "passes": [
+    {
+      "pass_id": "p001",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T01:06:16Z",
+      "los_utc": "2026-11-09T01:14:09Z",
+      "max_elevation_deg": 11.2,
+      "duration_s": 473,
+      "expected_volume_gb": 33.1
+    },
+    {
+      "pass_id": "p002",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T01:16:40Z",
+      "los_utc": "2026-11-09T01:24:19Z",
+      "max_elevation_deg": 10.7,
+      "duration_s": 460,
+      "expected_volume_gb": 32.2
+    },
+    {
+      "pass_id": "p003",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T02:49:18Z",
+      "los_utc": "2026-11-09T02:55:23Z",
+      "max_elevation_deg": 8.3,
+      "duration_s": 365,
+      "expected_volume_gb": 25.6
+    },
+    {
+      "pass_id": "p004",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T02:59:39Z",
+      "los_utc": "2026-11-09T03:05:40Z",
+      "max_elevation_deg": 8.2,
+      "duration_s": 361,
+      "expected_volume_gb": 25.3
+    },
+    {
+      "pass_id": "p005",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T04:31:23Z",
+      "los_utc": "2026-11-09T04:37:51Z",
+      "max_elevation_deg": 8.8,
+      "duration_s": 388,
+      "expected_volume_gb": 27.1
+    },
+    {
+      "pass_id": "p006",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T04:41:36Z",
+      "los_utc": "2026-11-09T04:48:15Z",
+      "max_elevation_deg": 9.0,
+      "duration_s": 399,
+      "expected_volume_gb": 27.9
+    },
+    {
+      "pass_id": "p007",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T06:12:23Z",
+      "los_utc": "2026-11-09T06:20:56Z",
+      "max_elevation_deg": 12.7,
+      "duration_s": 513,
+      "expected_volume_gb": 35.9
+    },
+    {
+      "pass_id": "p008",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T06:19:08Z",
+      "los_utc": "2026-11-09T06:19:42Z",
+      "max_elevation_deg": 5.0,
+      "duration_s": 34,
+      "expected_volume_gb": 2.4
+    },
+    {
+      "pass_id": "p009",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T06:22:31Z",
+      "los_utc": "2026-11-09T06:31:19Z",
+      "max_elevation_deg": 13.4,
+      "duration_s": 527,
+      "expected_volume_gb": 36.9
+    },
+    {
+      "pass_id": "p010",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T06:27:59Z",
+      "los_utc": "2026-11-09T06:31:30Z",
+      "max_elevation_deg": 6.0,
+      "duration_s": 211,
+      "expected_volume_gb": 14.8
+    },
+    {
+      "pass_id": "p011",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T07:52:51Z",
+      "los_utc": "2026-11-09T08:03:29Z",
+      "max_elevation_deg": 21.1,
+      "duration_s": 638,
+      "expected_volume_gb": 44.6
+    },
+    {
+      "pass_id": "p012",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T07:56:09Z",
+      "los_utc": "2026-11-09T08:06:19Z",
+      "max_elevation_deg": 18.6,
+      "duration_s": 610,
+      "expected_volume_gb": 42.7
+    },
+    {
+      "pass_id": "p013",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T08:02:58Z",
+      "los_utc": "2026-11-09T08:13:47Z",
+      "max_elevation_deg": 22.3,
+      "duration_s": 648,
+      "expected_volume_gb": 45.4
+    },
+    {
+      "pass_id": "p014",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "matera-1",
+      "aos_utc": "2026-11-09T08:06:00Z",
+      "los_utc": "2026-11-09T08:12:28Z",
+      "max_elevation_deg": 8.9,
+      "duration_s": 388,
+      "expected_volume_gb": 27.2
+    },
+    {
+      "pass_id": "p015",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T08:06:10Z",
+      "los_utc": "2026-11-09T08:16:42Z",
+      "max_elevation_deg": 20.7,
+      "duration_s": 632,
+      "expected_volume_gb": 44.2
+    },
+    {
+      "pass_id": "p016",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "matera-1",
+      "aos_utc": "2026-11-09T08:15:23Z",
+      "los_utc": "2026-11-09T08:23:25Z",
+      "max_elevation_deg": 11.8,
+      "duration_s": 482,
+      "expected_volume_gb": 33.8
+    },
+    {
+      "pass_id": "p017",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T09:33:04Z",
+      "los_utc": "2026-11-09T09:45:02Z",
+      "max_elevation_deg": 36.9,
+      "duration_s": 718,
+      "expected_volume_gb": 50.3
+    },
+    {
+      "pass_id": "p018",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T09:35:40Z",
+      "los_utc": "2026-11-09T09:48:04Z",
+      "max_elevation_deg": 53.6,
+      "duration_s": 744,
+      "expected_volume_gb": 52.1
+    },
+    {
+      "pass_id": "p019",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "matera-1",
+      "aos_utc": "2026-11-09T09:43:08Z",
+      "los_utc": "2026-11-09T09:55:39Z",
+      "max_elevation_deg": 84.2,
+      "duration_s": 751,
+      "expected_volume_gb": 52.5
+    },
+    {
+      "pass_id": "p020",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T09:43:10Z",
+      "los_utc": "2026-11-09T09:55:14Z",
+      "max_elevation_deg": 39.1,
+      "duration_s": 724,
+      "expected_volume_gb": 50.7
+    },
+    {
+      "pass_id": "p021",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T09:45:44Z",
+      "los_utc": "2026-11-09T09:58:12Z",
+      "max_elevation_deg": 59.8,
+      "duration_s": 748,
+      "expected_volume_gb": 52.4
+    },
+    {
+      "pass_id": "p022",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "matera-1",
+      "aos_utc": "2026-11-09T09:53:11Z",
+      "los_utc": "2026-11-09T10:05:40Z",
+      "max_elevation_deg": 79.1,
+      "duration_s": 749,
+      "expected_volume_gb": 52.4
+    },
+    {
+      "pass_id": "p023",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T11:13:04Z",
+      "los_utc": "2026-11-09T11:25:36Z",
+      "max_elevation_deg": 65.0,
+      "duration_s": 752,
+      "expected_volume_gb": 52.6
+    },
+    {
+      "pass_id": "p024",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T11:15:20Z",
+      "los_utc": "2026-11-09T11:27:40Z",
+      "max_elevation_deg": 57.2,
+      "duration_s": 740,
+      "expected_volume_gb": 51.8
+    },
+    {
+      "pass_id": "p025",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T11:23:08Z",
+      "los_utc": "2026-11-09T11:35:42Z",
+      "max_elevation_deg": 68.5,
+      "duration_s": 754,
+      "expected_volume_gb": 52.7
+    },
+    {
+      "pass_id": "p026",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "matera-1",
+      "aos_utc": "2026-11-09T11:24:00Z",
+      "los_utc": "2026-11-09T11:32:16Z",
+      "max_elevation_deg": 12.9,
+      "duration_s": 496,
+      "expected_volume_gb": 34.7
+    },
+    {
+      "pass_id": "p027",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T11:25:22Z",
+      "los_utc": "2026-11-09T11:37:37Z",
+      "max_elevation_deg": 52.2,
+      "duration_s": 735,
+      "expected_volume_gb": 51.4
+    },
+    {
+      "pass_id": "p028",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "matera-1",
+      "aos_utc": "2026-11-09T11:34:27Z",
+      "los_utc": "2026-11-09T11:41:34Z",
+      "max_elevation_deg": 10.3,
+      "duration_s": 427,
+      "expected_volume_gb": 29.9
+    },
+    {
+      "pass_id": "p029",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T12:52:48Z",
+      "los_utc": "2026-11-09T13:05:22Z",
+      "max_elevation_deg": 82.2,
+      "duration_s": 754,
+      "expected_volume_gb": 52.8
+    },
+    {
+      "pass_id": "p030",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T12:54:44Z",
+      "los_utc": "2026-11-09T13:05:51Z",
+      "max_elevation_deg": 27.7,
+      "duration_s": 667,
+      "expected_volume_gb": 46.7
+    },
+    {
+      "pass_id": "p031",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T13:02:51Z",
+      "los_utc": "2026-11-09T13:15:25Z",
+      "max_elevation_deg": 79.5,
+      "duration_s": 754,
+      "expected_volume_gb": 52.8
+    },
+    {
+      "pass_id": "p032",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T13:04:44Z",
+      "los_utc": "2026-11-09T13:15:43Z",
+      "max_elevation_deg": 26.3,
+      "duration_s": 659,
+      "expected_volume_gb": 46.1
+    },
+    {
+      "pass_id": "p033",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T14:32:17Z",
+      "los_utc": "2026-11-09T14:44:44Z",
+      "max_elevation_deg": 64.8,
+      "duration_s": 747,
+      "expected_volume_gb": 52.3
+    },
+    {
+      "pass_id": "p034",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T14:33:30Z",
+      "los_utc": "2026-11-09T14:43:35Z",
+      "max_elevation_deg": 19.8,
+      "duration_s": 605,
+      "expected_volume_gb": 42.4
+    },
+    {
+      "pass_id": "p035",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T14:42:18Z",
+      "los_utc": "2026-11-09T14:54:45Z",
+      "max_elevation_deg": 64.0,
+      "duration_s": 747,
+      "expected_volume_gb": 52.3
+    },
+    {
+      "pass_id": "p036",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T14:43:25Z",
+      "los_utc": "2026-11-09T14:53:27Z",
+      "max_elevation_deg": 19.6,
+      "duration_s": 602,
+      "expected_volume_gb": 42.2
+    },
+    {
+      "pass_id": "p037",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T16:11:27Z",
+      "los_utc": "2026-11-09T16:21:51Z",
+      "max_elevation_deg": 21.8,
+      "duration_s": 625,
+      "expected_volume_gb": 43.7
+    },
+    {
+      "pass_id": "p038",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T16:11:35Z",
+      "los_utc": "2026-11-09T16:24:02Z",
+      "max_elevation_deg": 64.7,
+      "duration_s": 747,
+      "expected_volume_gb": 52.3
+    },
+    {
+      "pass_id": "p039",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T16:21:18Z",
+      "los_utc": "2026-11-09T16:31:49Z",
+      "max_elevation_deg": 22.5,
+      "duration_s": 631,
+      "expected_volume_gb": 44.2
+    },
+    {
+      "pass_id": "p040",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T16:21:36Z",
+      "los_utc": "2026-11-09T16:34:03Z",
+      "max_elevation_deg": 65.6,
+      "duration_s": 748,
+      "expected_volume_gb": 52.3
+    },
+    {
+      "pass_id": "p041",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T17:49:14Z",
+      "los_utc": "2026-11-09T18:00:57Z",
+      "max_elevation_deg": 36.2,
+      "duration_s": 703,
+      "expected_volume_gb": 49.2
+    },
+    {
+      "pass_id": "p042",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T17:50:56Z",
+      "los_utc": "2026-11-09T18:03:30Z",
+      "max_elevation_deg": 82.0,
+      "duration_s": 754,
+      "expected_volume_gb": 52.8
+    },
+    {
+      "pass_id": "p043",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T17:59:08Z",
+      "los_utc": "2026-11-09T18:10:59Z",
+      "max_elevation_deg": 38.9,
+      "duration_s": 711,
+      "expected_volume_gb": 49.7
+    },
+    {
+      "pass_id": "p044",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T18:00:58Z",
+      "los_utc": "2026-11-09T18:13:33Z",
+      "max_elevation_deg": 84.7,
+      "duration_s": 755,
+      "expected_volume_gb": 52.9
+    },
+    {
+      "pass_id": "p045",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "matera-1",
+      "aos_utc": "2026-11-09T19:23:20Z",
+      "los_utc": "2026-11-09T19:32:30Z",
+      "max_elevation_deg": 15.7,
+      "duration_s": 550,
+      "expected_volume_gb": 38.5
+    },
+    {
+      "pass_id": "p046",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T19:27:56Z",
+      "los_utc": "2026-11-09T19:40:30Z",
+      "max_elevation_deg": 85.7,
+      "duration_s": 754,
+      "expected_volume_gb": 52.8
+    },
+    {
+      "pass_id": "p047",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T19:30:43Z",
+      "los_utc": "2026-11-09T19:43:15Z",
+      "max_elevation_deg": 65.2,
+      "duration_s": 752,
+      "expected_volume_gb": 52.7
+    },
+    {
+      "pass_id": "p048",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "matera-1",
+      "aos_utc": "2026-11-09T19:32:51Z",
+      "los_utc": "2026-11-09T19:42:47Z",
+      "max_elevation_deg": 19.1,
+      "duration_s": 596,
+      "expected_volume_gb": 41.7
+    },
+    {
+      "pass_id": "p049",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T19:37:59Z",
+      "los_utc": "2026-11-09T19:50:34Z",
+      "max_elevation_deg": 86.6,
+      "duration_s": 755,
+      "expected_volume_gb": 52.8
+    },
+    {
+      "pass_id": "p050",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T19:40:49Z",
+      "los_utc": "2026-11-09T19:53:20Z",
+      "max_elevation_deg": 61.9,
+      "duration_s": 751,
+      "expected_volume_gb": 52.5
+    },
+    {
+      "pass_id": "p051",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "matera-1",
+      "aos_utc": "2026-11-09T21:00:34Z",
+      "los_utc": "2026-11-09T21:13:01Z",
+      "max_elevation_deg": 68.8,
+      "duration_s": 748,
+      "expected_volume_gb": 52.3
+    },
+    {
+      "pass_id": "p052",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T21:08:23Z",
+      "los_utc": "2026-11-09T21:20:10Z",
+      "max_elevation_deg": 33.5,
+      "duration_s": 707,
+      "expected_volume_gb": 49.5
+    },
+    {
+      "pass_id": "p053",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "matera-1",
+      "aos_utc": "2026-11-09T21:10:41Z",
+      "los_utc": "2026-11-09T21:23:01Z",
+      "max_elevation_deg": 55.1,
+      "duration_s": 740,
+      "expected_volume_gb": 51.8
+    },
+    {
+      "pass_id": "p054",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T21:11:15Z",
+      "los_utc": "2026-11-09T21:23:14Z",
+      "max_elevation_deg": 37.0,
+      "duration_s": 719,
+      "expected_volume_gb": 50.3
+    },
+    {
+      "pass_id": "p055",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T21:18:38Z",
+      "los_utc": "2026-11-09T21:30:12Z",
+      "max_elevation_deg": 30.2,
+      "duration_s": 694,
+      "expected_volume_gb": 48.6
+    },
+    {
+      "pass_id": "p056",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T21:21:27Z",
+      "los_utc": "2026-11-09T21:33:20Z",
+      "max_elevation_deg": 35.0,
+      "duration_s": 713,
+      "expected_volume_gb": 49.9
+    },
+    {
+      "pass_id": "p057",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "matera-1",
+      "aos_utc": "2026-11-09T22:45:01Z",
+      "los_utc": "2026-11-09T22:49:11Z",
+      "max_elevation_deg": 6.5,
+      "duration_s": 249,
+      "expected_volume_gb": 17.4
+    },
+    {
+      "pass_id": "p058",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T22:51:24Z",
+      "los_utc": "2026-11-09T22:59:24Z",
+      "max_elevation_deg": 11.4,
+      "duration_s": 479,
+      "expected_volume_gb": 33.5
+    },
+    {
+      "pass_id": "p059",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T22:52:48Z",
+      "los_utc": "2026-11-09T23:03:27Z",
+      "max_elevation_deg": 21.2,
+      "duration_s": 638,
+      "expected_volume_gb": 44.7
+    },
+    {
+      "pass_id": "p060",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "aos_utc": "2026-11-09T23:02:01Z",
+      "los_utc": "2026-11-09T23:09:19Z",
+      "max_elevation_deg": 10.1,
+      "duration_s": 439,
+      "expected_volume_gb": 30.7
+    },
+    {
+      "pass_id": "p061",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "aos_utc": "2026-11-09T23:03:06Z",
+      "los_utc": "2026-11-09T23:13:34Z",
+      "max_elevation_deg": 20.1,
+      "duration_s": 628,
+      "expected_volume_gb": 44.0
+    }
+  ]
+}

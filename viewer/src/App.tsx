@@ -16,6 +16,7 @@ import {
   Database,
   Activity,
   ShieldAlert,
+  HelpCircle,
 } from 'lucide-react';
 import type {
   ConflictRecord,
@@ -23,6 +24,7 @@ import type {
   PassesDocument,
   ScenarioData,
   ScheduleDocument,
+  ScoreboardDocument,
   TlesMap,
 } from './types/engine';
 import {
@@ -36,6 +38,9 @@ import {
   ensureConflicts,
   getLoserConflictInfo,
 } from './lib/telemetry';
+import ScoreboardPanel from './components/ScoreboardPanel';
+import AnalyticsDrawer from './components/AnalyticsDrawer';
+import HowToReadModal from './components/HowToReadModal';
 
 const SAT_COLORS: Record<string, string> = {
   'sentinel-2a': '#38bdf8', // Sky cyan
@@ -64,11 +69,13 @@ export default function App() {
     greedy: ScheduleDocument;
     optimizer: ScheduleDocument;
   } | null>(null);
+  const [scoreboard, setScoreboard] = useState<ScoreboardDocument | null>(null);
 
   const [method, setMethod] = useState<'greedy' | 'optimizer'>('optimizer');
   const [showGhostWeb, setShowGhostWeb] = useState<boolean>(true);
   const [showFootprints, setShowFootprints] = useState<boolean>(true);
   const [showConflicts3D, setShowConflicts3D] = useState<boolean>(true);
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
 
   const [currentTimeMs, setCurrentTimeMs] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
@@ -110,7 +117,7 @@ export default function App() {
     }
   }, [showFootprints, scenario]);
 
-  // 1. Load static JSON files
+  // 1. Load all 6 static JSON files
   useEffect(() => {
     Promise.all([
       fetch('/data/scenario.json').then((r) => {
@@ -133,19 +140,32 @@ export default function App() {
         if (!r.ok) throw new Error('Missing /data/schedule_optimizer.json');
         return r.json();
       }),
+      fetch('/data/scoreboard.json').then((r) => {
+        if (!r.ok) throw new Error('Missing /data/scoreboard.json');
+        return r.json();
+      }),
     ])
       .then(
-        ([scenarioData, tlesData, passesData, greedyData, optimizerData]: [
+        ([
+          scenarioData,
+          tlesData,
+          passesData,
+          greedyData,
+          optimizerData,
+          scoreboardData,
+        ]: [
           ScenarioData,
           TlesMap,
           PassesDocument,
           ScheduleDocument,
           ScheduleDocument,
+          ScoreboardDocument,
         ]) => {
           setScenario(scenarioData);
           setTles(tlesData);
           setPassesDoc(passesData);
           setSchedules({ greedy: greedyData, optimizer: optimizerData });
+          setScoreboard(scoreboardData);
           chosenSetsRef.current = {
             greedy: new Set(greedyData.assignments.map((a) => a.pass_id)),
             optimizer: new Set(optimizerData.assignments.map((a) => a.pass_id)),
@@ -173,7 +193,7 @@ export default function App() {
     return map;
   }, [passesDoc]);
 
-  // 2. Initialize Cesium Globe + Satellites + Antennas + Ghost Web + Chosen Beams + Red Conflict Loser Beams
+  // 2. Initialize Cesium Globe + Satellites + Antennas + Ghost Web + Chosen Beams + Red Conflict Beams
   useEffect(() => {
     if (!containerRef.current || !scenario || !tles || !passesDoc || !schedules) return;
 
@@ -344,7 +364,7 @@ export default function App() {
       });
     }
 
-    // C. Passes: Ghost Web + Chosen Laser Beams + Red Conflict Loser Beams & 3D Midpoint Conflict Badges
+    // C. Passes: Ghost Web + Chosen Laser Beams + Red Conflict Loser Beams & 3D Midpoint Tags
     ghostEntitiesRef.current = [];
     const crimsonRed = Cesium.Color.fromCssColorString('#ef4444');
 
@@ -361,7 +381,6 @@ export default function App() {
       const peakSatPos = satProp.getValue(midJd);
       const satColor = Cesium.Color.fromCssColorString(SAT_COLORS[p.satellite_id] ?? '#38bdf8');
 
-      // 1. Static Ghost Link
       if (peakSatPos) {
         const ghostEntity = viewer.entities.add({
           id: `ghost-${p.pass_id}`,
@@ -383,7 +402,6 @@ export default function App() {
         ghostEntitiesRef.current.push(ghostEntity);
       }
 
-      // 2. Chosen Active Downlink Beam
       viewer.entities.add({
         id: `beam-chosen-${p.pass_id}`,
         availability: new Cesium.TimeIntervalCollection([
@@ -407,7 +425,6 @@ export default function App() {
         },
       });
 
-      // Helper to check if this unchosen pass is currently losing a conflict with a chosen pass
       const findConflictWinner = () => {
         const activeChosen = chosenSetsRef.current[methodRef.current];
         if (activeChosen.has(p.pass_id)) return null;
@@ -420,7 +437,6 @@ export default function App() {
         return null;
       };
 
-      // 3. Conflict Loser Beam (Bright Red Dashed Beam + Midpoint 3D Reason Tag)
       viewer.entities.add({
         id: `beam-conflict-${p.pass_id}`,
         availability: new Cesium.TimeIntervalCollection([
@@ -443,7 +459,6 @@ export default function App() {
         },
       });
 
-      // 4. 3D Floating Label at the Midpoint of the Red Loser Link showing Reason (same_antenna / same_satellite)
       viewer.entities.add({
         id: `label-conflict-${p.pass_id}`,
         availability: new Cesium.TimeIntervalCollection([
@@ -536,7 +551,6 @@ export default function App() {
     return computeFleetTelemetry(scenario, schedules[other], currentTimeMs);
   }, [scenario, schedules, method, currentTimeMs]);
 
-  // Passes that are unchosen and conflict with a chosen pass (for "Next Conflict" button)
   const conflictLoserPasses = useMemo(() => {
     if (!passesDoc) return [];
     return passesDoc.passes.filter((p) => {
@@ -642,6 +656,7 @@ export default function App() {
     );
   }
 
+  const isLoading = !scenario || !tles || !passesDoc || !schedules;
   const startMs = scenario ? new Date(scenario.start_utc).getTime() : 0;
   const endMs = scenario ? startMs + scenario.duration_hours * 3600 * 1000 : 100;
   const isoClock = currentTimeMs
@@ -655,27 +670,37 @@ export default function App() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-slate-950 select-none">
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 text-slate-100">
+          <div className="h-10 w-10 rounded-full border-2 border-sky-400 border-t-transparent animate-spin mb-4" />
+          <div className="font-mono text-sm font-bold uppercase tracking-widest text-sky-400">
+            Initializing QO Engine 3 Ephemeris...
+          </div>
+        </div>
+      )}
+
       {/* 3D Cesium Canvas */}
       <div ref={containerRef} className="w-full h-full" />
 
-      {/* LEFT HUD COLUMN: Mission Clock + Ground Stations + Live Onboard Buffer Gauges + Data Trail Counter */}
-      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2.5 w-[430px] max-w-[92vw]">
+      {/* LEFT HUD COLUMN: Mission Clock + Ground Stations + Data Trail + Live Buffers */}
+      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 w-[420px] max-w-[92vw]">
         {/* 1. Mission Header & Camera Lock */}
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-800/90 bg-slate-950/85 px-4 py-3 backdrop-blur-md shadow-xl">
+        <div className="flex items-center justify-between gap-2 rounded-xl border border-slate-800/90 bg-slate-950/85 px-3.5 py-2.5 backdrop-blur-md shadow-xl">
           <div>
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px] font-semibold uppercase tracking-widest text-sky-400">
-                QO Engine 3 • Buffers, Data Trail & Conflicts
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-sky-400">
+                QO Engine 3 • Mission Control
               </span>
             </div>
-            <div className="mt-1 font-mono text-lg font-bold tracking-tight text-white">
+            <div className="mt-0.5 font-mono text-base font-bold tracking-tight text-white">
               {isoClock || 'Loading ephemeris...'}
             </div>
           </div>
 
           {scenario && (
-            <div className="flex items-center gap-1.5 border-l border-slate-800 pl-3">
+            <div className="flex items-center gap-1 border-l border-slate-800 pl-2.5">
               {scenario.satellites.map((sat) => {
                 const targetKey = `sat-${sat.id}`;
                 const active = trackedTarget === targetKey;
@@ -701,6 +726,13 @@ export default function App() {
               >
                 <Compass className="w-4 h-4" />
               </button>
+              <button
+                onClick={() => setIsHelpOpen(true)}
+                title="How to read this scene"
+                className="rounded-lg bg-sky-500/15 p-1.5 text-sky-300 hover:bg-sky-500/25 border border-sky-500/40 cursor-pointer"
+              >
+                <HelpCircle className="w-4 h-4" />
+              </button>
             </div>
           )}
         </div>
@@ -715,7 +747,7 @@ export default function App() {
                 <button
                   key={ant.id}
                   onClick={() => handleTrackEntity(active ? null : targetKey)}
-                  className={`flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-mono transition cursor-pointer ${
+                  className={`flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-mono transition cursor-pointer ${
                     active
                       ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/50'
                       : 'bg-slate-900/90 text-slate-300 hover:bg-slate-800 border border-slate-800'
@@ -748,7 +780,6 @@ export default function App() {
                   ? 'bg-red-950/70 text-red-300 border-red-500/50'
                   : 'bg-slate-900 text-slate-500 border-slate-800'
               }`}
-              title="Toggle 3D red conflict loser links and reason tags"
             >
               <ShieldAlert className="w-3 h-3" />
               Conflicts ({conflictCountsByReason.total})
@@ -758,7 +789,7 @@ export default function App() {
 
         {/* 3. Live Ticking Data Trail (GB Delivered So Far Counter) */}
         {fleetTelemetry && activeSchedule && (
-          <div className="rounded-xl border border-slate-800/90 bg-slate-950/85 p-3.5 backdrop-blur-md shadow-xl">
+          <div className="rounded-xl border border-slate-800/90 bg-slate-950/85 p-3 backdrop-blur-md shadow-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400">
                 <Database className="w-3.5 h-3.5 text-emerald-400" />
@@ -774,17 +805,17 @@ export default function App() {
               )}
             </div>
 
-            <div className="mt-2 flex items-baseline justify-between">
+            <div className="mt-1.5 flex items-baseline justify-between">
               <div className="flex items-baseline gap-2">
-                <span className="font-mono text-3xl font-extrabold tracking-tight text-white">
+                <span className="font-mono text-2xl font-extrabold tracking-tight text-white">
                   {fleetTelemetry.totalDeliveredSoFarGb.toFixed(1)}
                 </span>
-                <span className="font-mono text-sm font-semibold text-emerald-400">
+                <span className="font-mono text-xs font-semibold text-emerald-400">
                   / {fleetTelemetry.totalPlannedGb.toFixed(0)} GB
                 </span>
               </div>
 
-              <div className="text-right font-mono text-xs">
+              <div className="text-right font-mono text-[11px]">
                 <span
                   className={
                     liveDeltaGb > 0.05
@@ -797,14 +828,13 @@ export default function App() {
                   {liveDeltaGb >= 0 ? `+${liveDeltaGb.toFixed(1)}` : liveDeltaGb.toFixed(1)} GB vs{' '}
                   {method === 'optimizer' ? 'greedy' : 'optimizer'}
                 </span>
-                <div className="text-[11px] text-red-400/90">
+                <div className="text-[10px] text-red-400/90">
                   Spilled: {fleetTelemetry.totalOverflowSoFarGb.toFixed(0)} GB
                 </div>
               </div>
             </div>
 
-            {/* Overall 24h Delivery Progress Bar */}
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-900 border border-slate-800">
+            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-900 border border-slate-800">
               <div
                 className="h-full bg-gradient-to-r from-sky-500 to-emerald-400 transition-all duration-150"
                 style={{
@@ -820,19 +850,19 @@ export default function App() {
           </div>
         )}
 
-        {/* 4. Live Onboard Buffer Gauges per Satellite (Flashes Red on Overflow) */}
+        {/* 4. Live Onboard Buffer Gauges per Satellite */}
         {scenario && fleetTelemetry && (
-          <div className="rounded-xl border border-slate-800/90 bg-slate-950/85 p-3.5 backdrop-blur-md shadow-xl">
-            <div className="flex items-center justify-between mb-2.5">
+          <div className="rounded-xl border border-slate-800/90 bg-slate-950/85 p-3 backdrop-blur-md shadow-xl">
+            <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
                 Onboard Storage Buffers (300 GB Cap)
               </span>
               <span className="text-[10px] font-mono text-slate-400">
-                Gen: +62.5 GB/h per sat
+                +62.5 GB/h per sat
               </span>
             </div>
 
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2">
               {scenario.satellites.map((sat) => {
                 const t = fleetTelemetry.satellites[sat.id];
                 if (!t) return null;
@@ -841,7 +871,7 @@ export default function App() {
                 return (
                   <div
                     key={sat.id}
-                    className={`rounded-lg border p-2.5 transition ${
+                    className={`rounded-lg border p-2 transition ${
                       t.isOverflowing
                         ? 'border-red-500 bg-red-950/45 shadow-[0_0_15px_rgba(239,68,68,0.25)]'
                         : t.isDraining
@@ -850,20 +880,20 @@ export default function App() {
                     }`}
                   >
                     <div className="flex items-center justify-between text-xs font-mono">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <span
-                          className="h-2.5 w-2.5 rounded-full"
+                          className="h-2 w-2 rounded-full"
                           style={{ backgroundColor: satColor }}
                         />
                         <span className="font-bold uppercase text-white">{sat.id}</span>
                         {t.isOverflowing && (
-                          <span className="flex items-center gap-1 rounded bg-red-500 px-1.5 py-0.5 text-[10px] font-extrabold text-slate-950 animate-pulse">
-                            <AlertTriangle className="w-3 h-3" />
+                          <span className="flex items-center gap-1 rounded bg-red-500 px-1.5 py-0.5 text-[9px] font-extrabold text-slate-950 animate-pulse">
+                            <AlertTriangle className="w-2.5 h-2.5" />
                             OVERFLOWING
                           </span>
                         )}
                         {!t.isOverflowing && t.isDraining && (
-                          <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300 border border-emerald-500/40">
+                          <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[9px] font-bold text-emerald-300 border border-emerald-500/40">
                             DOWNLINKING
                           </span>
                         )}
@@ -875,8 +905,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* Fill Bar */}
-                    <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-slate-950 border border-slate-800">
+                    <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-950 border border-slate-800">
                       <div
                         className={`h-full transition-all duration-150 ${
                           t.isOverflowing
@@ -891,7 +920,7 @@ export default function App() {
                       />
                     </div>
 
-                    <div className="mt-1.5 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                    <div className="mt-1 flex items-center justify-between text-[10px] font-mono text-slate-400">
                       <span>
                         Sent: <strong className="text-slate-200">{t.deliveredSoFarGb.toFixed(1)} GB</strong>
                       </span>
@@ -911,56 +940,24 @@ export default function App() {
         )}
       </div>
 
-      {/* RIGHT HUD COLUMN: Scheduler Toggle, Quick Jumps & Live Pass / Conflict Inspector */}
+      {/* RIGHT HUD COLUMN: Scoreboard Panel + Scheduler Switcher + Live Conflict Monitor */}
       {schedules && activeSchedule && (
-        <div className="absolute top-4 right-4 z-10 flex w-96 max-w-[92vw] flex-col gap-2.5">
-          {/* Greedy vs Optimizer Switcher */}
-          <div className="rounded-xl border border-slate-800/90 bg-slate-950/85 p-3.5 backdrop-blur-md shadow-xl">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
-                Scheduler Mode
-              </span>
-              <span className="text-[11px] font-mono text-emerald-400">
-                {activeSchedule.summary.passes_used} / {activeSchedule.summary.passes_available} passes used
-              </span>
-            </div>
+        <div className="absolute top-4 right-4 z-10 flex w-96 max-w-[92vw] flex-col gap-2">
+          {/* 1. Scoreboard Benchmark Table (with +4 GB gain & required model note) */}
+          {scoreboard && (
+            <ScoreboardPanel
+              scoreboard={scoreboard}
+              activeMethod={method}
+              onSelectMethod={setMethod}
+            />
+          )}
 
-            <div className="grid grid-cols-2 gap-1.5 rounded-lg bg-slate-900 p-1 border border-slate-800">
-              {(['greedy', 'optimizer'] as const).map((m) => {
-                const isSelected = method === m;
-                const summary = schedules[m].summary;
-                return (
-                  <button
-                    key={m}
-                    onClick={() => setMethod(m)}
-                    className={`flex flex-col items-start rounded-md px-3 py-2 text-left transition cursor-pointer ${
-                      isSelected
-                        ? 'bg-sky-500 text-slate-950 shadow-sm'
-                        : 'text-slate-300 hover:bg-slate-800/70'
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
-                      {m === 'optimizer' && <Sparkles className="w-3.5 h-3.5" />}
-                      {m}
-                    </div>
-                    <div
-                      className={`text-[11px] font-mono mt-0.5 ${
-                        isSelected ? 'text-slate-900 font-semibold' : 'text-slate-400'
-                      }`}
-                    >
-                      {summary.gb_delivered.toFixed(0)} GB ({summary.overflow_events} overflows)
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Quick-Jump Navigation Buttons */}
-            <div className="mt-2.5 grid grid-cols-3 gap-1.5">
+          {/* 2. Quick-Jump Navigation Bar */}
+          <div className="rounded-xl border border-slate-800/90 bg-slate-950/85 p-2.5 backdrop-blur-md shadow-xl">
+            <div className="grid grid-cols-3 gap-1.5">
               <button
                 onClick={() => jumpToNextPass('beam')}
                 className="flex items-center justify-center gap-1 rounded-lg border border-slate-800 bg-slate-900 px-2 py-1.5 text-[11px] font-mono text-sky-300 hover:bg-slate-800 transition cursor-pointer"
-                title="Jump to the next scheduled active beam"
               >
                 <SkipForward className="w-3.5 h-3.5" />
                 Next Beam
@@ -968,7 +965,6 @@ export default function App() {
               <button
                 onClick={() => jumpToNextPass('conflict')}
                 className="flex items-center justify-center gap-1 rounded-lg border border-red-500/40 bg-red-500/10 px-2 py-1.5 text-[11px] font-mono text-red-300 hover:bg-red-500/20 transition cursor-pointer"
-                title="Jump to the next pass where two candidate passes clash in 3D"
               >
                 <ShieldAlert className="w-3.5 h-3.5" />
                 Next Clash
@@ -976,7 +972,6 @@ export default function App() {
               <button
                 onClick={() => jumpToNextPass('diff')}
                 className="flex items-center justify-center gap-1 rounded-lg border border-amber-500/40 bg-amber-500/10 px-2 py-1.5 text-[11px] font-mono text-amber-300 hover:bg-amber-500/20 transition cursor-pointer"
-                title="Jump to a pass where Greedy and Optimizer disagree"
               >
                 <Zap className="w-3.5 h-3.5" />
                 Diff ({diffPasses.length})
@@ -984,23 +979,23 @@ export default function App() {
             </div>
           </div>
 
-          {/* Live Visibility & Conflict Inspector Card */}
-          <div className="rounded-xl border border-slate-800/90 bg-slate-950/85 p-3.5 backdrop-blur-md shadow-xl">
+          {/* 3. Live Visibility & Conflict Monitor */}
+          <div className="rounded-xl border border-slate-800/90 bg-slate-950/85 p-3 backdrop-blur-md shadow-xl">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
                 Live Visibility & Conflict Monitor
               </span>
               <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-mono text-slate-300 border border-slate-800">
-                {conflictCountsByReason.sameSatellite} sat • {conflictCountsByReason.sameAntenna} dish clashes
+                {conflictCountsByReason.sameSatellite} sat • {conflictCountsByReason.sameAntenna} dish
               </span>
             </div>
 
             {activePassesNow.length === 0 ? (
-              <div className="rounded-lg border border-slate-800/60 bg-slate-900/50 px-3 py-3 text-xs font-mono text-slate-500 text-center">
-                No passes in visibility window right now. Click &ldquo;Next Clash&rdquo; or &ldquo;Next Beam&rdquo; above.
+              <div className="rounded-lg border border-slate-800/60 bg-slate-900/50 px-3 py-2.5 text-xs font-mono text-slate-500 text-center">
+                No passes in visibility window right now. Click &ldquo;Next Clash&rdquo; or &ldquo;Next Beam&rdquo;.
               </div>
             ) : (
-              <div className="flex flex-col gap-2 max-h-[340px] overflow-y-auto pr-0.5">
+              <div className="flex flex-col gap-1.5 max-h-[210px] overflow-y-auto pr-0.5">
                 {activePassesNow.map((p) => {
                   const isChosen = chosenSet.has(p.pass_id);
                   const otherMethod = method === 'optimizer' ? 'greedy' : 'optimizer';
@@ -1018,7 +1013,7 @@ export default function App() {
                   return (
                     <div
                       key={p.pass_id}
-                      className={`rounded-lg border px-3 py-2 text-xs font-mono transition ${
+                      className={`rounded-lg border px-2.5 py-2 text-xs font-mono transition ${
                         isChosen
                           ? 'border-sky-500/60 bg-sky-500/10 text-white'
                           : conflictInfo
@@ -1031,7 +1026,7 @@ export default function App() {
                           {p.pass_id.toUpperCase()} • {p.satellite_id} → {p.antenna_id}
                         </span>
                         <span
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${
+                          className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
                             isChosen
                               ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                               : conflictInfo
@@ -1052,22 +1047,15 @@ export default function App() {
                         <span>Expected: {p.expected_volume_gb} GB</span>
                       </div>
 
-                      {/* Exact Conflict Explanation Badge */}
                       {conflictInfo && (
-                        <div className="mt-1.5 rounded border border-red-500/40 bg-red-950/60 px-2 py-1 text-[11px] text-red-200">
+                        <div className="mt-1 rounded border border-red-500/40 bg-red-950/60 px-2 py-1 text-[10px] text-red-200">
                           <div className="font-bold text-red-300">
                             ✗ Blocked by {conflictInfo.winnerPass.pass_id.toUpperCase()} (
                             {conflictInfo.winnerPass.satellite_id} →{' '}
                             {conflictInfo.winnerPass.antenna_id})
                           </div>
-                          <div className="text-[10px] text-red-300/90 mt-0.5">
-                            Reason:{' '}
-                            <code className="font-bold underline">{conflictInfo.reason}</code>
-                            {conflictInfo.reason === 'same_antenna'
-                              ? conflictInfo.isSetupGapOnly
-                                ? ' (within 120s dish re-point setup window)'
-                                : ' (two satellites over the same dish)'
-                              : ' (one satellite cannot beam to two dishes at once)'}
+                          <div className="text-red-300/90">
+                            Reason: <code className="font-bold underline">{conflictInfo.reason}</code>
                           </div>
                         </div>
                       )}
@@ -1086,9 +1074,21 @@ export default function App() {
         </div>
       )}
 
+      {/* Synchronized 24h Buffer Curves & 61-Pass Gantt Drawer */}
+      {scenario && passesDoc && schedules && (
+        <AnalyticsDrawer
+          scenario={scenario}
+          passes={passesDoc.passes}
+          schedules={schedules}
+          activeMethod={method}
+          currentTimeMs={currentTimeMs}
+          onScrub={handleScrub}
+        />
+      )}
+
       {/* Bottom Timeline & Speed Bar */}
       {scenario && (
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex w-[92%] max-w-4xl items-center gap-4 rounded-2xl border border-slate-800/90 bg-slate-950/85 px-5 py-3 backdrop-blur-md shadow-2xl">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex w-[92%] max-w-4xl items-center gap-4 rounded-2xl border border-slate-800/90 bg-slate-950/90 px-5 py-3 backdrop-blur-md shadow-2xl">
           <button
             onClick={togglePlay}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500 text-slate-950 hover:bg-sky-400 transition cursor-pointer"
@@ -1143,6 +1143,9 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* How To Read This Scene Modal */}
+      <HowToReadModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </div>
   );
 }

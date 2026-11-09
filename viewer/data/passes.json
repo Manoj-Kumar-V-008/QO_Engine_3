@@ -24,7 +24,8 @@
       "los_utc": "2026-11-09T01:14:09Z",
       "max_elevation_deg": 11.2,
       "duration_s": 473,
-      "expected_volume_gb": 33.1
+      "max_volume_gb": 33.1,
+      "expected_volume_gb": 11.6
     },
     {
       "pass_id": "p002",
@@ -34,7 +35,8 @@
       "los_utc": "2026-11-09T01:24:19Z",
       "max_elevation_deg": 10.7,
       "duration_s": 460,
-      "expected_volume_gb": 32.2
+      "max_volume_gb": 32.2,
+      "expected_volume_gb": 10.7
     },
     {
       "pass_id": "p003",
@@ -44,7 +46,8 @@
       "los_utc": "2026-11-09T02:55:23Z",
       "max_elevation_deg": 8.3,
       "duration_s": 365,
-      "expected_volume_gb": 25.6
+      "max_volume_gb": 25.6,
+      "expected_volume_gb": 6.4
     },
     {
       "pass_id": "p004",
@@ -54,7 +57,8 @@
       "los_utc": "2026-11-09T03:05:40Z",
       "max_elevation_deg": 8.2,
       "duration_s": 361,
-      "expected_volume_gb": 25.3
+      "max_volume_gb": 25.3,
+      "expected_volume_gb": 6.3
     },
     {
       "pass_id": "p005",
@@ -64,7 +68,8 @@
       "los_utc": "2026-11-09T04:37:51Z",
       "max_elevation_deg": 8.8,
       "duration_s": 388,
-      "expected_volume_gb": 27.1
+      "max_volume_gb": 27.1,
+      "expected_volume_gb": 6.8
     },
     {
       "pass_id": "p006",
@@ -74,7 +79,8 @@
       "los_utc": "2026-11-09T04:48:15Z",
       "max_elevation_deg": 9.0,
       "duration_s": 399,
-      "expected_volume_gb": 27.9
+      "max_volume_gb": 27.9,
+      "expected_volume_gb": 7.0
     },
     {
       "pass_id": "p007",
@@ -84,7 +90,8 @@
       "los_utc": "2026-11-09T06:20:56Z",
       "max_elevation_deg": 12.7,
       "duration_s": 513,
-      "expected_volume_gb": 35.9
+      "max_volume_gb": 35.9,
+      "expected_volume_gb": 13.7
     },
     {
       "pass_id": "p008",
@@ -94,7 +101,8 @@
       "los_utc": "2026-11-09T06:19:42Z",
       "max_elevation_deg": 5.0,
       "duration_s": 34,
-      "expected_volume_gb": 2.4
+      "max_volume_gb": 2.4,
+      "expected_volume_gb": 0.6
     },
     {
       "pass_id": "p009",
@@ -104,7 +112,8 @@
       "los_utc": "2026-11-09T06:31:19Z",
       "max_elevation_deg": 13.4,
       "duration_s": 527,
-      "expected_volume_gb": 36.9
+      "max_volume_gb": 36.9,
+      "expected_volume_gb": 14.6
     },
     {
       "pass_id": "p010",
@@ -114,7 +123,8 @@
       "los_utc": "2026-11-09T06:31:30Z",
       "max_elevation_deg": 6.0,
       "duration_s": 211,
-      "expected_volume_gb": 14.8
+      "max_volume_gb": 14.8,
+      "expected_volume_gb": 3.7
     },
     {
       "pass_id": "p011",
@@ -124,7 +134,8 @@
       "los_utc": "2026-11-09T08:03:29Z",
       "max_elevation_deg": 21.1,
       "duration_s": 638,
-      "expected_volume_gb": 44.6
+      "max_volume_gb": 44.6,
+      "expected_volume_gb": 21.6
     },
     {
       "pass_id": "p012",
@@ -134,7 +145,8 @@
       "los_utc": "2026-11-09T08:06:19Z",
       "max_elevation_deg": 18.6,
       "duration_s": 610,
-      "expected_volume_gb": 42.7
+      "max_volume_gb": 42.7,
+      "expected_volume_gb": 18.2
     },
     {
       "pass_id": "p013",
@@ -144,7 +156,8 @@
       "los_utc": "2026-11-09T08:13:47Z",
       "max_elevation_deg": 22.3,
       "duration_s": 648,
-      "expected_volume_gb": 45.4
+      "max_volume_gb": 45.4,
+      "expected_volume_gb": 22.9
     },
     {
       "pass_id": "p014",
@@ -154,7 +167,8 @@
       "los_utc": "2026-11-09T08:12:28Z",
       "max_elevation_deg": 8.9,
       "duration_s": 388,
-      "expected_volume_gb": 27.2
+      "max_volume_gb": 27.2,
+      "expected_volume_gb": 6.8
     },
     {
       "pass_id": "p015",
@@ -164,7 +178,8 @@
       "los_utc": "2026-11-09T08:16:42Z",
       "max_elevation_deg": 20.7,
       "duration_s": 632,
-      "expected_volume_gb": 44.2
+      "max_volume_gb": 44.2,
+      "expected_volume_gb": 20.9
     },
     {
       "pass_id": "p016",
@@ -174,7 +189,8 @@
       "los_utc": "2026-11-09T08:23:25Z",
       "max_elevation_deg": 11.8,
       "duration_s": 482,
-      "expected_volume_gb": 33.8
+      "max_volume_gb": 33.8,
+      "expected_volume_gb": 12.3
     },
     {
       "pass_id": "p017",
@@ -184,7 +200,8 @@
       "los_utc": "2026-11-09T09:45:02Z",
       "max_elevation_deg": 36.9,
       "duration_s": 718,
-      "expected_volume_gb": 50.3
+      "max_volume_gb": 50.3,
+      "expected_volume_gb": 32.5
     },
     {
       "pass_id": "p018",
@@ -194,7 +211,8 @@
       "los_utc": "2026-11-09T09:48:04Z",
       "max_elevation_deg": 53.6,
       "duration_s": 744,
-      "expected_volume_gb": 52.1
+      "max_volume_gb": 52.1,
+      "expected_volume_gb": 36.2
     },
     {
       "pass_id": "p019",
@@ -204,7 +222,8 @@
       "los_utc": "2026-11-09T09:55:39Z",
       "max_elevation_deg": 84.2,
       "duration_s": 751,
-      "expected_volume_gb": 52.5
+      "max_volume_gb": 52.5,
+      "expected_volume_gb": 37.5
     },
     {
       "pass_id": "p020",
@@ -214,7 +233,8 @@
       "los_utc": "2026-11-09T09:55:14Z",
       "max_elevation_deg": 39.1,
       "duration_s": 724,
-      "expected_volume_gb": 50.7
+      "max_volume_gb": 50.7,
+      "expected_volume_gb": 33.4
     },
     {
       "pass_id": "p021",
@@ -224,7 +244,8 @@
       "los_utc": "2026-11-09T09:58:12Z",
       "max_elevation_deg": 59.8,
       "duration_s": 748,
-      "expected_volume_gb": 52.4
+      "max_volume_gb": 52.4,
+      "expected_volume_gb": 36.8
     },
     {
       "pass_id": "p022",
@@ -234,7 +255,8 @@
       "los_utc": "2026-11-09T10:05:40Z",
       "max_elevation_deg": 79.1,
       "duration_s": 749,
-      "expected_volume_gb": 52.4
+      "max_volume_gb": 52.4,
+      "expected_volume_gb": 37.2
     },
     {
       "pass_id": "p023",
@@ -244,7 +266,8 @@
       "los_utc": "2026-11-09T11:25:36Z",
       "max_elevation_deg": 65.0,
       "duration_s": 752,
-      "expected_volume_gb": 52.6
+      "max_volume_gb": 52.6,
+      "expected_volume_gb": 37.2
     },
     {
       "pass_id": "p024",
@@ -254,7 +277,8 @@
       "los_utc": "2026-11-09T11:27:40Z",
       "max_elevation_deg": 57.2,
       "duration_s": 740,
-      "expected_volume_gb": 51.8
+      "max_volume_gb": 51.8,
+      "expected_volume_gb": 36.4
     },
     {
       "pass_id": "p025",
@@ -264,7 +288,8 @@
       "los_utc": "2026-11-09T11:35:42Z",
       "max_elevation_deg": 68.5,
       "duration_s": 754,
-      "expected_volume_gb": 52.7
+      "max_volume_gb": 52.7,
+      "expected_volume_gb": 37.3
     },
     {
       "pass_id": "p026",
@@ -274,7 +299,8 @@
       "los_utc": "2026-11-09T11:32:16Z",
       "max_elevation_deg": 12.9,
       "duration_s": 496,
-      "expected_volume_gb": 34.7
+      "max_volume_gb": 34.7,
+      "expected_volume_gb": 13.5
     },
     {
       "pass_id": "p027",
@@ -284,7 +310,8 @@
       "los_utc": "2026-11-09T11:37:37Z",
       "max_elevation_deg": 52.2,
       "duration_s": 735,
-      "expected_volume_gb": 51.4
+      "max_volume_gb": 51.4,
+      "expected_volume_gb": 35.6
     },
     {
       "pass_id": "p028",
@@ -294,7 +321,8 @@
       "los_utc": "2026-11-09T11:41:34Z",
       "max_elevation_deg": 10.3,
       "duration_s": 427,
-      "expected_volume_gb": 29.9
+      "max_volume_gb": 29.9,
+      "expected_volume_gb": 9.0
     },
     {
       "pass_id": "p029",
@@ -304,7 +332,8 @@
       "los_utc": "2026-11-09T13:05:22Z",
       "max_elevation_deg": 82.2,
       "duration_s": 754,
-      "expected_volume_gb": 52.8
+      "max_volume_gb": 52.8,
+      "expected_volume_gb": 37.7
     },
     {
       "pass_id": "p030",
@@ -314,7 +343,8 @@
       "los_utc": "2026-11-09T13:05:51Z",
       "max_elevation_deg": 27.7,
       "duration_s": 667,
-      "expected_volume_gb": 46.7
+      "max_volume_gb": 46.7,
+      "expected_volume_gb": 25.6
     },
     {
       "pass_id": "p031",
@@ -324,7 +354,8 @@
       "los_utc": "2026-11-09T13:15:25Z",
       "max_elevation_deg": 79.5,
       "duration_s": 754,
-      "expected_volume_gb": 52.8
+      "max_volume_gb": 52.8,
+      "expected_volume_gb": 37.6
     },
     {
       "pass_id": "p032",
@@ -334,7 +365,8 @@
       "los_utc": "2026-11-09T13:15:43Z",
       "max_elevation_deg": 26.3,
       "duration_s": 659,
-      "expected_volume_gb": 46.1
+      "max_volume_gb": 46.1,
+      "expected_volume_gb": 25.2
     },
     {
       "pass_id": "p033",
@@ -344,7 +376,8 @@
       "los_utc": "2026-11-09T14:44:44Z",
       "max_elevation_deg": 64.8,
       "duration_s": 747,
-      "expected_volume_gb": 52.3
+      "max_volume_gb": 52.3,
+      "expected_volume_gb": 37.0
     },
     {
       "pass_id": "p034",
@@ -354,7 +387,8 @@
       "los_utc": "2026-11-09T14:43:35Z",
       "max_elevation_deg": 19.8,
       "duration_s": 605,
-      "expected_volume_gb": 42.4
+      "max_volume_gb": 42.4,
+      "expected_volume_gb": 18.4
     },
     {
       "pass_id": "p035",
@@ -364,7 +398,8 @@
       "los_utc": "2026-11-09T14:54:45Z",
       "max_elevation_deg": 64.0,
       "duration_s": 747,
-      "expected_volume_gb": 52.3
+      "max_volume_gb": 52.3,
+      "expected_volume_gb": 36.9
     },
     {
       "pass_id": "p036",
@@ -374,7 +409,8 @@
       "los_utc": "2026-11-09T14:53:27Z",
       "max_elevation_deg": 19.6,
       "duration_s": 602,
-      "expected_volume_gb": 42.2
+      "max_volume_gb": 42.2,
+      "expected_volume_gb": 18.3
     },
     {
       "pass_id": "p037",
@@ -384,7 +420,8 @@
       "los_utc": "2026-11-09T16:21:51Z",
       "max_elevation_deg": 21.8,
       "duration_s": 625,
-      "expected_volume_gb": 43.7
+      "max_volume_gb": 43.7,
+      "expected_volume_gb": 21.5
     },
     {
       "pass_id": "p038",
@@ -394,7 +431,8 @@
       "los_utc": "2026-11-09T16:24:02Z",
       "max_elevation_deg": 64.7,
       "duration_s": 747,
-      "expected_volume_gb": 52.3
+      "max_volume_gb": 52.3,
+      "expected_volume_gb": 37.0
     },
     {
       "pass_id": "p039",
@@ -404,7 +442,8 @@
       "los_utc": "2026-11-09T16:31:49Z",
       "max_elevation_deg": 22.5,
       "duration_s": 631,
-      "expected_volume_gb": 44.2
+      "max_volume_gb": 44.2,
+      "expected_volume_gb": 22.3
     },
     {
       "pass_id": "p040",
@@ -414,7 +453,8 @@
       "los_utc": "2026-11-09T16:34:03Z",
       "max_elevation_deg": 65.6,
       "duration_s": 748,
-      "expected_volume_gb": 52.3
+      "max_volume_gb": 52.3,
+      "expected_volume_gb": 37.0
     },
     {
       "pass_id": "p041",
@@ -424,7 +464,8 @@
       "los_utc": "2026-11-09T18:00:57Z",
       "max_elevation_deg": 36.2,
       "duration_s": 703,
-      "expected_volume_gb": 49.2
+      "max_volume_gb": 49.2,
+      "expected_volume_gb": 31.6
     },
     {
       "pass_id": "p042",
@@ -434,7 +475,8 @@
       "los_utc": "2026-11-09T18:03:30Z",
       "max_elevation_deg": 82.0,
       "duration_s": 754,
-      "expected_volume_gb": 52.8
+      "max_volume_gb": 52.8,
+      "expected_volume_gb": 37.7
     },
     {
       "pass_id": "p043",
@@ -444,7 +486,8 @@
       "los_utc": "2026-11-09T18:10:59Z",
       "max_elevation_deg": 38.9,
       "duration_s": 711,
-      "expected_volume_gb": 49.7
+      "max_volume_gb": 49.7,
+      "expected_volume_gb": 32.6
     },
     {
       "pass_id": "p044",
@@ -454,7 +497,8 @@
       "los_utc": "2026-11-09T18:13:33Z",
       "max_elevation_deg": 84.7,
       "duration_s": 755,
-      "expected_volume_gb": 52.9
+      "max_volume_gb": 52.9,
+      "expected_volume_gb": 37.6
     },
     {
       "pass_id": "p045",
@@ -464,7 +508,8 @@
       "los_utc": "2026-11-09T19:32:30Z",
       "max_elevation_deg": 15.7,
       "duration_s": 550,
-      "expected_volume_gb": 38.5
+      "max_volume_gb": 38.5,
+      "expected_volume_gb": 16.1
     },
     {
       "pass_id": "p046",
@@ -474,7 +519,8 @@
       "los_utc": "2026-11-09T19:40:30Z",
       "max_elevation_deg": 85.7,
       "duration_s": 754,
-      "expected_volume_gb": 52.8
+      "max_volume_gb": 52.8,
+      "expected_volume_gb": 37.8
     },
     {
       "pass_id": "p047",
@@ -484,7 +530,8 @@
       "los_utc": "2026-11-09T19:43:15Z",
       "max_elevation_deg": 65.2,
       "duration_s": 752,
-      "expected_volume_gb": 52.7
+      "max_volume_gb": 52.7,
+      "expected_volume_gb": 37.2
     },
     {
       "pass_id": "p048",
@@ -494,7 +541,8 @@
       "los_utc": "2026-11-09T19:42:47Z",
       "max_elevation_deg": 19.1,
       "duration_s": 596,
-      "expected_volume_gb": 41.7
+      "max_volume_gb": 41.7,
+      "expected_volume_gb": 18.1
     },
     {
       "pass_id": "p049",
@@ -504,7 +552,8 @@
       "los_utc": "2026-11-09T19:50:34Z",
       "max_elevation_deg": 86.6,
       "duration_s": 755,
-      "expected_volume_gb": 52.8
+      "max_volume_gb": 52.8,
+      "expected_volume_gb": 37.9
     },
     {
       "pass_id": "p050",
@@ -514,7 +563,8 @@
       "los_utc": "2026-11-09T19:53:20Z",
       "max_elevation_deg": 61.9,
       "duration_s": 751,
-      "expected_volume_gb": 52.5
+      "max_volume_gb": 52.5,
+      "expected_volume_gb": 37.1
     },
     {
       "pass_id": "p051",
@@ -524,7 +574,8 @@
       "los_utc": "2026-11-09T21:13:01Z",
       "max_elevation_deg": 68.8,
       "duration_s": 748,
-      "expected_volume_gb": 52.3
+      "max_volume_gb": 52.3,
+      "expected_volume_gb": 37.0
     },
     {
       "pass_id": "p052",
@@ -534,7 +585,8 @@
       "los_utc": "2026-11-09T21:20:10Z",
       "max_elevation_deg": 33.5,
       "duration_s": 707,
-      "expected_volume_gb": 49.5
+      "max_volume_gb": 49.5,
+      "expected_volume_gb": 31.0
     },
     {
       "pass_id": "p053",
@@ -544,7 +596,8 @@
       "los_utc": "2026-11-09T21:23:01Z",
       "max_elevation_deg": 55.1,
       "duration_s": 740,
-      "expected_volume_gb": 51.8
+      "max_volume_gb": 51.8,
+      "expected_volume_gb": 36.0
     },
     {
       "pass_id": "p054",
@@ -554,7 +607,8 @@
       "los_utc": "2026-11-09T21:23:14Z",
       "max_elevation_deg": 37.0,
       "duration_s": 719,
-      "expected_volume_gb": 50.3
+      "max_volume_gb": 50.3,
+      "expected_volume_gb": 32.5
     },
     {
       "pass_id": "p055",
@@ -564,7 +618,8 @@
       "los_utc": "2026-11-09T21:30:12Z",
       "max_elevation_deg": 30.2,
       "duration_s": 694,
-      "expected_volume_gb": 48.6
+      "max_volume_gb": 48.6,
+      "expected_volume_gb": 28.0
     },
     {
       "pass_id": "p056",
@@ -574,7 +629,8 @@
       "los_utc": "2026-11-09T21:33:20Z",
       "max_elevation_deg": 35.0,
       "duration_s": 713,
-      "expected_volume_gb": 49.9
+      "max_volume_gb": 49.9,
+      "expected_volume_gb": 31.6
     },
     {
       "pass_id": "p057",
@@ -584,7 +640,8 @@
       "los_utc": "2026-11-09T22:49:11Z",
       "max_elevation_deg": 6.5,
       "duration_s": 249,
-      "expected_volume_gb": 17.4
+      "max_volume_gb": 17.4,
+      "expected_volume_gb": 4.4
     },
     {
       "pass_id": "p058",
@@ -594,7 +651,8 @@
       "los_utc": "2026-11-09T22:59:24Z",
       "max_elevation_deg": 11.4,
       "duration_s": 479,
-      "expected_volume_gb": 33.5
+      "max_volume_gb": 33.5,
+      "expected_volume_gb": 11.9
     },
     {
       "pass_id": "p059",
@@ -604,7 +662,8 @@
       "los_utc": "2026-11-09T23:03:27Z",
       "max_elevation_deg": 21.2,
       "duration_s": 638,
-      "expected_volume_gb": 44.7
+      "max_volume_gb": 44.7,
+      "expected_volume_gb": 21.6
     },
     {
       "pass_id": "p060",
@@ -614,7 +673,8 @@
       "los_utc": "2026-11-09T23:09:19Z",
       "max_elevation_deg": 10.1,
       "duration_s": 439,
-      "expected_volume_gb": 30.7
+      "max_volume_gb": 30.7,
+      "expected_volume_gb": 8.7
     },
     {
       "pass_id": "p061",
@@ -624,7 +684,8 @@
       "los_utc": "2026-11-09T23:13:34Z",
       "max_elevation_deg": 20.1,
       "duration_s": 628,
-      "expected_volume_gb": 44.0
+      "max_volume_gb": 44.0,
+      "expected_volume_gb": 20.1
     }
   ]
 }

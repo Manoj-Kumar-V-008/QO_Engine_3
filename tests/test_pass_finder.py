@@ -2,8 +2,15 @@ from datetime import datetime, timezone
 
 import pytest
 
-from engine.pass_finder import find_all_passes, find_passes, volume_gb
-from engine.scenario import Scenario
+from engine.pass_finder import (
+    FLAT_STEPS,
+    find_all_passes,
+    find_passes,
+    pass_volume_gb,
+    rate_fraction,
+    volume_gb,
+)
+from engine.scenario import Antenna, Scenario
 
 # Synthetic TLEs: same sun-synchronous orbit (~786 km, 98.6 deg), half an orbit apart.
 # Not real satellites; they keep the tests offline and repeatable.
@@ -63,15 +70,40 @@ def test_all_passes_cover_every_pair_and_are_sorted():
     assert aos_times == sorted(aos_times)  # ISO strings sort chronologically
 
 
-def test_pass_ids_are_unique_and_volumes_follow_formula():
+def test_pass_ids_are_unique_and_max_volume_follows_formula():
     records = find_all_passes(SCENARIO, TLES)
     ids = [r["pass_id"] for r in records]
     assert len(ids) == len(set(ids))
     assert ids[0] == "p001"
     for r in records:
-        assert r["expected_volume_gb"] == pytest.approx(
-            volume_gb(r["duration_s"], 560), abs=0.1
-        )
+        assert r["max_volume_gb"] == pytest.approx(volume_gb(r["duration_s"], 560), abs=0.1)
+
+
+def test_rate_fraction_steps():
+    assert rate_fraction(5) == 0.25
+    assert rate_fraction(10) == 0.50
+    assert rate_fraction(25) == 0.75
+    assert rate_fraction(30) == 1.00
+    assert rate_fraction(89) == 1.00
+
+
+def test_expected_volume_is_between_quarter_and_full_rate():
+    for r in find_all_passes(SCENARIO, TLES):
+        assert 0.25 * r["max_volume_gb"] - 0.1 <= r["expected_volume_gb"] <= r["max_volume_gb"] + 0.1
+
+
+def test_flat_steps_match_the_simple_formula():
+    antenna = SCENARIO.antennas[0]
+    p = find_passes(TLE_A, antenna, START, 24)[0]
+    flat = pass_volume_gb(TLE_A, antenna, p.aos_utc, p.los_utc, 560, steps=FLAT_STEPS)
+    assert flat == pytest.approx(volume_gb(p.duration_s, 560), rel=1e-6)
+
+
+def test_higher_passes_keep_more_of_their_full_rate_volume():
+    records = [r for r in find_all_passes(SCENARIO, TLES) if r["antenna_id"] == "polar"]
+    records.sort(key=lambda r: r["max_elevation_deg"])
+    low, high = records[0], records[-1]
+    assert high["expected_volume_gb"] / high["max_volume_gb"] > low["expected_volume_gb"] / low["max_volume_gb"]
 
 
 def test_two_satellites_give_more_passes_than_one():

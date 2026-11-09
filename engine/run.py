@@ -6,6 +6,7 @@ import json
 import sys
 from pathlib import Path
 
+from engine.buffer import simulate_buffer
 from engine.celestrak import fetch_tle
 from engine.pass_finder import find_all_passes, iso_z, tle_epoch_utc
 from engine.scenario import load_scenario
@@ -45,9 +46,27 @@ def main(scenario_path, output_path):
                 p for p in document["passes"]
                 if p["satellite_id"] == sat.id and p["antenna_id"] == ant.id
             ]
-            total = sum(p["expected_volume_gb"] for p in mine)
-            print(f"{sat.id} x {ant.id}: {len(mine)} passes, up to {total:.0f} GB")
+            expected = sum(p["expected_volume_gb"] for p in mine)
+            upper = sum(p["max_volume_gb"] for p in mine)
+            print(
+                f"{sat.id} x {ant.id}: {len(mine)} passes, "
+                f"{expected:.0f} GB expected ({upper:.0f} GB at full rate)"
+            )
     print(f"{len(document['passes'])} passes written to {output}")
+
+    print("\nBuffer baselines (one antenna at a time, no scheduling yet):")
+    for sat in scenario.satellites:
+        mine = [p for p in document["passes"] if p["satellite_id"] == sat.id]
+        options = [("no downlink", [])] + [
+            (ant.id + " only", [p for p in mine if p["antenna_id"] == ant.id])
+            for ant in scenario.antennas
+        ]
+        for label, chosen in options:
+            result = simulate_buffer(sat, chosen, scenario.start_utc, scenario.duration_hours)
+            print(
+                f"{sat.id}, {label}: delivered {result['delivered_gb']:.0f} GB, "
+                f"overflow {result['overflow_gb']:.0f} GB ({result['overflow_events']} events)"
+            )
 
 
 if __name__ == "__main__":

@@ -103,7 +103,7 @@
       "pass_id": "p021",
       "satellite_id": "sentinel-2a",
       "antenna_id": "kiruna-1",
-      "start_utc": "2026-11-09T09:45:43Z",
+      "start_utc": "2026-11-09T09:45:44Z",
       "end_utc": "2026-11-09T09:58:12Z",
       "planned_gb": 36.8
     },
@@ -111,7 +111,7 @@
       "pass_id": "p024",
       "satellite_id": "sentinel-2b",
       "antenna_id": "kiruna-1",
-      "start_utc": "2026-11-09T11:15:19Z",
+      "start_utc": "2026-11-09T11:15:20Z",
       "end_utc": "2026-11-09T11:27:40Z",
       "planned_gb": 36.4
     },
@@ -224,7 +224,7 @@
       "satellite_id": "sentinel-2b",
       "antenna_id": "matera-1",
       "start_utc": "2026-11-09T22:45:01Z",
-      "end_utc": "2026-11-09T22:49:10Z",
+      "end_utc": "2026-11-09T22:49:11Z",
       "planned_gb": 4.4
     },
     {
@@ -480,19 +480,19 @@
       },
       {
         "t_utc": "2026-11-09T09:50:00Z",
-        "level_gb": 292.37
+        "level_gb": 292.36
       },
       {
         "t_utc": "2026-11-09T10:00:00Z",
-        "level_gb": 278.62
+        "level_gb": 278.57
       },
       {
         "t_utc": "2026-11-09T10:10:00Z",
-        "level_gb": 289.04
+        "level_gb": 288.99
       },
       {
         "t_utc": "2026-11-09T10:20:00Z",
-        "level_gb": 299.45
+        "level_gb": 299.4
       },
       {
         "t_utc": "2026-11-09T10:30:00Z",
@@ -1094,7 +1094,7 @@
       },
       {
         "t_utc": "2026-11-09T11:20:00Z",
-        "level_gb": 291.4
+        "level_gb": 291.44
       },
       {
         "t_utc": "2026-11-09T11:30:00Z",

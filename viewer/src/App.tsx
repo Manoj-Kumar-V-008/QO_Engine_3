@@ -72,8 +72,8 @@ export default function App() {
   const ghostCollectionRef = useRef<Cesium.PolylineCollection | null>(null);
 
   // Direct DOM refs for 60fps playhead & range input (avoids 60fps React re-renders!)
-  const scrubberInputRef = useRef<HTMLInputElement | null>(null);
-  const chartPlayheadRef = useRef<HTMLDivElement | null>(null);
+const scrubberInputRef = useRef<HTMLInputElement>(null);
+const chartPlayheadRef = useRef<HTMLDivElement>(null);
 
   // Baseline Data
   const [baseScenario, setBaseScenario] = useState<ScenarioData | null>(null);

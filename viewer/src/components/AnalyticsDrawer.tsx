@@ -19,7 +19,7 @@ interface AnalyticsDrawerProps {
     optimizer: ScheduleDocument;
   };
   activeMethod: 'greedy' | 'optimizer';
-  playheadRef: React.RefObject<HTMLDivElement | null>;
+  playheadRef: React.RefObject<HTMLDivElement>;
   onScrub: (timeMs: number) => void;
 }
 

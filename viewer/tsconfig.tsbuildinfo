@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/lib/orbit.ts","./src/types/engine.ts"],"version":"5.6.3"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/analyticsdrawer.tsx","./src/components/conflictspanel.tsx","./src/components/guidedtourbar.tsx","./src/components/howtoreadmodal.tsx","./src/components/scoreboardpanel.tsx","./src/components/whatifpanel.tsx","./src/lib/orbit.ts","./src/lib/telemetry.ts","./src/lib/whatifengine.ts","./src/types/engine.ts"],"version":"5.6.3"}

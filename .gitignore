@@ -1,9 +1,12 @@
-.venv/
+# Python
 __pycache__/
-*.pyc
-.vscode/
-.env
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
 data/cache/
-node_modules
-rough.py
+
+# Node / Vite
+viewer/node_modules/
 viewer/dist/
+.DS_Store

@@ -1,10 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   BarChart3,
   ChevronDown,
   ChevronUp,
   Layers,
-  Radio,
 } from 'lucide-react';
 import type {
   PassRecord,
@@ -20,7 +19,7 @@ interface AnalyticsDrawerProps {
     optimizer: ScheduleDocument;
   };
   activeMethod: 'greedy' | 'optimizer';
-  currentTimeMs: number;
+  playheadRef: React.RefObject<HTMLDivElement | null>;
   onScrub: (timeMs: number) => void;
 }
 
@@ -35,19 +34,27 @@ const ANT_COLORS: Record<string, string> = {
   'matera-1': '#f472b6',
 };
 
-export default function AnalyticsDrawer({
+const HOUR_TICKS = [0, 3, 6, 9, 12, 15, 18, 21, 24];
+
+/**
+ * Memoized static SVG chart: only redraws when schedule, method, or tab changes.
+ * NEVER redraws on 60fps clock ticks! The playhead moves via a plain HTML div ref.
+ */
+const StaticChartPlot = React.memo(function StaticChartPlot({
   scenario,
   passes,
   schedules,
   activeMethod,
-  currentTimeMs,
-  onScrub,
-}: AnalyticsDrawerProps) {
-  const [isOpen, setIsOpen] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<'buffers' | 'gantt'>('buffers');
-  const [compareOverlay, setCompareOverlay] = useState<boolean>(true);
-  const svgRef = useRef<SVGSVGElement | null>(null);
-
+  activeTab,
+  compareOverlay,
+}: {
+  scenario: ScenarioData;
+  passes: PassRecord[];
+  schedules: { greedy: ScheduleDocument; optimizer: ScheduleDocument };
+  activeMethod: 'greedy' | 'optimizer';
+  activeTab: 'buffers' | 'gantt';
+  compareOverlay: boolean;
+}) {
   const startMs = useMemo(
     () => new Date(scenario.start_utc).getTime(),
     [scenario.start_utc]
@@ -68,13 +75,12 @@ export default function AnalyticsDrawer({
     [otherSchedule]
   );
 
-  // SVG coordinate dimensions
-  const width = 920;
-  const height = 165;
-  const padLeft = 54;
-  const padRight = 18;
-  const padTop = 16;
-  const padBottom = 26;
+  const width = 800;
+  const height = 148;
+  const padLeft = 48;
+  const padRight = 14;
+  const padTop = 14;
+  const padBottom = 22;
   const plotW = width - padLeft - padRight;
   const plotH = height - padTop - padBottom;
   const maxCap = Math.max(
@@ -92,18 +98,11 @@ export default function AnalyticsDrawer({
     return padTop + plotH - (clamped / maxCap) * plotH;
   };
 
-  const handleSvgPointer = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (!svgRef.current) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    const relX = ((e.clientX - rect.left) / rect.width) * width;
-    const frac = Math.min(1, Math.max(0, (relX - padLeft) / plotW));
-    onScrub(startMs + frac * durationMs);
-  };
-
-  // Build SVG polyline points for each satellite's buffer_timeline
   const buildPolyline = (sched: ScheduleDocument, satId: string, initGb: number) => {
     const pts = sched.buffer_timeline[satId] ?? [];
-    const coords: string[] = [`${timeToX(startMs).toFixed(1)},${gbToY(initGb).toFixed(1)}`];
+    const coords: string[] = [
+      `${timeToX(startMs).toFixed(1)},${gbToY(initGb).toFixed(1)}`,
+    ];
     for (const pt of pts) {
       const x = timeToX(new Date(pt.t_utc).getTime());
       const y = gbToY(pt.level_gb);
@@ -112,46 +111,274 @@ export default function AnalyticsDrawer({
     return coords.join(' ');
   };
 
-  // Find overflow segments where buffer hits capacity (300 GB)
-  const overflowDots = useMemo(() => {
-    const dots: { x: number; y: number; satId: string }[] = [];
+  // Compute contiguous overflow time spans (shaded bands instead of hundreds of SVG circles)
+  const overflowSpans = useMemo(() => {
+    const spans: { x1: number; x2: number }[] = [];
     for (const sat of scenario.satellites) {
       const pts = activeSchedule.buffer_timeline[sat.id] ?? [];
+      let spanStartMs: number | null = null;
+      let prevMs = startMs;
       for (const pt of pts) {
-        if (pt.level_gb >= sat.buffer_capacity_gb - 0.5) {
-          dots.push({
-            x: timeToX(new Date(pt.t_utc).getTime()),
-            y: gbToY(pt.level_gb),
-            satId: sat.id,
-          });
+        const ptMs = new Date(pt.t_utc).getTime();
+        const isFull = pt.level_gb >= sat.buffer_capacity_gb - 0.5;
+        if (isFull && spanStartMs === null) {
+          spanStartMs = prevMs;
+        } else if (!isFull && spanStartMs !== null) {
+          spans.push({ x1: timeToX(spanStartMs), x2: timeToX(prevMs) });
+          spanStartMs = null;
         }
+        prevMs = ptMs;
+      }
+      if (spanStartMs !== null) {
+        spans.push({ x1: timeToX(spanStartMs), x2: timeToX(prevMs) });
       }
     }
-    return dots;
+    return spans;
   }, [activeSchedule, scenario.satellites, startMs, durationMs]);
 
-  const playheadX = timeToX(currentTimeMs);
-  const hourTicks = [0, 3, 6, 9, 12, 15, 18, 21, 24];
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className="w-full h-34 select-none pointer-events-none"
+    >
+      {/* Vertical Hour Gridlines */}
+      {HOUR_TICKS.map((h) => {
+        const x = padLeft + (h / scenario.duration_hours) * plotW;
+        return (
+          <g key={h}>
+            <line
+              x1={x}
+              y1={padTop}
+              x2={x}
+              y2={padTop + plotH}
+              stroke="#1e293b"
+              strokeWidth="1"
+            />
+            <text
+              x={x}
+              y={height - 5}
+              textAnchor="middle"
+              fill="#64748b"
+              fontSize="10"
+              fontFamily="ui-monospace, monospace"
+            >
+              +{h}h
+            </text>
+          </g>
+        );
+      })}
+
+      {activeTab === 'buffers' ? (
+        <>
+          {/* Shaded Red Ceiling Band (280-300 GB Danger Zone) */}
+          <rect
+            x={padLeft}
+            y={gbToY(300)}
+            width={plotW}
+            height={gbToY(275) - gbToY(300)}
+            fill="#ef4444"
+            opacity="0.08"
+          />
+
+          {/* Shaded Red Spans where Buffer is Actively Spilling at 300 GB */}
+          {overflowSpans.map((sp, i) => (
+            <rect
+              key={i}
+              x={sp.x1}
+              y={padTop}
+              width={Math.max(2, sp.x2 - sp.x1)}
+              height={6}
+              fill="#ef4444"
+              opacity="0.85"
+              rx="1"
+            />
+          ))}
+
+          {/* Horizontal GB Gridlines (0, 150, 300 GB) */}
+          {[0, 150, 300].map((gb) => {
+            const y = gbToY(gb);
+            const isCap = gb === 300;
+            return (
+              <g key={gb}>
+                <line
+                  x1={padLeft}
+                  y1={y}
+                  x2={padLeft + plotW}
+                  y2={y}
+                  stroke={isCap ? '#ef4444' : '#1e293b'}
+                  strokeWidth={isCap ? '1.2' : '1'}
+                  strokeDasharray={isCap ? '5 4' : undefined}
+                  opacity={isCap ? 0.75 : 1}
+                />
+                <text
+                  x={padLeft - 6}
+                  y={y + 3}
+                  textAnchor="end"
+                  fill={isCap ? '#f87171' : '#64748b'}
+                  fontSize="10"
+                  fontFamily="ui-monospace, monospace"
+                >
+                  {gb}G
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Optional Comparison Curves */}
+          {compareOverlay &&
+            scenario.satellites.map((sat) => (
+              <polyline
+                key={`other-${sat.id}`}
+                fill="none"
+                stroke={SAT_COLORS[sat.id] ?? '#38bdf8'}
+                strokeWidth="1.4"
+                strokeDasharray="4 4"
+                opacity={0.4}
+                points={buildPolyline(
+                  otherSchedule,
+                  sat.id,
+                  sat.initial_buffer_gb
+                )}
+              />
+            ))}
+
+          {/* Active Scheduler Buffer Curves */}
+          {scenario.satellites.map((sat) => (
+            <polyline
+              key={`active-${sat.id}`}
+              fill="none"
+              stroke={SAT_COLORS[sat.id] ?? '#38bdf8'}
+              strokeWidth="2.2"
+              points={buildPolyline(
+                activeSchedule,
+                sat.id,
+                sat.initial_buffer_gb
+              )}
+            />
+          ))}
+        </>
+      ) : (
+        /* GANTT PASS TIMELINE BY GROUND STATION */
+        <>
+          {scenario.antennas.map((ant, idx) => {
+            const rowH = plotH / scenario.antennas.length;
+            const rowY = padTop + idx * rowH;
+            const antPasses = passes.filter((p) => p.antenna_id === ant.id);
+            const antColor = ANT_COLORS[ant.id] ?? '#22d3ee';
+
+            return (
+              <g key={ant.id}>
+                <line
+                  x1={padLeft}
+                  y1={rowY + rowH / 2}
+                  x2={padLeft + plotW}
+                  y2={rowY + rowH / 2}
+                  stroke="#1e293b"
+                  strokeWidth="1"
+                />
+                <text
+                  x={padLeft - 6}
+                  y={rowY + rowH / 2 + 3}
+                  textAnchor="end"
+                  fill={antColor}
+                  fontSize="9"
+                  fontWeight="bold"
+                  fontFamily="ui-monospace, monospace"
+                >
+                  {ant.name.slice(0, 6)}
+                </text>
+
+                {antPasses.map((p) => {
+                  const x1 = timeToX(new Date(p.aos_utc).getTime());
+                  const x2 = Math.max(
+                    x1 + 3.5,
+                    timeToX(new Date(p.los_utc).getTime())
+                  );
+                  const isChosen = chosenSet.has(p.pass_id);
+                  const isDiff =
+                    chosenSet.has(p.pass_id) !== otherChosenSet.has(p.pass_id);
+                  const satColor = SAT_COLORS[p.satellite_id] ?? '#38bdf8';
+
+                  return (
+                    <rect
+                      key={p.pass_id}
+                      x={x1}
+                      y={rowY + 4}
+                      width={x2 - x1}
+                      height={Math.max(4, rowH - 8)}
+                      rx="1.5"
+                      fill={isChosen ? satColor : '#1e293b'}
+                      opacity={isChosen ? 0.92 : 0.45}
+                      stroke={
+                        isDiff
+                          ? '#fbbf24'
+                          : isChosen
+                          ? '#ffffff'
+                          : '#475569'
+                      }
+                      strokeWidth={isDiff ? '1.5' : '0.5'}
+                    />
+                  );
+                })}
+              </g>
+            );
+          })}
+        </>
+      )}
+    </svg>
+  );
+});
+
+export default function AnalyticsDrawer({
+  scenario,
+  passes,
+  schedules,
+  activeMethod,
+  playheadRef,
+  onScrub,
+}: AnalyticsDrawerProps) {
+  // Starts collapsed by default so the 3D globe is completely unobstructed
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'buffers' | 'gantt'>('buffers');
+  const [compareOverlay, setCompareOverlay] = useState<boolean>(true);
+  const plotContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const startMs = useMemo(
+    () => new Date(scenario.start_utc).getTime(),
+    [scenario.start_utc]
+  );
+  const durationMs = scenario.duration_hours * 3600 * 1000;
+  const otherMethod = activeMethod === 'optimizer' ? 'greedy' : 'optimizer';
+
+  // Left and right padding percentages matching SVG (padLeft=48/800=6%, padRight=14/800=1.75%)
+  const handlePointerScrub = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!plotContainerRef.current) return;
+    const rect = plotContainerRef.current.getBoundingClientRect();
+    const relX = (e.clientX - rect.left) / rect.width;
+    const padLeftFrac = 48 / 800;
+    const plotWFrac = (800 - 48 - 14) / 800;
+    const frac = Math.min(1, Math.max(0, (relX - padLeftFrac) / plotWFrac));
+    onScrub(startMs + frac * durationMs);
+  };
 
   return (
-    <div className="absolute bottom-22 left-1/2 -translate-x-1/2 z-10 w-[92%] max-w-4xl">
-      {/* Drawer Header Bar */}
-      <div className="flex items-center justify-between rounded-t-xl border border-b-0 border-slate-800/90 bg-slate-950/90 px-4 py-2 backdrop-blur-md">
+    <div className="w-full">
+      {/* Compact Header Bar */}
+      <div className="flex items-center justify-between rounded-t-xl border border-slate-800/90 bg-slate-950/90 px-3.5 py-1.5 backdrop-blur-md">
         <div className="flex items-center gap-2">
-          <BarChart3 className="w-4 h-4 text-sky-400" />
-          <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-200">
-            24h Telemetry & Schedule Timeline
+          <BarChart3 className="w-3.5 h-3.5 text-sky-400" />
+          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-200">
+            24h Telemetry Chart
           </span>
 
-          {/* Mode Tabs */}
-          <div className="ml-3 flex items-center gap-1 rounded-lg bg-slate-900 p-0.5 border border-slate-800">
+          <div className="ml-2 flex items-center gap-1 rounded-lg bg-slate-900 p-0.5 border border-slate-800">
             <button
               onClick={() => {
                 setActiveTab('buffers');
                 setIsOpen(true);
               }}
-              className={`rounded-md px-2.5 py-1 text-[11px] font-mono font-semibold transition cursor-pointer ${
-                activeTab === 'buffers'
+              className={`rounded px-2 py-0.5 text-[10px] font-mono font-semibold transition cursor-pointer ${
+                isOpen && activeTab === 'buffers'
                   ? 'bg-sky-500 text-slate-950'
                   : 'text-slate-400 hover:text-white'
               }`}
@@ -163,275 +390,76 @@ export default function AnalyticsDrawer({
                 setActiveTab('gantt');
                 setIsOpen(true);
               }}
-              className={`rounded-md px-2.5 py-1 text-[11px] font-mono font-semibold transition cursor-pointer ${
-                activeTab === 'gantt'
+              className={`rounded px-2 py-0.5 text-[10px] font-mono font-semibold transition cursor-pointer ${
+                isOpen && activeTab === 'gantt'
                   ? 'bg-sky-500 text-slate-950'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              61 Passes Gantt
+              {passes.length} Passes Gantt
             </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {isOpen && activeTab === 'buffers' && (
             <button
               onClick={() => setCompareOverlay((v) => !v)}
-              className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-mono transition cursor-pointer ${
+              className={`hidden md:flex items-center gap-1 rounded border px-2 py-0.5 text-[10px] font-mono transition cursor-pointer ${
                 compareOverlay
                   ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
                   : 'border-slate-800 bg-slate-900 text-slate-500'
               }`}
-              title="Overlay dashed curve of the other scheduler for visual comparison"
             >
               <Layers className="w-3 h-3" />
-              Compare {otherMethod} (dashed)
+              vs {otherMethod}
             </button>
-          )}
-
-          {/* Legend */}
-          {isOpen && activeTab === 'buffers' && (
-            <div className="hidden sm:flex items-center gap-3 text-[11px] font-mono text-slate-300">
-              {scenario.satellites.map((sat) => (
-                <span key={sat.id} className="flex items-center gap-1">
-                  <span
-                    className="h-2 w-2 rounded-full"
-                    style={{ backgroundColor: SAT_COLORS[sat.id] }}
-                  />
-                  {sat.id}
-                </span>
-              ))}
-              <span className="flex items-center gap-1 text-red-400">
-                <span className="h-2 w-2 rounded-full bg-red-500" />
-                300 GB Spill
-              </span>
-            </div>
           )}
 
           <button
             onClick={() => setIsOpen((v) => !v)}
-            className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-900 px-2 py-1 text-[11px] font-mono text-slate-300 hover:bg-slate-800 cursor-pointer"
+            className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-900 px-2 py-0.5 text-[10px] font-mono text-slate-300 hover:bg-slate-800 cursor-pointer"
           >
             {isOpen ? (
               <>
-                Hide <ChevronDown className="w-3.5 h-3.5" />
+                Collapse <ChevronDown className="w-3 h-3" />
               </>
             ) : (
               <>
-                Show Chart <ChevronUp className="w-3.5 h-3.5" />
+                Expand Chart <ChevronUp className="w-3 h-3" />
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* Collapsible Chart Body */}
+      {/* Collapsible Chart Body with Zero-Render HTML Div Playhead */}
       {isOpen && (
-        <div className="rounded-b-xl border border-slate-800/90 bg-slate-950/90 px-3 pb-2.5 pt-1 backdrop-blur-md shadow-2xl">
-          <svg
-            ref={svgRef}
-            viewBox={`0 0 ${width} ${height}`}
-            className="w-full h-38 cursor-crosshair select-none"
-            onClick={handleSvgPointer}
-            onMouseMove={(e) => {
-              if (e.buttons === 1) handleSvgPointer(e);
-            }}
+        <div
+          ref={plotContainerRef}
+          onClick={handlePointerScrub}
+          onMouseMove={(e) => {
+            if (e.buttons === 1) handlePointerScrub(e);
+          }}
+          className="relative rounded-b-xl border border-t-0 border-slate-800/90 bg-slate-950/90 px-2 pb-2 pt-1 backdrop-blur-md shadow-2xl cursor-crosshair overflow-hidden"
+        >
+          <StaticChartPlot
+            scenario={scenario}
+            passes={passes}
+            schedules={schedules}
+            activeMethod={activeMethod}
+            activeTab={activeTab}
+            compareOverlay={compareOverlay}
+          />
+
+          {/* Playhead vertical line moved directly via DOM ref at 60fps (0 React re-renders) */}
+          <div
+            ref={playheadRef}
+            style={{ left: '6%' }}
+            className="pointer-events-none absolute top-2 bottom-5 w-[1.5px] bg-white shadow-[0_0_6px_#38bdf8]"
           >
-            {/* Vertical Hour Gridlines */}
-            {hourTicks.map((h) => {
-              const x = padLeft + (h / scenario.duration_hours) * plotW;
-              return (
-                <g key={h}>
-                  <line
-                    x1={x}
-                    y1={padTop}
-                    x2={x}
-                    y2={padTop + plotH}
-                    stroke="#1e293b"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x={x}
-                    y={height - 7}
-                    textAnchor="middle"
-                    fill="#64748b"
-                    fontSize="10"
-                    fontFamily="ui-monospace, monospace"
-                  >
-                    +{h}h
-                  </text>
-                </g>
-              );
-            })}
-
-            {activeTab === 'buffers' ? (
-              <>
-                {/* Horizontal GB Gridlines (0, 150, 300 GB) */}
-                {[0, 150, 300].map((gb) => {
-                  const y = gbToY(gb);
-                  const isCap = gb === 300;
-                  return (
-                    <g key={gb}>
-                      <line
-                        x1={padLeft}
-                        y1={y}
-                        x2={padLeft + plotW}
-                        y2={y}
-                        stroke={isCap ? '#ef4444' : '#1e293b'}
-                        strokeWidth={isCap ? '1.2' : '1'}
-                        strokeDasharray={isCap ? '5 4' : undefined}
-                        opacity={isCap ? 0.75 : 1}
-                      />
-                      <text
-                        x={padLeft - 6}
-                        y={y + 3}
-                        textAnchor="end"
-                        fill={isCap ? '#f87171' : '#64748b'}
-                        fontSize="10"
-                        fontFamily="ui-monospace, monospace"
-                      >
-                        {gb}G
-                      </text>
-                    </g>
-                  );
-                })}
-
-                {/* Optional Comparison Curves (Other scheduler as dashed lines) */}
-                {compareOverlay &&
-                  scenario.satellites.map((sat) => (
-                    <polyline
-                      key={`other-${sat.id}`}
-                      fill="none"
-                      stroke={SAT_COLORS[sat.id] ?? '#38bdf8'}
-                      strokeWidth="1.4"
-                      strokeDasharray="4 4"
-                      opacity={0.4}
-                      points={buildPolyline(
-                        otherSchedule,
-                        sat.id,
-                        sat.initial_buffer_gb
-                      )}
-                    />
-                  ))}
-
-                {/* Active Scheduler Buffer Curves */}
-                {scenario.satellites.map((sat) => (
-                  <polyline
-                    key={`active-${sat.id}`}
-                    fill="none"
-                    stroke={SAT_COLORS[sat.id] ?? '#38bdf8'}
-                    strokeWidth="2.2"
-                    points={buildPolyline(
-                      activeSchedule,
-                      sat.id,
-                      sat.initial_buffer_gb
-                    )}
-                  />
-                ))}
-
-                {/* Red Overflow Markers at 300 GB Ceiling */}
-                {overflowDots.map((d, idx) => (
-                  <circle
-                    key={idx}
-                    cx={d.x}
-                    cy={d.y}
-                    r="2.6"
-                    fill="#ef4444"
-                  />
-                ))}
-              </>
-            ) : (
-              /* GANTT PASS TIMELINE BY GROUND STATION */
-              <>
-                {scenario.antennas.map((ant, idx) => {
-                  const rowH = plotH / scenario.antennas.length;
-                  const rowY = padTop + idx * rowH;
-                  const antPasses = passes.filter((p) => p.antenna_id === ant.id);
-                  const antColor = ANT_COLORS[ant.id] ?? '#38bdf8';
-
-                  return (
-                    <g key={ant.id}>
-                      <line
-                        x1={padLeft}
-                        y1={rowY + rowH / 2}
-                        x2={padLeft + plotW}
-                        y2={rowY + rowH / 2}
-                        stroke="#1e293b"
-                        strokeWidth="1"
-                      />
-                      <text
-                        x={padLeft - 6}
-                        y={rowY + rowH / 2 + 3}
-                        textAnchor="end"
-                        fill={antColor}
-                        fontSize="10"
-                        fontWeight="bold"
-                        fontFamily="ui-monospace, monospace"
-                      >
-                        {ant.name.slice(0, 6)}
-                      </text>
-
-                      {antPasses.map((p) => {
-                        const x1 = timeToX(new Date(p.aos_utc).getTime());
-                        const x2 = Math.max(
-                          x1 + 4,
-                          timeToX(new Date(p.los_utc).getTime())
-                        );
-                        const isChosen = chosenSet.has(p.pass_id);
-                        const isDiff =
-                          chosenSet.has(p.pass_id) !==
-                          otherChosenSet.has(p.pass_id);
-                        const satColor =
-                          SAT_COLORS[p.satellite_id] ?? '#38bdf8';
-
-                        return (
-                          <g key={p.pass_id}>
-                            <rect
-                              x={x1}
-                              y={rowY + 6}
-                              width={x2 - x1}
-                              height={rowH - 12}
-                              rx="2"
-                              fill={isChosen ? satColor : '#1e293b'}
-                              opacity={isChosen ? 0.92 : 0.45}
-                              stroke={
-                                isDiff
-                                  ? '#fbbf24'
-                                  : isChosen
-                                  ? '#ffffff'
-                                  : '#475569'
-                              }
-                              strokeWidth={isDiff ? '1.8' : '0.6'}
-                            >
-                              <title>
-                                {`${p.pass_id.toUpperCase()} (${p.satellite_id} -> ${p.antenna_id})
-Expected: ${p.expected_volume_gb} GB | Max El: ${p.max_elevation_deg}°
-Status: ${
-                                  isChosen ? 'CHOSEN' : 'SKIPPED'
-                                }${isDiff ? ' (Differs between Greedy & Optimizer!)' : ''}`}
-                              </title>
-                            </rect>
-                          </g>
-                        );
-                      })}
-                    </g>
-                  );
-                })}
-              </>
-            )}
-
-            {/* Synchronized Playhead Line */}
-            <line
-              x1={playheadX}
-              y1={padTop - 4}
-              x2={playheadX}
-              y2={padTop + plotH + 4}
-              stroke="#f8fafc"
-              strokeWidth="1.8"
-            />
-            <circle cx={playheadX} cy={padTop} r="3.5" fill="#38bdf8" />
-          </svg>
+            <div className=" -ml-[3px] -mt-1 h-2 w-2 rounded-full bg-sky-400" />
+          </div>
         </div>
       )}
     </div>

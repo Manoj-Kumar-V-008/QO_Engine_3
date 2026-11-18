@@ -1,5 +1,7 @@
+import { useRef, type CSSProperties } from 'react';
 import type { LandingDataBundle } from '../data/loadLandingData';
 import type { BufferPoint } from '../../types/engine';
+import { useRevealOnce } from '../hooks/useRevealOnce';
 
 interface ActWastedPassProps {
   data: LandingDataBundle | null;
@@ -12,6 +14,7 @@ function BufferSmallMultiple({
   qslicePts,
   startMs,
   durationMs,
+  revealed,
 }: {
   title: string;
   norad: number;
@@ -19,6 +22,7 @@ function BufferSmallMultiple({
   qslicePts: BufferPoint[];
   startMs: number;
   durationMs: number;
+  revealed: boolean;
 }) {
   const W = 540;
   const H = 176;
@@ -46,7 +50,7 @@ function BufferSmallMultiple({
   const qsliceOverflowMarks = qslicePts.filter((p) => p.level_gb >= 299.5);
 
   return (
-    <div className="lp-plate p-4">
+    <div className="lp-plate lp-plate-interactive p-4" data-revealed={revealed ? 'true' : 'false'}>
       <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
         <div className="flex items-baseline gap-2.5">
           <span className="font-semibold text-[15px]" style={{ color: 'var(--ink-void)' }}>
@@ -156,20 +160,30 @@ function BufferSmallMultiple({
           />
         ))}
 
-        {/* Greedy buffer curve */}
+        {/* Greedy buffer curve (drawn on reveal via pathLength=1) */}
         {greedyPath && (
           <path
             d={greedyPath}
+            pathLength={1}
+            className="lp-curve-draw"
             fill="none"
             stroke="#9DA9B8"
             strokeWidth="1.4"
-            strokeDasharray="4 3"
+            strokeOpacity="0.82"
           />
         )}
 
-        {/* Q Slice buffer curve */}
+        {/* Q Slice buffer curve (draws 140ms after Greedy to highlight lower drain) */}
         {qslicePath && (
-          <path d={qslicePath} fill="none" stroke="#45D6A0" strokeWidth="1.9" />
+          <path
+            d={qslicePath}
+            pathLength={1}
+            className="lp-curve-draw"
+            style={{ '--curve-delay': '140ms' } as CSSProperties}
+            fill="none"
+            stroke="#45D6A0"
+            strokeWidth="1.9"
+          />
         )}
 
         <text
@@ -187,6 +201,11 @@ function BufferSmallMultiple({
 }
 
 export default function ActWastedPass({ data }: ActWastedPassProps) {
+  const waterfallRef = useRef<HTMLDivElement>(null);
+  const buffersRef = useRef<HTMLDivElement>(null);
+  const waterfallRevealed = useRevealOnce(waterfallRef, 0.22);
+  const buffersRevealed = useRevealOnce(buffersRef, 0.2);
+
   const rows = data?.waterfallRows ?? [
     {
       method: 'greedy' as const,
@@ -269,8 +288,15 @@ export default function ActWastedPass({ data }: ActWastedPassProps) {
         </div>
 
         {/* Full-Width 0..3,000 GB Mass-Balance Waterfall Chart */}
-        <div className="lp-plate p-5 sm:p-7">
-          <div className="flex flex-wrap items-center justify-between gap-4 pb-5 mb-6" style={{ borderBottom: '1px solid var(--rule-void)' }}>
+        <div
+          ref={waterfallRef}
+          data-revealed={waterfallRevealed ? 'true' : 'false'}
+          className="lp-plate p-5 sm:p-7"
+        >
+          <div
+            className="flex flex-wrap items-center justify-between gap-4 pb-5 mb-6"
+            style={{ borderBottom: '1px solid var(--rule-void)' }}
+          >
             <div>
               <div className="lp-micro" style={{ color: 'var(--ink-void)' }}>
                 24-HOUR DATA ACCOUNTING · SHARED 0 TO 3,000 GB AXIS
@@ -321,13 +347,14 @@ export default function ActWastedPass({ data }: ActWastedPassProps) {
             </div>
           </div>
 
-          {/* Stacked rows */}
+          {/* Stacked rows: dedicated fill layer scales on GPU so labels NEVER squish */}
           <div className="space-y-5">
-            {rows.map((row) => {
+            {rows.map((row, rowIdx) => {
               const delPct = (row.deliveredGb / totalGb) * 100;
               const ovfPct = (row.overflowGb / totalGb) * 100;
               const stoPct = (row.storedGb / totalGb) * 100;
               const isQSlice = row.method === 'qslice';
+              const rowDelay = rowIdx * 90;
 
               return (
                 <div
@@ -363,30 +390,45 @@ export default function ActWastedPass({ data }: ActWastedPassProps) {
                     >
                       {/* Delivered segment */}
                       <div
-                        className="h-full flex items-center px-3 overflow-hidden"
-                        style={{
-                          width: `${delPct}%`,
-                          backgroundColor: barColors[row.method],
-                          color: '#05070A',
-                        }}
+                        className="relative h-full flex items-center px-3 overflow-hidden"
+                        style={{ width: `${delPct}%`, color: '#05070A' }}
                       >
-                        <span className="lp-mono text-[13.5px] font-semibold whitespace-nowrap">
+                        <div
+                          className="lp-bar-fill absolute inset-0"
+                          style={{
+                            backgroundColor: barColors[row.method],
+                            transitionDelay: `${rowDelay}ms`,
+                          }}
+                          aria-hidden="true"
+                        />
+                        <span
+                          className="lp-bar-label relative z-10 lp-mono text-[13.5px] font-semibold whitespace-nowrap"
+                          style={{ transitionDelay: `${rowDelay + 240}ms` }}
+                        >
                           {row.deliveredGb.toFixed(1)} GB
                         </span>
                       </div>
 
                       {/* Overflow segment (45 deg diagonal red hatch) */}
                       <div
-                        className="h-full lp-hatch-overflow flex items-center justify-center px-2 overflow-hidden"
+                        className="relative h-full flex items-center justify-center px-2 overflow-hidden"
                         style={{
                           width: `${ovfPct}%`,
                           borderLeft: '1px solid rgba(255,100,100,0.55)',
                           borderRight: '1px solid rgba(157,169,184,0.3)',
                         }}
                       >
+                        <div
+                          className="lp-bar-fill lp-hatch-overflow absolute inset-0"
+                          style={{ transitionDelay: `${rowDelay + 80}ms` }}
+                          aria-hidden="true"
+                        />
                         <span
-                          className="lp-mono text-[13px] font-semibold whitespace-nowrap"
-                          style={{ color: '#FF8585' }}
+                          className="lp-bar-label relative z-10 lp-mono text-[13px] font-semibold whitespace-nowrap"
+                          style={{
+                            color: '#FF8585',
+                            transitionDelay: `${rowDelay + 280}ms`,
+                          }}
                         >
                           {row.overflowGb.toFixed(1)} GB lost
                         </span>
@@ -394,12 +436,20 @@ export default function ActWastedPass({ data }: ActWastedPassProps) {
 
                       {/* Stored segment (600 GB) */}
                       <div
-                        className="h-full lp-hatch-stored flex items-center justify-center px-1.5 overflow-hidden"
+                        className="relative h-full flex items-center justify-center px-1.5 overflow-hidden"
                         style={{ width: `${stoPct}%` }}
                       >
+                        <div
+                          className="lp-bar-fill lp-hatch-stored absolute inset-0"
+                          style={{ transitionDelay: `${rowDelay + 140}ms` }}
+                          aria-hidden="true"
+                        />
                         <span
-                          className="lp-mono text-[12.5px] whitespace-nowrap hidden md:inline"
-                          style={{ color: 'var(--ink-void-2)' }}
+                          className="lp-bar-label relative z-10 lp-mono text-[12.5px] whitespace-nowrap hidden md:inline"
+                          style={{
+                            color: 'var(--ink-void-2)',
+                            transitionDelay: `${rowDelay + 310}ms`,
+                          }}
                         >
                           {row.storedGb.toFixed(0)} GB
                         </span>
@@ -422,20 +472,23 @@ export default function ActWastedPass({ data }: ActWastedPassProps) {
               <div className="hidden sm:block relative h-9">
                 {/* Bracket spanning from Greedy delivered (691.4/3000) to Q Slice delivered (999.2/3000) */}
                 <div
-                  className="absolute top-0 h-4"
+                  className="lp-bar-fill absolute top-0 h-4"
                   style={{
                     left: `${(greedyRow.deliveredGb / totalGb) * 100}%`,
                     width: `${((qsliceRow.deliveredGb - greedyRow.deliveredGb) / totalGb) * 100}%`,
                     borderLeft: '1.5px solid #45D6A0',
                     borderRight: '1.5px solid #45D6A0',
                     borderBottom: '1.5px solid #45D6A0',
+                    transitionDuration: '360ms',
+                    transitionDelay: '420ms',
                   }}
                 />
                 <div
-                  className="text-[14px] font-medium absolute top-5 whitespace-nowrap"
+                  className="lp-bar-label text-[14px] font-medium absolute top-5 whitespace-nowrap"
                   style={{
                     left: `${(greedyRow.deliveredGb / totalGb) * 100}%`,
                     color: 'var(--green)',
+                    transitionDelay: '520ms',
                   }}
                 >
                   <span className="lp-mono font-semibold">+{qsliceRow.deltaVsGreedyGb.toFixed(1)} GB</span> delivered (<span className="lp-mono font-semibold">+{qsliceRow.deltaVsGreedyPct.toFixed(1)}%</span> vs. Greedy) — same 3 dishes, same 24 hours
@@ -448,15 +501,16 @@ export default function ActWastedPass({ data }: ActWastedPassProps) {
           </div>
 
           {/* Accessible table alternative */}
-          <details className="mt-5 pt-3" style={{ borderTop: '1px solid var(--rule-void)' }}>
+          <details className="lp-details mt-5 pt-3" style={{ borderTop: '1px solid var(--rule-void)' }}>
             <summary
-              className="lp-micro cursor-pointer select-none"
+              className="lp-details-summary lp-micro cursor-pointer select-none flex items-center justify-between py-1.5"
               style={{ color: 'var(--ink-void-2)' }}
             >
-              Inspect exact 24-hour mass-balance numbers (accessible table)
+              <span>Inspect exact 24-hour mass-balance numbers (accessible table)</span>
+              <span className="lp-details-icon lp-mono" aria-hidden="true">+</span>
             </summary>
-            <div className="lp-table-wrap mt-3">
-              <table className="lp-table">
+            <div className="lp-details-body lp-table-wrap mt-3">
+              <table className="lp-table lp-table-void">
                 <thead>
                   <tr>
                     <th>Scheduler</th>
@@ -488,7 +542,7 @@ export default function ActWastedPass({ data }: ActWastedPassProps) {
 
         {/* Small Multiples: 24-Hour Buffer Curves for S2A & S2B */}
         {data && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-6">
+          <div ref={buffersRef} className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-6">
             <BufferSmallMultiple
               title="SENTINEL-2A"
               norad={40697}
@@ -496,6 +550,7 @@ export default function ActWastedPass({ data }: ActWastedPassProps) {
               qslicePts={data.schedules.qslice.buffer_timeline['sentinel-2a'] ?? []}
               startMs={startMs}
               durationMs={durationMs}
+              revealed={buffersRevealed}
             />
             <BufferSmallMultiple
               title="SENTINEL-2B"
@@ -504,6 +559,7 @@ export default function ActWastedPass({ data }: ActWastedPassProps) {
               qslicePts={data.schedules.qslice.buffer_timeline['sentinel-2b'] ?? []}
               startMs={startMs}
               durationMs={durationMs}
+              revealed={buffersRevealed}
             />
           </div>
         )}

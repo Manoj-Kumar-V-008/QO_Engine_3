@@ -14,6 +14,17 @@
   --qo-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
+html {
+  scroll-padding-top: 68px;
+  scroll-behavior: smooth;
+}
+
+@media (max-width: 767px) {
+  html {
+    scroll-padding-top: 64px;
+  }
+}
+
 html,
 body,
 #root {
@@ -119,11 +130,41 @@ body,
 }
 
 .hud-transition {
-  transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 200ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    color 140ms cubic-bezier(0.2, 0, 0, 1),
+    background-color 140ms cubic-bezier(0.2, 0, 0, 1),
+    border-color 140ms cubic-bezier(0.2, 0, 0, 1),
+    opacity 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button.hud-transition:active {
+  transform: translate3d(0, 1px, 0) scale(0.98);
+  transition-duration: 60ms;
+}
+
+@keyframes hudModalBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes hudModalPlateIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.hud-modal-backdrop {
+  animation: hudModalBackdropIn 160ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+.hud-modal-plate {
+  animation: hudModalPlateIn 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .cesium-viewer-bottom {
@@ -134,9 +175,14 @@ body,
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   .animate-pulse,
   .animate-ping,
-  .animate-spin {
+  .animate-spin,
+  .hud-modal-backdrop,
+  .hud-modal-plate {
     animation: none !important;
   }
   .hud-transition {

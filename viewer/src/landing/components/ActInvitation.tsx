@@ -4,6 +4,7 @@ import type { LandingDataBundle } from '../data/loadLandingData';
 import type { AntennaConfig } from '../../types/engine';
 import { runWhatIfPipeline } from '../../lib/whatifEngine';
 import { PrimaryLaunchButton } from './LandingButton';
+import { RollingNumber } from './RollingNumber';
 
 type WhatIfResult = ReturnType<typeof runWhatIfPipeline>;
 
@@ -41,8 +42,9 @@ function latToY(lat: number): number {
 export default function ActInvitation({ data, onLaunchConsole }: ActInvitationProps) {
   const [selectedStation, setSelectedStation] = useState<AntennaConfig | null>(null);
   const [whatIfResult, setWhatIfResult] = useState<WhatIfResult | null>(null);
+  const [solveSeq, setSolveSeq] = useState<number>(0);
 
-  // Compute 2 real SGP4 orbits (~200 minutes) of ground track for clean map context
+  // Compute 2 real SGP4 orbits (~240 minutes) of ground track for clean map context
   const groundTracks = useMemo(() => {
     if (!data) return { s2a: [] as string[], s2b: [] as string[] };
     const buildSegments = (satId: string) => {
@@ -86,6 +88,7 @@ export default function ActInvitation({ data, onLaunchConsole }: ActInvitationPr
     const res = runWhatIfPipeline(data.scenario, data.passesDoc, data.tles, [ant]);
     setSelectedStation(ant);
     setWhatIfResult(res);
+    setSolveSeq((n) => n + 1);
   };
 
   const handleMapClick = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -147,7 +150,7 @@ export default function ActInvitation({ data, onLaunchConsole }: ActInvitationPr
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           {/* Left 7 cols: Interactive SGP4 Ground-Track Map */}
-          <div className="lg:col-span-7 lp-plate p-4 sm:p-5 flex flex-col justify-between">
+          <div className="lg:col-span-7 lp-plate lp-plate-interactive p-4 sm:p-5 flex flex-col justify-between">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <span className="lp-micro" style={{ color: 'var(--ink-void)' }}>
                 CLICK ANYWHERE ON EARTH TO ADD A 4TH GROUND STATION
@@ -259,6 +262,7 @@ export default function ActInvitation({ data, onLaunchConsole }: ActInvitationPr
                       fill={isSel ? '#45D6A0' : 'none'}
                       stroke={isSel ? '#45D6A0' : 'rgba(233,237,242,0.45)'}
                       strokeWidth="1.2"
+                      className="lp-ledger-rect"
                     />
                     <text
                       x={p.lon > 120 ? -9 : 9}
@@ -275,16 +279,30 @@ export default function ActInvitation({ data, onLaunchConsole }: ActInvitationPr
                 );
               })}
 
-              {/* Selected custom/preset station crosshair */}
+              {/* Selected custom/preset station crosshair with one-shot acquisition lock-on */}
               {selectedStation && (
                 <g
+                  key={`${selectedStation.id}-${selectedStation.lat_deg}-${selectedStation.lon_deg}-${solveSeq}`}
                   transform={`translate(${lonToX(selectedStation.lon_deg)}, ${latToY(
                     selectedStation.lat_deg
                   )})`}
                 >
-                  <line x1="-14" y1="0" x2="14" y2="0" stroke="#45D6A0" strokeWidth="1.2" />
-                  <line x1="0" y1="-14" x2="0" y2="14" stroke="#45D6A0" strokeWidth="1.2" />
-                  <circle cx="0" cy="0" r="6" fill="#45D6A0" fillOpacity="0.22" stroke="#45D6A0" />
+                  {/* One-shot radar acquisition ping ring */}
+                  <circle
+                    cx="0"
+                    cy="0"
+                    r="8"
+                    fill="none"
+                    stroke="#45D6A0"
+                    strokeWidth="1.4"
+                    className="lp-acquire-ping"
+                  />
+                  {/* Reticle lock-on settle */}
+                  <g className="lp-acquire-lock">
+                    <line x1="-14" y1="0" x2="14" y2="0" stroke="#45D6A0" strokeWidth="1.2" />
+                    <line x1="0" y1="-14" x2="0" y2="14" stroke="#45D6A0" strokeWidth="1.2" />
+                    <circle cx="0" cy="0" r="6" fill="#45D6A0" fillOpacity="0.22" stroke="#45D6A0" />
+                  </g>
                 </g>
               )}
             </svg>
@@ -312,6 +330,7 @@ export default function ActInvitation({ data, onLaunchConsole }: ActInvitationPr
                     }
                     className="lp-btn-tactile"
                   >
+                    <span className="lp-lock-pip" aria-hidden="true" />
                     <span>+ {p.name}</span>
                     <span className="lp-mono text-[12px] opacity-80">
                       {p.lat > 0 ? `${p.lat.toFixed(0)}°N` : `${Math.abs(p.lat).toFixed(0)}°S`}
@@ -326,6 +345,7 @@ export default function ActInvitation({ data, onLaunchConsole }: ActInvitationPr
                   onClick={() => {
                     setSelectedStation(null);
                     setWhatIfResult(null);
+                    setSolveSeq((n) => n + 1);
                   }}
                   className="lp-btn-tactile"
                   style={{ color: 'var(--ink-void-2)' }}
@@ -337,7 +357,16 @@ export default function ActInvitation({ data, onLaunchConsole }: ActInvitationPr
           </div>
 
           {/* Right 5 cols: Live Computed Solver Output */}
-          <div className="lg:col-span-5 lp-plate p-5 sm:p-6 flex flex-col justify-between">
+          <div className="relative overflow-hidden lg:col-span-5 lp-plate p-5 sm:p-6 flex flex-col justify-between">
+            {/* One-shot top-edge scanline flash when in-browser solver completes */}
+            {solveSeq > 0 && (
+              <div
+                key={`scan-${solveSeq}`}
+                className="lp-solve-scanline"
+                aria-hidden="true"
+              />
+            )}
+
             <div>
               <div
                 className="flex items-center justify-between pb-3 mb-5"
@@ -354,51 +383,71 @@ export default function ActInvitation({ data, onLaunchConsole }: ActInvitationPr
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4" style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}>
+                <div
+                  className="lp-plate-interactive p-4"
+                  style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}
+                >
                   <div className="text-[12.5px] font-medium" style={{ color: 'var(--ink-void-2)' }}>
                     Q Slice delivered
                   </div>
                   <div
-                    className="lp-mono text-[28px] font-semibold mt-1"
+                    className="text-[28px] font-semibold mt-1"
                     style={{ color: 'var(--green)' }}
                   >
-                    {newQ.toFixed(1)} GB
+                    <RollingNumber value={`${newQ.toFixed(1)} GB`} />
                   </div>
                   <div className="text-[13px] mt-1" style={{ color: 'var(--ink-void-2)' }}>
-                    {whatIfResult
-                      ? `${addedGb >= 0 ? '+' : ''}${addedGb.toFixed(1)} GB vs. baseline`
-                      : '3 European stations'}
+                    {whatIfResult ? (
+                      <>
+                        <RollingNumber
+                          value={`${addedGb >= 0 ? '+' : ''}${addedGb.toFixed(1)}`}
+                          className="font-medium"
+                        />{' '}
+                        GB vs. baseline
+                      </>
+                    ) : (
+                      '3 European stations'
+                    )}
                   </div>
                 </div>
 
-                <div className="p-4" style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}>
+                <div
+                  className="lp-plate-interactive p-4"
+                  style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}
+                >
                   <div className="text-[12.5px] font-medium" style={{ color: 'var(--ink-void-2)' }}>
                     Candidate passes
                   </div>
                   <div
-                    className="lp-mono text-[28px] font-semibold mt-1"
+                    className="text-[28px] font-semibold mt-1"
                     style={{ color: 'var(--cyan)' }}
                   >
-                    {newPasses}
+                    <RollingNumber value={`${newPasses}`} />
                   </div>
                   <div className="text-[13px] mt-1" style={{ color: 'var(--ink-void-2)' }}>
                     {whatIfResult ? `+${addedPasses} new SGP4 passes` : '61 baseline passes'}
                   </div>
                 </div>
 
-                <div className="p-4" style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}>
+                <div
+                  className="lp-plate-interactive p-4"
+                  style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}
+                >
                   <div className="text-[12.5px] font-medium" style={{ color: 'var(--ink-void-2)' }}>
                     24h overflow
                   </div>
                   <div
-                    className="lp-mono text-[23px] font-semibold mt-1"
+                    className="text-[23px] font-semibold mt-1"
                     style={{ color: 'var(--red)' }}
                   >
-                    {newOverflow.toFixed(1)} GB
+                    <RollingNumber value={`${newOverflow.toFixed(1)} GB`} />
                   </div>
                 </div>
 
-                <div className="p-4" style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}>
+                <div
+                  className="lp-plate-interactive p-4"
+                  style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}
+                >
                   <div className="text-[12.5px] font-medium" style={{ color: 'var(--ink-void-2)' }}>
                     Constraints
                   </div>

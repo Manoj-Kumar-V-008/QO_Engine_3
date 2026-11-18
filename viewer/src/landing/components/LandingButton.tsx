@@ -62,7 +62,7 @@ export function ArrowVerticalIcon({
 
 /**
  * Tactile Split-Chamber Aerospace Command Button
- * Two-chamber hardware switchgear: precision-beveled command plate + recessed sliding arrow cell.
+ * Two-chamber hardware switchgear: precision-beveled command plate + recessed dual-arrow handoff chamber.
  */
 export function PrimaryLaunchButton({
   children,
@@ -78,7 +78,8 @@ export function PrimaryLaunchButton({
     >
       <span className="lp-btn-label">{children}</span>
       <span className="lp-btn-cell" aria-hidden="true">
-        <ArrowRightIcon />
+        <ArrowRightIcon className="lp-btn-arrow lp-btn-arrow--out" />
+        <ArrowRightIcon className="lp-btn-arrow lp-btn-arrow--in" />
       </span>
     </button>
   );

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   AlertTriangle,
   Award,
@@ -16,16 +17,28 @@ interface HowToReadModalProps {
 }
 
 export default function HowToReadModal({ isOpen, onClose }: HowToReadModalProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#02050d]/80 p-4 backdrop-blur-md"
+      className="hud-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-[#02050d]/82 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Mission Reference"
       onClick={onClose}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-2xl rounded-lg hud-glass-strong hud-reticle p-5 text-slate-100"
+        className="hud-modal-plate relative w-full max-w-2xl rounded-lg hud-glass-strong hud-reticle p-5 text-slate-100"
       >
         <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
           <div className="flex items-center gap-2">

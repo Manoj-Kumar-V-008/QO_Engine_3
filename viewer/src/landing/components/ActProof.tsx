@@ -1,21 +1,33 @@
+import { useRef } from 'react';
 import type { LandingDataBundle } from '../data/loadLandingData';
 import { PrimaryLaunchButton } from './LandingButton';
+import { useRevealOnce } from '../hooks/useRevealOnce';
 
 interface ActProofProps {
   data: LandingDataBundle | null;
   onLaunchConsole: () => void;
 }
 
-function CheckMarkSvg() {
+function CheckMarkSvg({ delayMs }: { delayMs: number }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" className="shrink-0">
       <rect x="0.75" y="0.75" width="12.5" height="12.5" stroke="#0C6343" strokeWidth="1.2" />
-      <path d="M3.2 7.2L5.8 9.8L10.8 4.2" stroke="#0C6343" strokeWidth="1.5" />
+      <path
+        d="M3.2 7.2L5.8 9.8L10.8 4.2"
+        pathLength={1}
+        className="lp-check-draw"
+        style={{ transitionDelay: `${delayMs}ms` }}
+        stroke="#0C6343"
+        strokeWidth="1.5"
+      />
     </svg>
   );
 }
 
 export default function ActProof({ data, onLaunchConsole }: ActProofProps) {
+  const validatorRef = useRef<HTMLDivElement>(null);
+  const validatorRevealed = useRevealOnce(validatorRef, 0.25);
+
   const rows = data?.waterfallRows ?? [
     {
       method: 'greedy' as const,
@@ -64,7 +76,7 @@ export default function ActProof({ data, onLaunchConsole }: ActProofProps) {
   return (
     <section id="act-04" className="lp-act lp-paper">
       <div className="lp-container">
-        {/* Document Header + Verification Stamp */}
+        {/* Document Header + Verification Stamp (stamp remains completely static) */}
         <div
           className="flex flex-wrap items-end justify-between gap-6 pb-8 mb-10"
           style={{ borderBottom: '2px solid var(--ink-paper)' }}
@@ -96,7 +108,7 @@ export default function ActProof({ data, onLaunchConsole }: ActProofProps) {
           SCROLL TABLE HORIZONTALLY TO VIEW ALL 9 COLUMNS →
         </div>
         <div className="lp-table-wrap">
-          <table className="lp-table">
+          <table className="lp-table lp-table-paper">
             <thead>
               <tr>
                 <th>Scheduler</th>
@@ -116,8 +128,9 @@ export default function ActProof({ data, onLaunchConsole }: ActProofProps) {
                 return (
                   <tr
                     key={r.method}
+                    data-highlight={isQ ? 'true' : 'false'}
                     style={{
-                      backgroundColor: isQ ? 'var(--paper-raised)' : 'transparent',
+                      backgroundColor: isQ ? 'var(--paper-raised)' : undefined,
                       fontWeight: isQ ? 600 : 400,
                     }}
                   >
@@ -185,7 +198,11 @@ export default function ActProof({ data, onLaunchConsole }: ActProofProps) {
         </p>
 
         {/* Independent 5-Rule Physics Validator Strip */}
-        <div className="mt-12">
+        <div
+          ref={validatorRef}
+          data-revealed={validatorRevealed ? 'true' : 'false'}
+          className="mt-12"
+        >
           <div
             className="flex flex-wrap items-baseline justify-between gap-2 pb-3"
             style={{ borderBottom: '2px solid var(--ink-paper)' }}
@@ -199,15 +216,15 @@ export default function ActProof({ data, onLaunchConsole }: ActProofProps) {
           </div>
 
           <div role="list">
-            {checks.map((c) => (
+            {checks.map((c, idx) => (
               <div
                 key={c.id}
                 role="listitem"
-                className="grid grid-cols-1 md:grid-cols-12 gap-3 py-4 items-center"
+                className="lp-validator-row grid grid-cols-1 md:grid-cols-12 gap-3 py-4 items-center"
                 style={{ borderBottom: '1px solid var(--rule-paper)' }}
               >
                 <div className="md:col-span-4 flex items-center gap-3">
-                  <CheckMarkSvg />
+                  <CheckMarkSvg delayMs={idx * 55} />
                   <span
                     className="text-[14.5px] font-semibold"
                     style={{ color: 'var(--ink-paper)' }}

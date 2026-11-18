@@ -91,9 +91,33 @@ function HeroLimbInstrument() {
             );
           })}
           {/* Q Slice allocation ticks along top ruler */}
-          <rect x="60" y="-4" width="165" height="4" fill="#F0A43C" />
-          <rect x="231" y="-4" width="102" height="4" fill="#5BD6E6" />
-          <rect x="339" y="-4" width="122" height="4" fill="#45D6A0" />
+          <rect
+            x="60"
+            y="-4"
+            width="165"
+            height="4"
+            fill="#F0A43C"
+            className="lp-hero-ruler-bar"
+            style={{ animationDelay: '260ms' }}
+          />
+          <rect
+            x="231"
+            y="-4"
+            width="102"
+            height="4"
+            fill="#5BD6E6"
+            className="lp-hero-ruler-bar"
+            style={{ animationDelay: '380ms' }}
+          />
+          <rect
+            x="339"
+            y="-4"
+            width="122"
+            height="4"
+            fill="#45D6A0"
+            className="lp-hero-ruler-bar"
+            style={{ animationDelay: '490ms' }}
+          />
           <text
             x="60"
             y="24"
@@ -141,6 +165,8 @@ function HeroLimbInstrument() {
         {/* Highlighted handover path segment */}
         <path
           d="M 118 220 Q 290 156 492 178"
+          pathLength={1}
+          className="lp-svg-draw"
           fill="none"
           stroke="#5BD6E6"
           strokeWidth="2"
@@ -181,51 +207,69 @@ function HeroLimbInstrument() {
 
         {/* RF Downlink Beams from Sentinel-2B handover positions to European dishes */}
         {/* Svalbard beam (QS009) */}
-        <line
-          x1="168"
-          y1="199"
-          x2="146"
-          y2="424"
-          stroke="#F0A43C"
-          strokeWidth="1.4"
-          strokeOpacity="0.88"
-        />
-        <polygon
-          points="168,199 135,427 157,422"
-          fill="#F0A43C"
-          fillOpacity="0.09"
-        />
+        <g className="lp-hero-beam" style={{ animationDelay: '420ms' }}>
+          <line
+            x1="168"
+            y1="199"
+            x2="146"
+            y2="424"
+            stroke="#F0A43C"
+            strokeWidth="1.4"
+            strokeOpacity="0.88"
+          />
+          <polygon
+            points="168,199 135,427 157,422"
+            fill="#F0A43C"
+            fillOpacity="0.09"
+          />
+        </g>
 
         {/* Kiruna beam (QS010 — active relay baton) */}
-        <line
-          x1="312"
-          y1="173"
-          x2="314"
-          y2="399"
-          stroke="#5BD6E6"
-          strokeWidth="1.75"
-        />
-        <polygon
-          points="312,173 301,400 327,400"
-          fill="#5BD6E6"
-          fillOpacity="0.12"
-        />
+        <g className="lp-hero-beam" style={{ animationDelay: '540ms' }}>
+          <line
+            x1="312"
+            y1="173"
+            x2="314"
+            y2="399"
+            stroke="#5BD6E6"
+            strokeWidth="1.75"
+          />
+          <polygon
+            points="312,173 301,400 327,400"
+            fill="#5BD6E6"
+            fillOpacity="0.12"
+          />
+          {/* Subtle active carrier telemetry pulse traveling down Kiruna relay beam */}
+          <line
+            x1="312"
+            y1="173"
+            x2="314"
+            y2="399"
+            pathLength={1}
+            className="lp-carrier-pulse"
+            stroke="#EEF2F6"
+            strokeWidth="2.4"
+            strokeLinecap="square"
+          />
+        </g>
 
         {/* Matera beam (QS012) */}
-        <line
-          x1="466"
-          y1="176"
-          x2="496"
-          y2="420"
-          stroke="#45D6A0"
-          strokeWidth="1.4"
-          strokeOpacity="0.85"
-        />
-        <polygon
-          points="466,176 485,418 507,423"
-          fill="#45D6A0"
-          fillOpacity="0.09"
-        />
+        <g className="lp-hero-beam" style={{ animationDelay: '660ms' }}>
+          <line
+            x1="466"
+            y1="176"
+            x2="496"
+            y2="420"
+            stroke="#45D6A0"
+            strokeWidth="1.4"
+            strokeOpacity="0.85"
+          />
+          <polygon
+            points="466,176 485,418 507,423"
+            fill="#45D6A0"
+            fillOpacity="0.09"
+          />
+        </g>
 
         {/* 15s Guard Tick Callouts between beams */}
         <g fontFamily="IBM Plex Mono, monospace" fontSize="10.5" fill="#E9EDF2">

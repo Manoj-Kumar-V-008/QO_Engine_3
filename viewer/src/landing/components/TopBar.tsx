@@ -1,12 +1,24 @@
-import { useEffect, useState } from 'react';
-import { scrollStore, type ActId } from '../data/scrollStore';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  scrollStore,
+  type ActId,
+  type HeaderSurface,
+} from '../data/scrollStore';
 import { ArrowRightIcon, PrimaryLaunchButton } from './LandingButton';
 
 interface TopBarProps {
   onLaunchConsole: () => void;
 }
 
-const SECTIONS: { id: ActId; title: string }[] = [
+const NAV_ITEMS: { id: ActId; shortLabel: string; title: string }[] = [
+  { id: '01', shortLabel: 'Loss', title: 'The wasted pass' },
+  { id: '02', shortLabel: 'Ceiling', title: 'The binary ceiling' },
+  { id: '03', shortLabel: 'Ledger', title: 'The 15-second decision' },
+  { id: '04', shortLabel: 'Proof', title: 'Proof on paper' },
+  { id: '05', shortLabel: 'Lab', title: 'What-If station lab' },
+];
+
+const DRAWER_SECTIONS: { id: ActId; title: string }[] = [
   { id: '00', title: 'Overview' },
   { id: '01', title: 'The wasted pass' },
   { id: '02', title: 'The binary ceiling' },
@@ -15,7 +27,7 @@ const SECTIONS: { id: ActId; title: string }[] = [
   { id: '05', title: 'What-If station lab' },
 ];
 
-export function OrbitalMark({ size = 16 }: { size?: number }) {
+export function OrbitalMark({ size = 18 }: { size?: number }) {
   return (
     <svg
       width={size}
@@ -26,10 +38,18 @@ export function OrbitalMark({ size = 16 }: { size?: number }) {
     >
       <path
         d="M1 13.5 A11.5 11.5 0 0 1 15 13.5"
-        stroke="#5BD6E6"
+        stroke="currentColor"
+        strokeOpacity="0.48"
         strokeWidth="1.25"
       />
-      <line x1="4" y1="9.5" x2="12.5" y2="3.5" stroke="#E9EDF2" strokeWidth="1.2" />
+      <line
+        x1="4"
+        y1="9.5"
+        x2="12.5"
+        y2="3.5"
+        stroke="currentColor"
+        strokeWidth="1.2"
+      />
       <rect x="11.2" y="2.2" width="2.6" height="2.6" fill="#F0A43C" />
       <rect x="3.1" y="8.8" width="1.8" height="1.8" fill="#45D6A0" />
     </svg>
@@ -38,76 +58,160 @@ export function OrbitalMark({ size = 16 }: { size?: number }) {
 
 export default function TopBar({ onLaunchConsole }: TopBarProps) {
   const [activeAct, setActiveAct] = useState<ActId>('00');
-  const [utcNow, setUtcNow] = useState<string>(() =>
-    new Date().toISOString().slice(11, 19)
-  );
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [scrolled, setScrolled] = useState<boolean>(false);
+  const [surface, setSurface] = useState<HeaderSurface>('void');
+  const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
-  useEffect(() => {
-    const unsub = scrollStore.subscribeAct(setActiveAct);
-    return unsub;
-  }, []);
+  const navRef = useRef<HTMLElement>(null);
+  const itemRefs = useRef<Partial<Record<ActId, HTMLAnchorElement | null>>>({});
+  const railRef = useRef<HTMLSpanElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setUtcNow(new Date().toISOString().slice(11, 19));
-    }, 1000);
-    return () => window.clearInterval(id);
-  }, []);
+  const drawerRef = useRef<HTMLElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const triggerBtnRef = useRef<HTMLButtonElement>(null);
+  const wasDrawerOpen = useRef<boolean>(false);
 
+  // Subscribe to scroll store (discrete state changes + zero-render progress hairline)
   useEffect(() => {
-    if (!drawerOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setDrawerOpen(false);
+    const unsubAct = scrollStore.subscribeAct(setActiveAct);
+    const unsubScrolled = scrollStore.subscribeScrolled(setScrolled);
+    const unsubSurface = scrollStore.subscribeHeaderSurface(setSurface);
+    const unsubProgress = scrollStore.subscribePageProgress((p) => {
+      if (progressRef.current) {
+        progressRef.current.style.transform = `scaleX(${p.toFixed(4)})`;
+      }
+    });
+    return () => {
+      unsubAct();
+      unsubScrolled();
+      unsubSurface();
+      unsubProgress();
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  // Measure active nav link once on activeAct change or nav resize — GPU transform only
+  useLayoutEffect(() => {
+    const updateRail = () => {
+      const rail = railRef.current;
+      if (!rail) return;
+      const activeEl = activeAct !== '00' ? itemRefs.current[activeAct] : null;
+      if (!activeEl) {
+        rail.style.opacity = '0';
+        return;
+      }
+      const left = activeEl.offsetLeft;
+      const width = activeEl.offsetWidth;
+      rail.style.transform = `translate3d(${left}px, 0, 0) scaleX(${width})`;
+      rail.style.opacity = '1';
+    };
+
+    updateRail();
+
+    const navEl = navRef.current;
+    if (!navEl || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(updateRail);
+    ro.observe(navEl);
+    return () => ro.disconnect();
+  }, [activeAct]);
+
+  // Mobile drawer inert handling, body scroll lock, Escape key & focus management
+  useEffect(() => {
+    const drawerEl = drawerRef.current as (HTMLElement & { inert: boolean }) | null;
+    if (drawerEl) {
+      drawerEl.inert = !drawerOpen;
+    }
+
+    if (drawerOpen) {
+      wasDrawerOpen.current = true;
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
+      const focusTimer = window.setTimeout(() => {
+        closeBtnRef.current?.focus();
+      }, 40);
+
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setDrawerOpen(false);
+      };
+      window.addEventListener('keydown', onKey);
+
+      return () => {
+        window.clearTimeout(focusTimer);
+        document.body.style.overflow = prevOverflow;
+        window.removeEventListener('keydown', onKey);
+      };
+    }
+
+    if (wasDrawerOpen.current) {
+      wasDrawerOpen.current = false;
+      triggerBtnRef.current?.focus();
+    }
   }, [drawerOpen]);
 
   return (
     <>
-      <header className="lp-topbar">
+      <header
+        className="lp-topbar"
+        data-scrolled={scrolled ? 'true' : 'false'}
+        data-surface={surface}
+      >
         <div className="lp-container lp-topbar-inner">
+          {/* Left slot (1fr, justify-self: start) */}
           <a href="#act-00" className="lp-brand">
-            <OrbitalMark size={16} />
-            <span>QOE3</span>
+            <OrbitalMark size={18} />
+            <span className="lp-brand-wordmark">QOE3</span>
+            <span className="lp-brand-sep" aria-hidden="true" />
+            <span className="lp-mono lp-brand-sub">S2 · 15s</span>
           </a>
 
-          <nav className="lp-nav-index" aria-label="Mission document index">
-            {SECTIONS.map((s) => (
-              <a
-                key={s.id}
-                href={`#act-${s.id}`}
-                data-active={activeAct === s.id ? 'true' : 'false'}
-                className="lp-nav-item"
-                title={`${s.id} — ${s.title}`}
-              >
-                <span>{s.id}</span>
-                <span className="sr-only"> {s.title}</span>
-              </a>
-            ))}
+          {/* Center slot (auto, optically dead-center on desktop) */}
+          <nav
+            ref={navRef}
+            className="lp-nav-index"
+            aria-label="Mission document index"
+          >
+            {NAV_ITEMS.map((item) => {
+              const isActive = activeAct === item.id;
+              return (
+                <a
+                  key={item.id}
+                  ref={(el) => {
+                    itemRefs.current[item.id] = el;
+                  }}
+                  href={`#act-${item.id}`}
+                  data-active={isActive ? 'true' : 'false'}
+                  aria-current={isActive ? 'location' : undefined}
+                  className="lp-nav-item"
+                  title={`${item.id} — ${item.title}`}
+                >
+                  <span className="lp-nav-num lp-mono">{item.id}</span>
+                  <span className="lp-nav-label">{item.shortLabel}</span>
+                </a>
+              );
+            })}
+            <span
+              ref={railRef}
+              className="lp-nav-active-rail"
+              aria-hidden="true"
+              style={{ opacity: 0, transform: 'translate3d(0, 0, 0) scaleX(0)' }}
+            />
           </nav>
 
-          <div className="flex items-center gap-3.5">
-            <span
-              className="lp-mono lp-clock-sm text-[13px] tracking-[0.03em]"
-              style={{ color: 'var(--ink-void-2)' }}
-              aria-label="Current UTC time"
-            >
-              {utcNow} UTC
-            </span>
-
+          {/* Right slot (1fr, justify-self: end) */}
+          <div className="lp-topbar-actions">
             <button
               type="button"
               onClick={onLaunchConsole}
               className="lp-nav-console"
             >
-              <span className="lp-nav-dot" aria-hidden="true" />
-              <span>Open Console</span>
-              <ArrowRightIcon />
+              <span className="lp-nav-console-full">Open Console</span>
+              <span className="lp-nav-console-short">Console</span>
+              <ArrowRightIcon className="lp-nav-arrow" />
             </button>
 
             <button
+              ref={triggerBtnRef}
               type="button"
               onClick={() => setDrawerOpen(true)}
               aria-expanded={drawerOpen}
@@ -118,85 +222,99 @@ export default function TopBar({ onLaunchConsole }: TopBarProps) {
             </button>
           </div>
         </div>
+
+        {/* Full-bleed 1px document scroll progress hairline (direct DOM ref, zero React renders) */}
+        <div
+          ref={progressRef}
+          className="lp-scroll-hairline"
+          aria-hidden="true"
+          style={{ transform: 'scaleX(0)' }}
+        />
       </header>
 
-      {drawerOpen && (
-        <>
+      {/* Always-mounted Mobile Paper Drawer with smooth GPU open & close */}
+      <div
+        className="lp-drawer-backdrop"
+        data-open={drawerOpen ? 'true' : 'false'}
+        onClick={() => setDrawerOpen(false)}
+        aria-hidden="true"
+      />
+
+      <aside
+        ref={drawerRef}
+        id="lp-mobile-drawer"
+        className="lp-drawer-paper"
+        data-open={drawerOpen ? 'true' : 'false'}
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!drawerOpen}
+        aria-label="Document index"
+      >
+        <div>
           <div
-            className="lp-drawer-backdrop"
-            onClick={() => setDrawerOpen(false)}
-            aria-hidden="true"
-          />
-          <aside
-            id="lp-mobile-drawer"
-            className="lp-drawer-paper"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Document index"
+            className="flex items-center justify-between pb-4"
+            style={{ borderBottom: '1px solid var(--ink-paper)' }}
           >
-            <div>
-              <div
-                className="flex items-center justify-between pb-4"
-                style={{ borderBottom: '1px solid var(--ink-paper)' }}
-              >
-                <span className="lp-mono text-[11px] font-semibold tracking-[0.08em] uppercase">
-                  QOE3 · Mission Index
-                </span>
-                <button
-                  type="button"
+            <span className="lp-mono text-[11.5px] font-semibold tracking-[0.08em] uppercase">
+              QOE3 · Mission Index
+            </span>
+            <button
+              ref={closeBtnRef}
+              type="button"
+              onClick={() => setDrawerOpen(false)}
+              className="lp-drawer-close lp-mono text-[11.5px] font-semibold uppercase px-3 py-2 cursor-pointer"
+            >
+              Close [ESC]
+            </button>
+          </div>
+
+          <nav className="mt-4 flex flex-col" aria-label="Mobile sections">
+            {DRAWER_SECTIONS.map((s, idx) => {
+              const isActive = activeAct === s.id;
+              return (
+                <a
+                  key={s.id}
+                  href={`#act-${s.id}`}
                   onClick={() => setDrawerOpen(false)}
-                  className="lp-mono text-[11px] font-semibold uppercase px-2.5 py-1.5 cursor-pointer"
+                  className="lp-drawer-link"
+                  data-active={isActive ? 'true' : 'false'}
                   style={{
-                    border: '1px solid var(--ink-paper)',
-                    background: 'transparent',
-                    color: 'var(--ink-paper)',
+                    transitionDelay: drawerOpen
+                      ? `${Math.min(idx * 30, 150)}ms`
+                      : '0ms',
                   }}
                 >
-                  Close [ESC]
-                </button>
-              </div>
-
-              <nav className="mt-4 flex flex-col" aria-label="Mobile sections">
-                {SECTIONS.map((s, idx) => (
-                  <a
-                    key={s.id}
-                    href={`#act-${s.id}`}
-                    onClick={() => setDrawerOpen(false)}
-                    className="lp-drawer-link"
-                    style={{ animationDelay: `${idx * 30}ms` }}
+                  <span>{s.title}</span>
+                  <span
+                    className="lp-mono text-[12px]"
+                    style={{ color: 'var(--amber-paper)' }}
                   >
-                    <span>{s.title}</span>
-                    <span
-                      className="lp-mono text-[12px]"
-                      style={{ color: 'var(--amber-paper)' }}
-                    >
-                      {s.id}
-                    </span>
-                  </a>
-                ))}
-              </nav>
-            </div>
+                    {s.id}
+                  </span>
+                </a>
+              );
+            })}
+          </nav>
+        </div>
 
-            <div className="pt-6" style={{ borderTop: '1px solid var(--rule-paper)' }}>
-              <div
-                className="lp-mono text-[13px] mb-4"
-                style={{ color: 'var(--ink-paper-2)' }}
-              >
-                DEMO-001 · 2026-11-09 00:00 UTC · {utcNow} UTC
-              </div>
-              <PrimaryLaunchButton
-                fullWidth
-                onClick={() => {
-                  setDrawerOpen(false);
-                  onLaunchConsole();
-                }}
-              >
-                Run the 24-hour scenario
-              </PrimaryLaunchButton>
-            </div>
-          </aside>
-        </>
-      )}
+        <div className="pt-6" style={{ borderTop: '1px solid var(--rule-paper)' }}>
+          <div
+            className="lp-mono text-[12.5px] mb-4"
+            style={{ color: 'var(--ink-paper-2)' }}
+          >
+            DEMO-001 · EPOCH 2026-11-09 00:00 UTC
+          </div>
+          <PrimaryLaunchButton
+            fullWidth
+            onClick={() => {
+              setDrawerOpen(false);
+              onLaunchConsole();
+            }}
+          >
+            Run the 24-hour scenario
+          </PrimaryLaunchButton>
+        </div>
+      </aside>
     </>
   );
 }

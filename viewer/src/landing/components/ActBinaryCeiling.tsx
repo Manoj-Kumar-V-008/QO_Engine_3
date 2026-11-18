@@ -1,4 +1,6 @@
+import { useRef, useState, type CSSProperties } from 'react';
 import type { LandingDataBundle } from '../data/loadLandingData';
+import { useRevealOnce } from '../hooks/useRevealOnce';
 
 interface ActBinaryCeilingProps {
   data: LandingDataBundle | null;
@@ -13,7 +15,19 @@ function fracX(utc: string | number): number {
   return Math.max(0, Math.min(1, (ms - WIN_START) / WIN_SPAN));
 }
 
+function stationKeyForPass(passId: string | null): 'svalbard' | 'kiruna' | 'matera' | null {
+  if (!passId) return null;
+  if (passId === 'p011' || passId === 'p013') return 'svalbard';
+  if (passId === 'p012' || passId === 'p015') return 'kiruna';
+  if (passId === 'p014') return 'matera';
+  return null;
+}
+
 export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
+  const [hoveredPass, setHoveredPass] = useState<string | null>(null);
+  const elevRef = useRef<HTMLDivElement>(null);
+  const elevRevealed = useRevealOnce(elevRef, 0.22);
+
   const passes = data?.conflictWindowPasses ?? [];
   const profile = data?.elevationProfile ?? [];
   const milpRow = data?.waterfallRows.find((r) => r.method === 'optimizer');
@@ -60,6 +74,8 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
   const handover2X = padL + fracX('2026-11-09T08:06:15Z') * plotW;
 
   const milpChosen = new Set(['p012', 'p013']);
+  const activeStation = stationKeyForPass(hoveredPass);
+  const overlapHighlighted = hoveredPass === 'p011' || hoveredPass === 'p012';
 
   return (
     <section id="act-02" className="lp-act">
@@ -84,11 +100,11 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
               discard entire windows.
             </p>
 
-            {/* Diagram 1: Real 07:51–08:17 UTC Conflict Cluster */}
-            <div className="lp-plate p-4 sm:p-5 mt-8">
+            {/* Diagram 1: Real 07:51–08:17 UTC Conflict Cluster (linked hover/focus brushing) */}
+            <div className="lp-plate lp-plate-interactive p-4 sm:p-5 mt-8">
               <div className="flex flex-wrap items-baseline justify-between gap-2 mb-4">
                 <span className="lp-micro" style={{ color: 'var(--ink-void)' }}>
-                  REAL CONFLICT CLUSTER · 07:51–08:17 UTC (SENTINEL-2B &amp; 2A)
+                  REAL CONFLICT CLUSTER · 07:51–08:17 UTC · HOVER PASS TO BRUSH CURVE
                 </span>
                 <span className="lp-micro" style={{ color: 'var(--red)' }}>
                   MILP MUST DROP P011, P014, P015
@@ -128,19 +144,19 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
                   );
                 })}
 
-                {/* Red conflict tie-lines between p011-p012 (same_satellite) and p011-p013 (same_antenna) */}
+                {/* Red conflict tie-zone between p011-p012 (same_satellite) */}
                 {orderedPasses.length >= 4 && (
                   <g>
-                    {/* p011 <-> p012 overlap highlight */}
                     <rect
                       x={padL + fracX('2026-11-09T07:56:09Z') * plotW}
                       y={22}
                       width={(fracX('2026-11-09T08:03:29Z') - fracX('2026-11-09T07:56:09Z')) * plotW}
                       height={60}
-                      fill="rgba(255,100,100,0.09)"
+                      fill={overlapHighlighted ? 'rgba(255,100,100,0.22)' : 'rgba(255,100,100,0.09)'}
                       stroke="#FF6464"
-                      strokeWidth="1"
+                      strokeWidth={overlapHighlighted ? 1.5 : 1}
                       strokeDasharray="3 2"
+                      className="lp-brush-el"
                     />
                     <text
                       x={padL + fracX('2026-11-09T07:59:50Z') * plotW}
@@ -148,7 +164,7 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
                       textAnchor="middle"
                       fontFamily="IBM Plex Mono, monospace"
                       fontSize="10.5"
-                      fill="#FF7A7A"
+                      fill={overlapHighlighted ? '#FFA3A3' : '#FF7A7A'}
                     >
                       SAME_SATELLITE OVERLAP (7m 20s)
                     </text>
@@ -162,16 +178,38 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
                   const w = Math.max(4, x2 - x1);
                   const chosenByMilp = milpChosen.has(p.pass_id);
                   const col = stationColor(p.antenna_id);
+                  const isHovered = hoveredPass === p.pass_id;
+                  const isDimmed = hoveredPass !== null && !isHovered;
 
                   return (
-                    <g key={p.pass_id}>
+                    <g
+                      key={p.pass_id}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`Inspect ${p.pass_id.toUpperCase()} over ${stationShort(p.antenna_id)} (${p.expected_volume_gb.toFixed(1)} GB)`}
+                      className="lp-brush-row cursor-pointer outline-none"
+                      style={{ opacity: isDimmed ? 0.34 : 1 }}
+                      onMouseEnter={() => setHoveredPass(p.pass_id)}
+                      onMouseLeave={() => setHoveredPass(null)}
+                      onFocus={() => setHoveredPass(p.pass_id)}
+                      onBlur={() => setHoveredPass(null)}
+                    >
+                      {/* Invisible full-lane hover hit strip */}
+                      <rect
+                        x={0}
+                        y={y - 3}
+                        width={W}
+                        height={28}
+                        fill="transparent"
+                      />
+
                       <text
                         x={padL - 10}
                         y={y + 15}
                         textAnchor="end"
                         fontFamily="IBM Plex Mono, monospace"
                         fontSize="10"
-                        fill={chosenByMilp ? '#E9EDF2' : '#9DA9B8'}
+                        fill={isHovered ? '#FFFFFF' : chosenByMilp ? '#E9EDF2' : '#9DA9B8'}
                       >
                         {p.pass_id.toUpperCase()} · {p.satellite_id === 'sentinel-2b' ? 'S2B' : 'S2A'}
                       </text>
@@ -181,19 +219,20 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
                         y={y}
                         width={w}
                         height={22}
-                        fill={chosenByMilp ? col : 'rgba(255,100,100,0.08)'}
-                        fillOpacity={chosenByMilp ? 0.24 : 1}
-                        stroke={chosenByMilp ? col : '#FF6464'}
-                        strokeWidth={chosenByMilp ? 1.4 : 1}
-                        strokeDasharray={chosenByMilp ? undefined : '3 2'}
+                        fill={chosenByMilp || isHovered ? col : 'rgba(255,100,100,0.08)'}
+                        fillOpacity={isHovered ? 0.38 : chosenByMilp ? 0.24 : 1}
+                        stroke={chosenByMilp || isHovered ? col : '#FF6464'}
+                        strokeWidth={isHovered ? 2 : chosenByMilp ? 1.4 : 1}
+                        strokeDasharray={chosenByMilp || isHovered ? undefined : '3 2'}
+                        className="lp-brush-el"
                       />
 
                       <text
-                        x={w < 190 ? x1 + 6 : x1 + 6}
+                        x={x1 + 6}
                         y={y + 15}
                         fontFamily="IBM Plex Mono, monospace"
                         fontSize="10.5"
-                        fill={chosenByMilp ? '#EEF2F6' : '#FFA0A0'}
+                        fill={isHovered ? '#FFFFFF' : chosenByMilp ? '#EEF2F6' : '#FFA0A0'}
                       >
                         {w < 190
                           ? `${stationShort(p.antenna_id)} · ${p.expected_volume_gb.toFixed(1)} GB`
@@ -205,8 +244,12 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
               </svg>
             </div>
 
-            {/* Diagram 2: Real SGP4 Elevation & Rate Steps (0-10 / 10-20 / 20-30 / >=30 deg) */}
-            <div className="lp-plate p-4 sm:p-5 mt-4">
+            {/* Diagram 2: Real SGP4 Elevation & Rate Steps (linked to Diagram 1 hover/focus) */}
+            <div
+              ref={elevRef}
+              data-revealed={elevRevealed ? 'true' : 'false'}
+              className="lp-plate lp-plate-interactive p-4 sm:p-5 mt-4"
+            >
               <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
                 <span className="lp-micro" style={{ color: 'var(--ink-void)' }}>
                   SENTINEL-2B SGP4 ELEVATION &amp; STEPPED X-BAND RATE
@@ -254,7 +297,7 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
                   );
                 })}
 
-                {/* Q Slice handover vertical cuts */}
+                {/* Q Slice handover vertical cuts sweeping down on reveal */}
                 <line
                   x1={handover1X}
                   y1={elPadT}
@@ -263,6 +306,8 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
                   stroke="#E9EDF2"
                   strokeWidth="1"
                   strokeDasharray="2 2"
+                  className="lp-cut-sweep"
+                  style={{ transitionDelay: '360ms' }}
                 />
                 <text
                   x={handover1X + 5}
@@ -282,6 +327,8 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
                   stroke="#E9EDF2"
                   strokeWidth="1"
                   strokeDasharray="2 2"
+                  className="lp-cut-sweep"
+                  style={{ transitionDelay: '460ms' }}
                 />
                 <text
                   x={handover2X + 5}
@@ -293,22 +340,85 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
                   08:06 HANDOFF
                 </text>
 
-                {/* Real SGP4 elevation curves */}
+                {/* Real SGP4 elevation curves (draw-in once + react live to brushed pass with 0ms delay) */}
                 {svalPath && (
-                  <path d={svalPath} fill="none" stroke="#F0A43C" strokeWidth="2" />
+                  <path
+                    d={svalPath}
+                    pathLength={1}
+                    className="lp-curve-draw"
+                    fill="none"
+                    stroke="#F0A43C"
+                    strokeWidth={activeStation === 'svalbard' ? 3.2 : 2}
+                    style={
+                      {
+                        opacity: activeStation && activeStation !== 'svalbard' ? 0.26 : 1,
+                        '--curve-delay': '0ms',
+                      } as CSSProperties
+                    }
+                  />
                 )}
                 {kirPath && (
-                  <path d={kirPath} fill="none" stroke="#5BD6E6" strokeWidth="2" />
+                  <path
+                    d={kirPath}
+                    pathLength={1}
+                    className="lp-curve-draw"
+                    fill="none"
+                    stroke="#5BD6E6"
+                    strokeWidth={activeStation === 'kiruna' ? 3.2 : 2}
+                    style={
+                      {
+                        opacity: activeStation && activeStation !== 'kiruna' ? 0.26 : 1,
+                        '--curve-delay': '80ms',
+                      } as CSSProperties
+                    }
+                  />
                 )}
                 {matPath && (
-                  <path d={matPath} fill="none" stroke="#45D6A0" strokeWidth="2" />
+                  <path
+                    d={matPath}
+                    pathLength={1}
+                    className="lp-curve-draw"
+                    fill="none"
+                    stroke="#45D6A0"
+                    strokeWidth={activeStation === 'matera' ? 3.2 : 2}
+                    style={
+                      {
+                        opacity: activeStation && activeStation !== 'matera' ? 0.26 : 1,
+                        '--curve-delay': '160ms',
+                      } as CSSProperties
+                    }
+                  />
                 )}
 
                 {/* Legend */}
                 <g transform={`translate(${padL}, ${elH - 7})`} fontFamily="IBM Plex Mono, monospace" fontSize="10.5">
-                  <text x="0" y="0" fill="#F0A43C">SVALBARD P011 (21.1°)</text>
-                  <text x="196" y="0" fill="#5BD6E6">KIRUNA P012 (18.6°)</text>
-                  <text x="382" y="0" fill="#45D6A0">MATERA P014 (8.9°)</text>
+                  <text
+                    x="0"
+                    y="0"
+                    fill="#F0A43C"
+                    className="lp-brush-el"
+                    style={{ opacity: activeStation && activeStation !== 'svalbard' ? 0.35 : 1 }}
+                  >
+                    SVALBARD P011 (21.1°)
+                  </text>
+                  <text
+                    x="196"
+                    y="0"
+                    fill="#5BD6E6"
+                    className="lp-brush-el"
+                    style={{ opacity: activeStation && activeStation !== 'kiruna' ? 0.35 : 1 }}
+                  >
+                    KIRUNA P012 (18.6°)
+                  </text>
+                  <text
+                    x="382"
+                    y="0"
+                    fill="#45D6A0"
+                    className="lp-brush-el"
+                    style={{ opacity: activeStation && activeStation !== 'matera' ? 0.35 : 1 }}
+                  >
+                    MATERA P014 (8.9°)
+                  </text>
                 </g>
               </svg>
             </div>
@@ -316,7 +426,7 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
 
           {/* Right 4 cols: Giant amber +0.6% ceiling figure + pull line */}
           <div className="lg:col-span-4 lg:pt-14 flex flex-col justify-between gap-8">
-            <div className="lp-plate p-6 sm:p-7">
+            <div className="lp-plate lp-plate-interactive p-6 sm:p-7">
               <div className="lp-micro" style={{ color: 'var(--ink-void-2)' }}>
                 WHOLE-PASS MILP GAIN OVER GREEDY
               </div>
@@ -329,7 +439,7 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
               >
                 +{(milpRow?.deltaVsGreedyPct ?? 0.6).toFixed(1)}%
               </div>
-                <div
+              <div
                 className="lp-mono text-[14px] mt-3 pb-5"
                 style={{
                   color: 'var(--ink-void-2)',
@@ -339,9 +449,7 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
                 +{(milpRow?.deltaVsGreedyGb ?? 4.4).toFixed(1)} GB across 24 hours (695.8 GB vs. 691.4 GB)
               </div>
 
-              <p
-                className="lp-body mt-5 mb-0"
-              >
+              <p className="lp-body mt-5 mb-0">
                 Whole-pass integer programming explores every legal subset of the 61
                 passes and still stalls at +0.6%. The ceiling is not algorithmic—it
                 is geometric. Holding Svalbard down to a 5° tail wastes high-elevation
@@ -353,10 +461,7 @@ export default function ActBinaryCeiling({ data }: ActBinaryCeilingProps) {
               className="m-0 pl-5 py-2"
               style={{ borderLeft: '2px solid var(--amber)' }}
             >
-              <p
-                className="lp-h3 m-0"
-                style={{ color: 'var(--ink-void)' }}
-              >
+              <p className="lp-h3 m-0" style={{ color: 'var(--ink-void)' }}>
                 MILP chose the pass.
                 <br />
                 Q Slice chooses the second.

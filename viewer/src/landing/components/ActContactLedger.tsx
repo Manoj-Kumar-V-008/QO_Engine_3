@@ -3,6 +3,7 @@ import type { LandingDataBundle } from '../data/loadLandingData';
 import type { ScheduleMethod } from '../../types/engine';
 import { scrollStore } from '../data/scrollStore';
 import FallbackStoryboard, { LEDGER_FRAMES } from '../explainer/FallbackStoryboard';
+import { RollingNumber } from './RollingNumber';
 
 const LazyContactLedger3D = lazy(() => import('../explainer/ContactLedger3D'));
 
@@ -33,7 +34,7 @@ export default function ActContactLedger({ data }: ActContactLedgerProps) {
     const unsubFrame = scrollStore.subscribeFrame(setActiveFrame);
     const unsubProgress = scrollStore.subscribeProgress((p) => {
       if (playheadRef.current) {
-        playheadRef.current.style.transform = `translate3d(${(p * 100).toFixed(2)}%, 0, 0)`;
+        playheadRef.current.style.transform = `scaleX(${p.toFixed(4)})`;
       }
     });
     return () => {
@@ -107,6 +108,18 @@ export default function ActContactLedger({ data }: ActContactLedgerProps) {
   const activeSummary = data?.waterfallRows.find((r) => r.method === mode);
   const activeAssignments = data?.schedules[mode].assignments ?? [];
   const show3D = Boolean(data && canUse3D && nearViewport && !webglFailed && !prefer2D);
+  const activeModeIdx = Math.max(
+    0,
+    MODE_LABELS.findIndex((m) => m.id === mode)
+  );
+
+  const deliveredStr = `${(activeSummary?.deliveredGb ?? 999.2).toFixed(1)} GB`;
+  const overflowStr = `${(activeSummary?.overflowGb ?? 1400.8).toFixed(1)} GB`;
+  const contactsStr = `${activeSummary?.passesUsed ?? 56}`;
+  const deltaStr =
+    mode === 'greedy'
+      ? 'Baseline'
+      : `+${(activeSummary?.deltaVsGreedyPct ?? 44.5).toFixed(1)}%`;
 
   return (
     <section id="act-03" aria-label="Act 03: The 15-second decision — Contact Ledger">
@@ -131,8 +144,13 @@ export default function ActContactLedger({ data }: ActContactLedgerProps) {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Segmented mode switch (GREEDY | MILP | Q SLICE) */}
+              {/* Recessed Segmented Control with GPU-composited sliding amber thumb */}
               <div className="lp-segmented" role="radiogroup" aria-label="Scheduler comparison mode">
+                <span
+                  className="lp-segmented-thumb"
+                  aria-hidden="true"
+                  style={{ transform: `translate3d(${activeModeIdx * 100}%, 0, 0)` }}
+                />
                 {MODE_LABELS.map((m) => (
                   <button
                     key={m.id}
@@ -196,7 +214,7 @@ export default function ActContactLedger({ data }: ActContactLedgerProps) {
               )}
             </div>
 
-            {/* Right 4 cols: Frame narration + Live numeric telemetry */}
+            {/* Right 4 cols: Frame narration + Live rolling numeric telemetry */}
             <div
               className="flex flex-col justify-between p-5 sm:p-6 overflow-y-auto"
               style={{ background: 'var(--plate)' }}
@@ -211,61 +229,64 @@ export default function ActContactLedger({ data }: ActContactLedgerProps) {
                   </span>
                 </div>
 
-                <h3 className="lp-h3" style={{ color: 'var(--ink-void)' }}>
-                  {frameMeta.title}
-                </h3>
+                <div key={frameMeta.code} className="lp-frame-enter">
+                  <h3 className="lp-h3" style={{ color: 'var(--ink-void)' }}>
+                    {frameMeta.title}
+                  </h3>
 
-                <p className="mt-4 text-[15.5px] leading-[1.65]" style={{ color: 'var(--ink-void-2)' }}>
-                  {frameMeta.body}
-                </p>
+                  <p className="mt-4 text-[15.5px] leading-[1.65]" style={{ color: 'var(--ink-void-2)' }}>
+                    {frameMeta.body}
+                  </p>
+                </div>
 
-                {/* Exact live metrics for selected scheduler */}
+                {/* Exact live rolling metrics for selected scheduler */}
                 <dl
-                  className="mt-6 grid grid-cols-2 gap-px m-0"
+                  key={`metrics-${mode}`}
+                  className="lp-mode-flash mt-6 grid grid-cols-2 gap-px m-0"
                   style={{
                     background: 'var(--rule-void)',
                     border: '1px solid var(--rule-void)',
                   }}
                 >
-                  <div className="p-3.5" style={{ background: 'var(--void)' }}>
+                  <div className="lp-plate-interactive p-3.5" style={{ background: 'var(--void)' }}>
                     <dt className="text-[12.5px] font-medium m-0" style={{ color: 'var(--ink-void-2)' }}>
                       Delivered
                     </dt>
                     <dd
-                      className="lp-mono m-0 mt-1 text-[20px] font-semibold"
+                      className="m-0 mt-1 text-[20px] font-semibold"
                       style={{ color: mode === 'qslice' ? 'var(--green)' : 'var(--ink-void)' }}
                     >
-                      {(activeSummary?.deliveredGb ?? 999.2).toFixed(1)} GB
+                      <RollingNumber value={deliveredStr} />
                     </dd>
                   </div>
-                  <div className="p-3.5" style={{ background: 'var(--void)' }}>
+                  <div className="lp-plate-interactive p-3.5" style={{ background: 'var(--void)' }}>
                     <dt className="text-[12.5px] font-medium m-0" style={{ color: 'var(--ink-void-2)' }}>
                       Overflow
                     </dt>
                     <dd
-                      className="lp-mono m-0 mt-1 text-[20px] font-semibold"
+                      className="m-0 mt-1 text-[20px] font-semibold"
                       style={{ color: 'var(--red)' }}
                     >
-                      {(activeSummary?.overflowGb ?? 1400.8).toFixed(1)} GB
+                      <RollingNumber value={overflowStr} />
                     </dd>
                   </div>
-                  <div className="p-3.5" style={{ background: 'var(--void)' }}>
+                  <div className="lp-plate-interactive p-3.5" style={{ background: 'var(--void)' }}>
                     <dt className="text-[12.5px] font-medium m-0" style={{ color: 'var(--ink-void-2)' }}>
                       Contacts
                     </dt>
                     <dd className="lp-mono m-0 mt-1 text-[17px] font-semibold" style={{ color: 'var(--ink-void)' }}>
-                      {activeSummary?.passesUsed ?? 56}{' '}
+                      <RollingNumber value={contactsStr} />{' '}
                       <span className="text-[12.5px]" style={{ color: 'var(--ink-void-3)' }}>
                         {mode === 'qslice' ? 'slices' : 'passes'}
                       </span>
                     </dd>
                   </div>
-                  <div className="p-3.5" style={{ background: 'var(--void)' }}>
+                  <div className="lp-plate-interactive p-3.5" style={{ background: 'var(--void)' }}>
                     <dt className="text-[12.5px] font-medium m-0" style={{ color: 'var(--ink-void-2)' }}>
                       vs. Greedy
                     </dt>
                     <dd
-                      className="lp-mono m-0 mt-1 text-[17px] font-semibold"
+                      className="m-0 mt-1 text-[17px] font-semibold"
                       style={{
                         color:
                           mode === 'qslice'
@@ -275,16 +296,21 @@ export default function ActContactLedger({ data }: ActContactLedgerProps) {
                             : 'var(--ink-void-2)',
                       }}
                     >
-                      {mode === 'greedy'
-                        ? 'Baseline'
-                        : `+${(activeSummary?.deltaVsGreedyPct ?? 44.5).toFixed(1)}%`}
+                      {mode === 'greedy' ? (
+                        <span className="lp-mono">{deltaStr}</span>
+                      ) : (
+                        <RollingNumber value={deltaStr} />
+                      )}
                     </dd>
                   </div>
                 </dl>
 
                 {/* Handover chain micro-ledger on Frame 05 */}
                 {activeFrame === 4 && data && (
-                  <div className="mt-4 p-3.5" style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}>
+                  <div
+                    className="lp-frame-enter mt-4 p-3.5"
+                    style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}
+                  >
                     <div className="lp-micro mb-2.5" style={{ color: 'var(--amber)' }}>
                       CANONICAL RELAY · SENTINEL-2B (33.0 GB)
                     </div>
@@ -335,37 +361,33 @@ export default function ActContactLedger({ data }: ActContactLedgerProps) {
             </div>
           </div>
 
-          {/* Bottom 15-second ruler with 6 frame ticks & direct-DOM playhead */}
+          {/* Bottom 15-second ruler with 6 frame ticks & full-width scaleX playhead */}
           <div
             className="relative h-10 px-4 sm:px-6 flex items-center justify-between"
             style={{ background: 'var(--void)' }}
-            aria-hidden="true"
           >
-            <div className="absolute inset-x-0 top-0 h-[2px]" style={{ background: 'var(--rule-void)' }}>
+            <div className="absolute inset-x-0 top-0 h-[2px]" style={{ background: 'var(--rule-void)' }} aria-hidden="true">
               <div
                 ref={playheadRef}
-                className="h-full w-full origin-left"
-                style={{
-                  background: 'var(--amber)',
-                  transform: 'translate3d(0%, 0, 0)',
-                  width: '12px',
-                }}
+                className="lp-act3-playhead"
+                style={{ transform: 'scaleX(0)' }}
               />
             </div>
-            {LEDGER_FRAMES.map((f) => (
-              <button
-                key={f.code}
-                type="button"
-                onClick={() => scrollStore.setManualFrame(f.index)}
-                className="lp-micro bg-transparent border-0 cursor-pointer flex items-center gap-1.5"
-                style={{
-                  color: f.index === activeFrame ? 'var(--amber)' : 'var(--ink-void-3)',
-                }}
-              >
-                <span>{f.code}</span>
-                <span className="hidden md:inline">{f.short}</span>
-              </button>
-            ))}
+            {LEDGER_FRAMES.map((f) => {
+              const isActive = f.index === activeFrame;
+              return (
+                <button
+                  key={f.code}
+                  type="button"
+                  onClick={() => scrollStore.setManualFrame(f.index)}
+                  data-active={isActive ? 'true' : 'false'}
+                  className="lp-ruler-btn lp-micro"
+                >
+                  <span className="lp-mono">{f.code}</span>
+                  <span className="hidden md:inline">{f.short}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -379,20 +401,23 @@ export default function ActContactLedger({ data }: ActContactLedgerProps) {
         }}
       >
         <div className="lp-container">
-          <details>
+          <details className="lp-details">
             <summary
-              className="lp-micro cursor-pointer select-none flex items-center justify-between py-2"
+              className="lp-details-summary lp-micro cursor-pointer select-none flex items-center justify-between py-2"
               style={{ color: 'var(--ink-void-2)' }}
             >
               <span>
                 FULL SCHEDULE GROUND TRUTH · {activeAssignments.length}{' '}
                 {mode === 'qslice' ? 'Q SLICE ASSIGNMENTS' : `${mode.toUpperCase()} PASSES`} (ACCESSIBLE HTML TABLE)
               </span>
-              <span style={{ color: 'var(--amber)' }}>EXPAND TABLE +</span>
+              <span className="inline-flex items-center gap-2" style={{ color: 'var(--amber)' }}>
+                <span>INSPECT</span>
+                <span className="lp-details-icon lp-mono" aria-hidden="true">+</span>
+              </span>
             </summary>
 
-            <div className="lp-table-wrap mt-4 max-h-[360px] overflow-y-auto lp-plate">
-              <table className="lp-table">
+            <div className="lp-details-body lp-table-wrap mt-4 max-h-[360px] overflow-y-auto lp-plate">
+              <table className="lp-table lp-table-void">
                 <thead>
                   <tr>
                     <th>ID</th>

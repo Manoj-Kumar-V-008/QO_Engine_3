@@ -168,6 +168,7 @@ export default function FallbackStoryboard({
                   height={16}
                   fill={antColor(a.antenna_id)}
                   fillOpacity={frame >= 3 ? (isFocus ? 1 : 0.85) : 0.35}
+                  className="lp-ledger-rect"
                 />
               );
             })}
@@ -181,6 +182,7 @@ export default function FallbackStoryboard({
               fill="none"
               stroke={frame === 4 ? '#F0A43C' : 'rgba(233,237,242,0.28)'}
               strokeWidth={frame === 4 ? 1.5 : 1}
+              className="lp-ledger-rect"
             />
             <text
               x={36 + ((Date.parse('2026-11-09T07:52:00Z') - startMs) / durMs) * 712 + 28}
@@ -281,6 +283,7 @@ export default function FallbackStoryboard({
                 y2="316"
                 stroke="#F0A43C"
                 strokeWidth={frame === 4 ? 2.2 : 1.5}
+                className={frame === 4 ? 'lp-relay-flow' : 'lp-ledger-rect'}
               />
               <line
                 x1="410"
@@ -289,6 +292,7 @@ export default function FallbackStoryboard({
                 y2="294"
                 stroke="#5BD6E6"
                 strokeWidth={frame === 4 ? 2.2 : 1.5}
+                className={frame === 4 ? 'lp-relay-flow' : 'lp-ledger-rect'}
               />
               <line
                 x1="605"
@@ -297,6 +301,7 @@ export default function FallbackStoryboard({
                 y2="316"
                 stroke="#45D6A0"
                 strokeWidth={frame === 4 ? 2.2 : 1.5}
+                className={frame === 4 ? 'lp-relay-flow' : 'lp-ledger-rect'}
               />
 
               <rect x="210" y="195" width="10" height="10" fill="#F0A43C" />

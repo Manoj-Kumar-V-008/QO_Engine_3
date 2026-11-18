@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { OrbitalMark } from './TopBar';
 import { PrimaryLaunchButton, QuietActionLink } from './LandingButton';
 
@@ -10,6 +10,71 @@ type DocModal = 'scope' | 'terms' | null;
 
 export default function Colophon({ onLaunchConsole }: ColophonProps) {
   const [modal, setModal] = useState<DocModal>(null);
+  const [closing, setClosing] = useState<boolean>(false);
+
+  const closeTimerRef = useRef<number | null>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
+
+  const openModal = useCallback((kind: Exclude<DocModal, null>, triggerEl: HTMLButtonElement) => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    lastTriggerRef.current = triggerEl;
+    setClosing(false);
+    setModal(kind);
+  }, []);
+
+  const closeModal = useCallback(() => {
+    if (!modal || closing) return;
+    const reduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) {
+      setModal(null);
+      setClosing(false);
+      lastTriggerRef.current?.focus();
+      return;
+    }
+    setClosing(true);
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = null;
+      setModal(null);
+      setClosing(false);
+      lastTriggerRef.current?.focus();
+    }, 160);
+  }, [modal, closing]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current !== null) {
+        window.clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Body scroll lock, Escape key close & initial focus management
+  useEffect(() => {
+    if (!modal) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const focusTimer = window.setTimeout(() => {
+      closeBtnRef.current?.focus();
+    }, 30);
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeModal();
+    };
+    window.addEventListener('keydown', onKey);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [modal, closeModal]);
 
   return (
     <>
@@ -110,51 +175,36 @@ export default function Colophon({ onLaunchConsole }: ColophonProps) {
             </div>
           </div>
 
-          {/* Row 3: Navigation & Documentation Links (zero fake email forms) */}
+          {/* Row 3: Navigation & Documentation Links */}
           <div className="py-5 flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-6">
               <button
                 type="button"
                 onClick={onLaunchConsole}
-                className="bg-transparent border-0 p-0 cursor-pointer text-[13.5px] font-semibold"
-                style={{ color: 'var(--ink-void)' }}
+                className="lp-footer-link lp-footer-link--primary"
               >
                 3D Console
               </button>
-              <a
-                href="#act-03"
-                className="no-underline text-[13.5px] font-medium"
-                style={{ color: 'var(--ink-void-2)' }}
-              >
+              <a href="#act-03" className="lp-footer-link">
                 Contact Ledger
               </a>
-              <a
-                href="#act-04"
-                className="no-underline text-[13.5px] font-medium"
-                style={{ color: 'var(--ink-void-2)' }}
-              >
+              <a href="#act-04" className="lp-footer-link">
                 Proof Sheet
               </a>
-              <a
-                href="#act-05"
-                className="no-underline text-[13.5px] font-medium"
-                style={{ color: 'var(--ink-void-2)' }}
-              >
+              <a href="#act-05" className="lp-footer-link">
                 What-If Lab
               </a>
               <button
                 type="button"
-                onClick={() => setModal('scope')}
-                className="bg-transparent border-0 p-0 cursor-pointer text-[13.5px] font-medium"
-                style={{ color: 'var(--ink-void-2)' }}
+                onClick={(e) => openModal('scope', e.currentTarget)}
+                className="lp-footer-link"
               >
                 Data Scope
               </button>
               <button
                 type="button"
-                onClick={() => setModal('terms')}
-                className="bg-transparent border-0 p-0 cursor-pointer text-[13.5px] font-medium"
-                style={{ color: 'var(--ink-void-2)' }}
+                onClick={(e) => openModal('terms', e.currentTarget)}
+                className="lp-footer-link"
               >
                 Usage Terms
               </button>
@@ -167,18 +217,19 @@ export default function Colophon({ onLaunchConsole }: ColophonProps) {
         </div>
       </footer>
 
-      {/* Scope / Terms Modal Dialog */}
+      {/* Scope / Terms Modal Dialog with crisp enter & exit transitions */}
       {modal && (
         <div
-          className="fixed inset-0 z-[120] flex items-center justify-center p-4"
-          style={{ background: 'rgba(5, 7, 10, 0.82)' }}
+          className="lp-modal-backdrop fixed inset-0 z-[120] flex items-center justify-center p-4"
+          data-closing={closing ? 'true' : 'false'}
           role="dialog"
           aria-modal="true"
           aria-label={modal === 'scope' ? 'Data Scope & Privacy' : 'Usage Terms'}
-          onClick={() => setModal(null)}
+          onClick={closeModal}
         >
           <div
-            className="lp-plate max-w-lg w-full p-6"
+            className="lp-modal-dialog lp-plate max-w-lg w-full p-6"
+            data-closing={closing ? 'true' : 'false'}
             onClick={(e) => e.stopPropagation()}
           >
             <div
@@ -189,10 +240,10 @@ export default function Colophon({ onLaunchConsole }: ColophonProps) {
                 {modal === 'scope' ? 'DATA SCOPE & PRIVACY' : 'SIMULATION USAGE TERMS'}
               </span>
               <button
+                ref={closeBtnRef}
                 type="button"
-                onClick={() => setModal(null)}
-                className="lp-micro bg-transparent border-0 cursor-pointer"
-                style={{ color: 'var(--ink-void-2)' }}
+                onClick={closeModal}
+                className="lp-footer-link lp-micro"
               >
                 CLOSE [ESC]
               </button>

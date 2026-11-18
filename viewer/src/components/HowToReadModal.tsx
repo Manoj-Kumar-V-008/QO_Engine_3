@@ -19,95 +19,108 @@ export default function HowToReadModal({ isOpen, onClose }: HowToReadModalProps)
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md">
-      <div className="relative w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900/95 p-6 text-slate-100 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#02050d]/80 p-4 backdrop-blur-md"
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-2xl rounded-lg hud-glass-strong hud-reticle p-5 text-slate-100"
+      >
+        <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
           <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-sky-400" />
-            <h2 className="text-base font-mono font-bold uppercase tracking-wider text-white">
-              How to Read This Scene • QO Engine 3
+            <BookOpen className="w-4 h-4 text-sky-400" />
+            <h2 className="font-display text-sm font-bold uppercase tracking-[0.14em] text-white">
+              Mission Reference // Quantum Orbit Engine 3
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg border border-slate-800 bg-slate-950 p-1.5 text-slate-400 hover:text-white cursor-pointer"
+            className="hud-transition rounded-md border border-slate-800 bg-slate-950/80 p-1.5 text-slate-400 hover:border-slate-600 hover:text-white cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
-          <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
-            <div className="flex items-center gap-2 font-bold text-sky-300 mb-1">
-              <Satellite className="w-4 h-4" />
-              1. Real SGP4 Polar Orbits
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+          <div className="rounded-md hud-subpanel p-3">
+            <div className="flex items-center gap-2 font-display font-bold text-sky-300 mb-1">
+              <Satellite className="w-3.5 h-3.5" />
+              1. LVLH Spacecraft & 290 km MSI Swath
             </div>
-            <p className="text-slate-400 leading-relaxed">
-              Sentinel-2A (cyan) and Sentinel-2B (purple) fly real orbits propagated from CelesTrak TLEs via SGP4. Each generates <strong className="text-slate-200">+62.5 GB/h</strong> into a 300 GB onboard buffer.
+            <p className="text-slate-400 leading-relaxed text-[11px]">
+              Sentinel-2A (cyan) and Sentinel-2B (violet) propagate real CelesTrak TLEs via SGP4 in LVLH nadir orientation. Their 290 km optical swaths generate{' '}
+              <strong className="text-slate-200 font-mono-tabular">+62.5 GB/h</strong> into a 300 GB onboard buffer.
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
-            <div className="flex items-center gap-2 font-bold text-emerald-300 mb-1">
-              <Radio className="w-4 h-4" />
-              2. Dishes & Visibility Rings
+          <div className="rounded-md hud-subpanel p-3">
+            <div className="flex items-center gap-2 font-display font-bold text-emerald-300 mb-1">
+              <Radio className="w-3.5 h-3.5" />
+              2. Slewing Dishes & Horizon Rings
             </div>
-            <p className="text-slate-400 leading-relaxed">
-              Svalbard, Kiruna, and Matera each have an outer <strong className="text-slate-200">5° horizon ring</strong> (where a pass begins/ends) and an inner <strong className="text-slate-200">30° ring</strong> where downlink reaches 100% rate (560 Mbps).
+            <p className="text-slate-400 leading-relaxed text-[11px]">
+              Svalbard, Kiruna, and Matera render 3D parabolic dishes that actively slew in Azimuth/Elevation toward the linked spacecraft. Concentric rings mark{' '}
+              <strong className="text-slate-200 font-mono-tabular">5°, 15°, and 30°</strong> (560 Mbps full-rate).
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
-            <div className="flex items-center gap-2 font-bold text-slate-200 mb-1">
-              <Eye className="w-4 h-4 text-sky-400" />
-              3. 61 Ghost Links vs. Live Beams
+          <div className="rounded-md hud-subpanel p-3">
+            <div className="flex items-center gap-2 font-display font-bold text-slate-100 mb-1">
+              <Eye className="w-3.5 h-3.5 text-sky-400" />
+              3. RF Carrier Streams vs Ghost Passes
             </div>
-            <p className="text-slate-400 leading-relaxed">
-              Faint static lines show all 61 candidate passes over 24 hours. When a scheduled pass opens, a <strong className="text-sky-300">bright glowing beam</strong> locks from dish to satellite and drains the buffer.
+            <p className="text-slate-400 leading-relaxed text-[11px]">
+              Faint static arcs outline all 61 24h candidate passes. During a locked pass, an animated{' '}
+              <strong className="text-sky-300">RF packet-pulse beam</strong> and reception cone stream telemetry from spacecraft to dish.
             </p>
           </div>
 
-          <div className="rounded-xl border border-red-500/30 bg-red-950/20 p-3">
-            <div className="flex items-center gap-2 font-bold text-red-300 mb-1">
-              <ShieldAlert className="w-4 h-4" />
-              4. Red Dashed Conflict Links
+          <div className="rounded-md border border-rose-500/30 bg-rose-950/20 p-3">
+            <div className="flex items-center gap-2 font-display font-bold text-rose-300 mb-1">
+              <ShieldAlert className="w-3.5 h-3.5" />
+              4. Crimson Contention Arcs
             </div>
-            <p className="text-slate-400 leading-relaxed">
-              When two passes clash, the dropped pass appears as a <strong className="text-red-300">red dashed beam</strong> tagged with <code className="text-red-200">same_antenna</code> (dish busy or 120s re-point gap) or <code className="text-red-200">same_satellite</code>.
+            <p className="text-slate-400 leading-relaxed text-[11px]">
+              When two visibility windows collide, the dropped pass renders as a pulsing crimson arc tagged{' '}
+              <code className="text-rose-200 font-mono-tabular">SAME_ANTENNA</code> (busy or 120s slew gap) or{' '}
+              <code className="text-rose-200 font-mono-tabular">SAME_SAT</code>.
             </p>
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
-            <div className="flex items-center gap-2 font-bold text-amber-300 mb-1">
-              <AlertTriangle className="w-4 h-4" />
-              5. Buffer Gauges & Red Overflows
+          <div className="rounded-md hud-subpanel p-3">
+            <div className="flex items-center gap-2 font-display font-bold text-amber-300 mb-1">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              5. Buffer Saturation & Overflow
             </div>
-            <p className="text-slate-400 leading-relaxed">
-              Because all 3 stations are in Europe, long non-European orbit arcs fill the 300 GB buffers to 100%, triggering <strong className="text-red-400">OVERFLOWING</strong> alerts and lost data.
+            <p className="text-slate-400 leading-relaxed text-[11px]">
+              Because all 3 baseline stations sit in Europe, long non-European arcs fill the 300 GB buffers to saturation, triggering red overflow bands in the 24h analytics plot.
             </p>
           </div>
 
-          <div className="rounded-xl border border-sky-500/30 bg-sky-950/20 p-3">
-            <div className="flex items-center gap-2 font-bold text-sky-300 mb-1">
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              6. Greedy vs. MILP Optimizer
+          <div className="rounded-md border border-emerald-500/35 bg-emerald-950/20 p-3">
+            <div className="flex items-center gap-2 font-display font-bold text-emerald-300 mb-1">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+              6. Q-Slice Handover vs MILP vs Greedy
             </div>
-            <p className="text-slate-400 leading-relaxed">
-              Greedy gives conflicted slots to whichever buffer fills soonest (691 GB). The PuLP/HiGHS MILP Optimizer looks ahead across all 24h to deliver <strong className="text-emerald-300">696 GB (+4 GB)</strong>.
+            <p className="text-slate-400 leading-relaxed text-[11px]">
+              Greedy delivers <strong className="font-mono-tabular text-slate-200">691.4 GB</strong> and whole-pass MILP delivers{' '}
+              <strong className="font-mono-tabular text-sky-300">695.8 GB (+0.6%)</strong>. Q-Slice 15s dynamic handover delivers{' '}
+              <strong className="font-mono-tabular text-emerald-300">999.2 GB (+44.5% / +307.8 GB)</strong> on the exact same 3 dishes.
             </p>
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-between border-t border-slate-800 pt-3 text-[11px] font-mono text-slate-400">
-          <span className="flex items-center gap-1.5">
+        <div className="mt-4 flex items-center justify-between border-t border-slate-800/80 pt-3 font-mono-tabular text-[10px] text-slate-400">
+          <div className="flex items-center gap-2">
             <Award className="w-3.5 h-3.5 text-amber-400" />
-            Note: Model result, not real Sentinel-2 operations.
-          </span>
+            <span>Shortcuts: Space (Play/Pause) · H (Cinematic) · ? (Help)</span>
+          </div>
           <button
             onClick={onClose}
-            className="rounded-lg bg-sky-500 px-4 py-1.5 text-xs font-bold text-slate-950 hover:bg-sky-400 transition cursor-pointer"
+            className="hud-transition rounded-md bg-sky-500 px-4 py-1.5 font-mono-tabular text-xs font-bold text-slate-950 hover:bg-sky-400 cursor-pointer"
           >
-            Got It
+            Acknowledge
           </button>
         </div>
       </div>

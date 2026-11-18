@@ -9,6 +9,7 @@ import type {
   SatelliteConfig,
   ScenarioData,
   ScheduleDocument,
+  ScheduleMethod,
   ScoreboardDocument,
   TlesMap,
 } from '../types/engine';
@@ -586,13 +587,290 @@ export function runOptimizerSchedule(
 }
 
 /**
+ * Q-Slice Dynamic Handover DP Optimizer:
+ * 15-second time-sliced multi-station handover + elevation-peak switching via joint Beam-DP.
+ * Strictly respects single-beam-per-satellite, single-sat-per-dish, full mechanical dish slew
+ * guard (setup_s), and 15s RF carrier handover guard between pre-slewed ground stations.
+ */
+export function runQSliceHandoverSchedule(
+  scenario: ScenarioData,
+  tles: TlesMap,
+  sliceS = 15,
+  rfHandoverS = 15,
+  beamWidth = 48
+): PassRecord[] {
+  const sats = scenario.satellites;
+  const ants = scenario.antennas;
+  if (sats.length === 0 || ants.length === 0) return [];
+
+  const satrecs = sats.map((s) => {
+    const t = tles[s.id];
+    return t ? satellite.twoline2satrec(t.line1, t.line2) : null;
+  });
+  const obsList = ants.map((a) => ({
+    longitude: (a.lon_deg * Math.PI) / 180,
+    latitude: (a.lat_deg * Math.PI) / 180,
+    height: (a.alt_m || 0) / 1000,
+  }));
+
+  const startMs = new Date(scenario.start_utc).getTime();
+  const totalSlices = Math.floor((scenario.duration_hours * 3600) / sliceS);
+  const dishSlewSlices = ants.map((a) => Math.max(1, Math.ceil((a.setup_s || 120) / sliceS)));
+  const rfGuardSlices = Math.max(1, Math.ceil(rfHandoverS / sliceS));
+
+  const rateMatrix: number[][][] = new Array(totalSlices);
+  const elMatrix: number[][][] = new Array(totalSlices);
+
+  for (let k = 0; k < totalSlices; k++) {
+    const midDate = new Date(startMs + (k + 0.5) * sliceS * 1000);
+    const gmst = satellite.gstime(midDate);
+    const rRow: number[][] = [];
+    const eRow: number[][] = [];
+    for (let si = 0; si < sats.length; si++) {
+      const sr = satrecs[si];
+      const pv = sr ? satellite.propagate(sr, midDate) : null;
+      const ecf =
+        pv && pv.position && typeof pv.position !== 'boolean'
+          ? satellite.eciToEcf(pv.position, gmst)
+          : null;
+      const satR: number[] = [];
+      const satE: number[] = [];
+      for (let ai = 0; ai < ants.length; ai++) {
+        if (!ecf) {
+          satR.push(0);
+          satE.push(-90);
+          continue;
+        }
+        const elDeg = (satellite.ecfToLookAngles(obsList[ai], ecf).elevation * 180) / Math.PI;
+        satE.push(elDeg);
+        if (elDeg >= ants[ai].min_elevation_deg) {
+          const mbps = sats[si].downlink_rate_mbps * rateFraction(elDeg);
+          satR.push((mbps * sliceS) / 8 / 1000);
+        } else {
+          satR.push(0);
+        }
+      }
+      rRow.push(satR);
+      eRow.push(satE);
+    }
+    rateMatrix[k] = rRow;
+    elMatrix[k] = eRow;
+  }
+
+  const genPerSlice = sats.map((s) => (s.generation_gb_per_hour * sliceS) / 3600);
+  interface BeamState {
+    buf: number[];
+    delivered: number;
+    overflow: number;
+    lastAntSat: number[];
+    antIdle: number[];
+    lastSatAnt: number[];
+    satIdle: number[];
+    score: number;
+    history: [number, number[]][];
+  }
+
+  let beam: BeamState[] = [
+    {
+      buf: sats.map((s) => s.initial_buffer_gb),
+      delivered: 0,
+      overflow: 0,
+      lastAntSat: ants.map(() => -1),
+      antIdle: [...dishSlewSlices],
+      lastSatAnt: sats.map(() => -1),
+      satIdle: sats.map(() => rfGuardSlices),
+      score: 0,
+      history: [],
+    },
+  ];
+
+  for (let k = 0; k < totalSlices; k++) {
+    let anyVis = false;
+    for (let si = 0; si < sats.length && !anyVis; si++) {
+      for (let ai = 0; ai < ants.length; ai++) {
+        if (rateMatrix[k][si][ai] > 0) {
+          anyVis = true;
+          break;
+        }
+      }
+    }
+
+    if (!anyVis) {
+      for (const st of beam) {
+        for (let si = 0; si < sats.length; si++) {
+          st.buf[si] += genPerSlice[si];
+          if (st.buf[si] > sats[si].buffer_capacity_gb) {
+            st.overflow += st.buf[si] - sats[si].buffer_capacity_gb;
+            st.buf[si] = sats[si].buffer_capacity_gb;
+          }
+          st.satIdle[si] = Math.min(rfGuardSlices, st.satIdle[si] + 1);
+        }
+        for (let ai = 0; ai < ants.length; ai++) {
+          st.antIdle[ai] = Math.min(dishSlewSlices[ai], st.antIdle[ai] + 1);
+        }
+      }
+      if (beam.length > 8) {
+        beam.sort((a, b) => b.delivered - a.delivered || a.overflow - b.overflow);
+        beam = beam.slice(0, 8);
+      }
+      continue;
+    }
+
+    const nextStates = new Map<string, BeamState>();
+    for (const st of beam) {
+      const opts: number[][] = sats.map((_, si) => {
+        const list = [-1];
+        for (let ai = 0; ai < ants.length; ai++) {
+          if (rateMatrix[k][si][ai] <= 0) continue;
+          if (
+            st.lastAntSat[ai] !== -1 &&
+            st.lastAntSat[ai] !== si &&
+            st.antIdle[ai] < dishSlewSlices[ai]
+          ) {
+            continue;
+          }
+          if (
+            st.lastSatAnt[si] !== -1 &&
+            st.lastSatAnt[si] !== ai &&
+            st.satIdle[si] < rfGuardSlices
+          ) {
+            continue;
+          }
+          list.push(ai);
+        }
+        return list;
+      });
+
+      const recurse = (si: number, chosen: number[]) => {
+        if (si === sats.length) {
+          const nBuf = [...st.buf];
+          let nDel = st.delivered;
+          let nOv = st.overflow;
+          const nLastAntSat = [...st.lastAntSat];
+          const nAntIdle = st.antIdle.map((v, ai) => Math.min(dishSlewSlices[ai], v + 1));
+          const nLastSatAnt = [...st.lastSatAnt];
+          const nSatIdle = st.satIdle.map((v) => Math.min(rfGuardSlices, v + 1));
+          let anyActive = false;
+
+          for (let j = 0; j < sats.length; j++) {
+            nBuf[j] += genPerSlice[j];
+            const ai = chosen[j];
+            if (ai !== -1) {
+              anyActive = true;
+              const sent = Math.min(rateMatrix[k][j][ai], nBuf[j]);
+              nBuf[j] -= sent;
+              nDel += sent;
+              nLastAntSat[ai] = j;
+              nAntIdle[ai] = 0;
+              nLastSatAnt[j] = ai;
+              nSatIdle[j] = 0;
+            }
+            if (nBuf[j] > sats[j].buffer_capacity_gb) {
+              nOv += nBuf[j] - sats[j].buffer_capacity_gb;
+              nBuf[j] = sats[j].buffer_capacity_gb;
+            }
+          }
+
+          const key = `${nLastSatAnt.join(',')}|${nSatIdle.join(',')}|${nLastAntSat.join(',')}|${nAntIdle.join(',')}`;
+          const sumBuf = nBuf.reduce((acc, b) => acc + b, 0);
+          const score = nDel - 0.001 * sumBuf;
+          const prev = nextStates.get(key);
+          if (!prev || score > prev.score) {
+            nextStates.set(key, {
+              buf: nBuf,
+              delivered: nDel,
+              overflow: nOv,
+              lastAntSat: nLastAntSat,
+              antIdle: nAntIdle,
+              lastSatAnt: nLastSatAnt,
+              satIdle: nSatIdle,
+              score,
+              history: anyActive ? [...st.history, [k, [...chosen]]] : st.history,
+            });
+          }
+          return;
+        }
+
+        for (const ai of opts[si]) {
+          if (ai !== -1 && chosen.includes(ai)) continue;
+          chosen.push(ai);
+          recurse(si + 1, chosen);
+          chosen.pop();
+        }
+      };
+
+      recurse(0, []);
+    }
+
+    beam = Array.from(nextStates.values())
+      .sort((a, b) => b.score - a.score)
+      .slice(0, beamWidth);
+  }
+
+  const best = beam[0];
+  interface RawSeg {
+    satIdx: number;
+    antIdx: number;
+    startK: number;
+    endK: number;
+    gb: number;
+    maxEl: number;
+  }
+  const rawSegs: RawSeg[] = [];
+  const active: (RawSeg | null)[] = sats.map(() => null);
+
+  for (const [k, chosen] of best.history) {
+    for (let si = 0; si < sats.length; si++) {
+      const ai = chosen[si];
+      if (ai !== -1) {
+        const gb = rateMatrix[k][si][ai];
+        const el = elMatrix[k][si][ai];
+        const cur = active[si];
+        if (cur && cur.antIdx === ai && cur.endK === k) {
+          cur.endK = k + 1;
+          cur.gb += gb;
+          if (el > cur.maxEl) cur.maxEl = el;
+        } else {
+          if (cur) rawSegs.push(cur);
+          active[si] = { satIdx: si, antIdx: ai, startK: k, endK: k + 1, gb, maxEl: el };
+        }
+      } else if (active[si]) {
+        rawSegs.push(active[si]!);
+        active[si] = null;
+      }
+    }
+  }
+  for (const seg of active) {
+    if (seg) rawSegs.push(seg);
+  }
+
+  rawSegs.sort((a, b) => a.startK - b.startK || a.satIdx - b.satIdx);
+  return rawSegs.map((seg, idx) => {
+    const sat = sats[seg.satIdx];
+    const ant = ants[seg.antIdx];
+    const durS = (seg.endK - seg.startK) * sliceS;
+    return {
+      pass_id: `qs${String(idx + 1).padStart(3, '0')}`,
+      satellite_id: sat.id,
+      antenna_id: ant.id,
+      aos_utc: isoZ(startMs + seg.startK * sliceS * 1000),
+      los_utc: isoZ(startMs + seg.endK * sliceS * 1000),
+      max_elevation_deg: round1(seg.maxEl),
+      duration_s: durS,
+      max_volume_gb: round1(volumeGb(durS, sat.downlink_rate_mbps)),
+      expected_volume_gb: round1(seg.gb),
+    };
+  });
+}
+
+/**
  * Port of engine/schedule.py: evaluate_schedule
  */
 export function evaluateScheduleDoc(
   scenario: ScenarioData,
   allPasses: PassRecord[],
   chosen: PassRecord[],
-  method: 'greedy' | 'optimizer',
+  method: ScheduleMethod,
   allConflictsCount: number
 ): ScheduleDocument {
   let delivered = 0;
@@ -704,7 +982,7 @@ export function runWhatIfPipeline(
 ): {
   scenario: ScenarioData;
   passesDoc: PassesDocument;
-  schedules: { greedy: ScheduleDocument; optimizer: ScheduleDocument };
+  schedules: { greedy: ScheduleDocument; optimizer: ScheduleDocument; qslice: ScheduleDocument };
   scoreboard: ScoreboardDocument;
   elapsedMs: number;
 } {
@@ -756,6 +1034,7 @@ export function runWhatIfPipeline(
 
   const greedyChosen = runGreedySchedule(updatedScenario, allPasses);
   const optimizerChosen = runOptimizerSchedule(updatedScenario, allPasses);
+  const qsliceChosen = runQSliceHandoverSchedule(updatedScenario, tles);
 
   const greedySchedule = evaluateScheduleDoc(
     updatedScenario,
@@ -771,10 +1050,18 @@ export function runWhatIfPipeline(
     'optimizer',
     conflicts.length
   );
+  const qsliceSchedule = evaluateScheduleDoc(
+    updatedScenario,
+    allPasses,
+    qsliceChosen,
+    'qslice',
+    conflicts.length
+  );
 
   const scoreboard = buildScoreboardDoc(updatedScenario, [
     greedySchedule,
     optimizerSchedule,
+    qsliceSchedule,
   ]);
 
   const elapsedMs = Math.round(performance.now() - t0);
@@ -790,6 +1077,7 @@ export function runWhatIfPipeline(
     schedules: {
       greedy: greedySchedule,
       optimizer: optimizerSchedule,
+      qslice: qsliceSchedule,
     },
     scoreboard,
     elapsedMs,

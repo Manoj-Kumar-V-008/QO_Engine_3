@@ -25,7 +25,7 @@ export const STRATEGIC_PRESETS: PresetStation[] = [
     lat_deg: -77.85,
     lon_deg: 166.67,
     alt_m: 10,
-    tag: 'South Pole Hub',
+    tag: 'South Pole',
   },
   {
     id: 'inuvik-1',
@@ -33,7 +33,7 @@ export const STRATEGIC_PRESETS: PresetStation[] = [
     lat_deg: 68.36,
     lon_deg: -133.72,
     alt_m: 68,
-    tag: 'Arctic Americas',
+    tag: 'Arctic West',
   },
   {
     id: 'bengaluru-1',
@@ -82,71 +82,75 @@ export default function WhatIfPanel({
   lastComputeMs,
   hasUnappliedChanges,
 }: WhatIfPanelProps) {
-  const baseOpt = baseScoreboard?.methods.find((m) => m.method === 'optimizer');
-  const currOpt = currentScoreboard?.methods.find((m) => m.method === 'optimizer');
+  const baseBest =
+    baseScoreboard?.methods.find((m) => m.method === 'qslice') ??
+    baseScoreboard?.methods.find((m) => m.method === 'optimizer');
+  const currBest =
+    currentScoreboard?.methods.find((m) => m.method === 'qslice') ??
+    currentScoreboard?.methods.find((m) => m.method === 'optimizer');
 
   const deltaDeliveredGb =
-    baseOpt && currOpt ? currOpt.gb_delivered - baseOpt.gb_delivered : 0;
+    baseBest && currBest ? currBest.gb_delivered - baseBest.gb_delivered : 0;
   const deltaOverflowGb =
-    baseOpt && currOpt ? currOpt.overflow_gb - baseOpt.overflow_gb : 0;
+    baseBest && currBest ? currBest.overflow_gb - baseBest.overflow_gb : 0;
 
   return (
-    <div className="rounded-xl border border-amber-500/40 bg-slate-950/90 p-3 backdrop-blur-md shadow-2xl">
+    <div className="flex flex-col gap-2.5">
       {/* Header */}
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <Globe2 className="w-4 h-4 text-amber-400" />
-          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-amber-300">
-            What-If Geometry Lab
+          <Globe2 className="w-3.5 h-3.5 text-amber-400" />
+          <span className="font-display text-[10px] font-bold uppercase tracking-[0.12em] text-amber-300">
+            Ground Network Lab
           </span>
         </div>
 
         {appliedAntennas.length > 0 && (
           <button
             onClick={onResetBaseline}
-            className="flex items-center gap-1 rounded-md border border-slate-700 bg-slate-900 px-2 py-0.5 text-[10px] font-mono text-slate-300 hover:bg-slate-800 hover:text-white cursor-pointer"
+            className="hud-transition flex items-center gap-1 rounded border border-slate-700 bg-slate-900/90 px-2 py-0.5 font-mono-tabular text-[10px] text-slate-300 hover:border-slate-500 hover:text-white cursor-pointer"
             title="Restore original 3-station European baseline"
           >
             <RotateCcw className="w-2.5 h-2.5" />
-            Reset (3 Dishes)
+            Reset Baseline
           </button>
         )}
       </div>
 
-      {/* Click-Globe Action + Re-Run Button */}
+      {/* Primary Controls */}
       <div className="grid grid-cols-2 gap-1.5">
         <button
           onClick={onTogglePlacing}
-          className={`flex items-center justify-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-mono font-bold transition cursor-pointer ${
+          className={`hud-transition flex items-center justify-center gap-1.5 rounded-md border px-2 py-2 font-mono-tabular text-[10px] font-bold uppercase tracking-wider cursor-pointer ${
             isPlacingStation
-              ? 'border-amber-400 bg-amber-400 text-slate-950 shadow-[0_0_15px_rgba(251,191,36,0.4)] animate-pulse'
-              : 'border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
+              ? 'border-amber-400 bg-amber-400 text-slate-950 shadow-[0_0_16px_rgba(245,158,11,0.4)] animate-pulse'
+              : 'border-amber-500/40 bg-amber-500/12 text-amber-300 hover:bg-amber-500/22'
           }`}
         >
           <Crosshair className="w-3.5 h-3.5" />
-          {isPlacingStation ? 'Click Globe Now...' : '+ Click Globe Dish'}
+          {isPlacingStation ? 'Pick Globe...' : '+ Place Dish'}
         </button>
 
         <button
           onClick={onRerunEngine}
           disabled={stagedAntennas.length === 0 && appliedAntennas.length === 0}
-          className={`flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-mono font-bold transition cursor-pointer ${
+          className={`hud-transition flex items-center justify-center gap-1.5 rounded-md px-2 py-2 font-mono-tabular text-[10px] font-bold uppercase tracking-wider cursor-pointer ${
             hasUnappliedChanges
-              ? 'bg-emerald-400 text-slate-950 hover:bg-emerald-300 shadow-[0_0_15px_rgba(52,211,153,0.4)]'
+              ? 'bg-emerald-400 text-slate-950 hover:bg-emerald-300 shadow-[0_0_14px_rgba(16,185,129,0.4)]'
               : stagedAntennas.length > 0
               ? 'bg-sky-500 text-slate-950 hover:bg-sky-400'
-              : 'bg-slate-900 text-slate-600 border border-slate-800 cursor-not-allowed'
+              : 'border border-slate-800 bg-slate-950/60 text-slate-600 cursor-not-allowed'
           }`}
         >
-          <Play className="w-3.5 h-3.5 fill-current" />
-          Re-run Engine
+          <Play className="w-3 h-3 fill-current" />
+          Solve 24h
         </button>
       </div>
 
-      {/* Quick Geometry Presets */}
-      <div className="mt-2">
-        <div className="text-[10px] font-mono text-slate-400 mb-1">
-          Or test a strategic global station preset:
+      {/* Strategic Presets */}
+      <div className="rounded-md hud-subpanel p-2">
+        <div className="mb-1.5 font-mono-tabular text-[9px] uppercase tracking-wider text-slate-400">
+          Strategic Global Site Presets
         </div>
         <div className="grid grid-cols-2 gap-1">
           {STRATEGIC_PRESETS.map((preset) => {
@@ -156,15 +160,15 @@ export default function WhatIfPanel({
                 key={preset.id}
                 onClick={() => !exists && onAddPreset(preset)}
                 disabled={exists}
-                className={`flex items-center justify-between rounded-md border px-2 py-1 text-[10px] font-mono transition ${
+                className={`hud-transition flex items-center justify-between rounded border px-2 py-1.5 font-mono-tabular text-[10px] ${
                   exists
-                    ? 'border-emerald-500/30 bg-emerald-950/30 text-emerald-400 cursor-default'
-                    : 'border-slate-800 bg-slate-900/80 text-slate-300 hover:border-amber-500/40 hover:text-white cursor-pointer'
+                    ? 'border-emerald-500/35 bg-emerald-950/35 text-emerald-300 cursor-default'
+                    : 'border-slate-800 bg-slate-950/70 text-slate-300 hover:border-amber-500/45 hover:text-white cursor-pointer'
                 }`}
               >
                 <span className="truncate font-semibold">{preset.name}</span>
-                <span className="text-[9px] text-slate-400 ml-1 flex items-center gap-0.5">
-                  {exists ? 'Added' : <Plus className="w-2.5 h-2.5 text-amber-400" />}
+                <span className="ml-1 text-[9px] text-slate-400">
+                  {exists ? 'OK' : <Plus className="w-3 h-3 text-amber-400" />}
                 </span>
               </button>
             );
@@ -172,30 +176,30 @@ export default function WhatIfPanel({
         </div>
       </div>
 
-      {/* Added Custom Stations List */}
+      {/* Staged / Applied Custom Stations */}
       {stagedAntennas.length > 0 && (
-        <div className="mt-2 flex flex-col gap-1 max-h-24 overflow-y-auto pr-0.5">
+        <div className="hud-scroll flex max-h-28 flex-col gap-1 overflow-y-auto pr-0.5">
           {stagedAntennas.map((ant) => {
             const isApplied = appliedAntennas.some((a) => a.id === ant.id);
             return (
               <div
                 key={ant.id}
-                className="flex items-center justify-between rounded-md border border-slate-800 bg-slate-900/90 px-2 py-1 text-[11px] font-mono"
+                className="flex items-center justify-between rounded border border-slate-800 bg-slate-950/80 px-2 py-1.5 font-mono-tabular text-[10px]"
               >
                 <div className="flex items-center gap-1.5 truncate">
                   <span
-                    className={`h-2 w-2 rounded-full ${
+                    className={`h-1.5 w-1.5 rounded-full ${
                       isApplied ? 'bg-emerald-400' : 'bg-amber-400 animate-ping'
                     }`}
                   />
-                  <span className="font-bold text-amber-200">{ant.name}</span>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="font-bold text-slate-100">{ant.name}</span>
+                  <span className="text-slate-400">
                     ({ant.lat_deg.toFixed(1)}°, {ant.lon_deg.toFixed(1)}°)
                   </span>
                 </div>
                 <button
                   onClick={() => onRemoveAntenna(ant.id)}
-                  className="text-slate-500 hover:text-red-400 cursor-pointer p-0.5"
+                  className="p-0.5 text-slate-500 hover:text-rose-400 cursor-pointer"
                   title="Remove custom station"
                 >
                   <Trash2 className="w-3 h-3" />
@@ -206,44 +210,34 @@ export default function WhatIfPanel({
         </div>
       )}
 
-      {/* Geometry Impact Banner (Shows once Re-run is clicked) */}
-      {appliedAntennas.length > 0 && baseOpt && currOpt && (
-        <div className="mt-2 rounded-lg border border-emerald-500/40 bg-emerald-950/25 px-2.5 py-2 font-mono text-[11px]">
-          <div className="flex items-center justify-between text-emerald-300 font-bold">
+      {/* Geometry Impact Readout */}
+      {appliedAntennas.length > 0 && baseBest && currBest && (
+        <div className="rounded-md border border-emerald-500/40 bg-emerald-950/25 p-2.5 font-mono-tabular text-[10px]">
+          <div className="flex items-center justify-between font-bold text-emerald-300">
             <span className="flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              Geometry Effect (+{appliedAntennas.length} Dish
-              {appliedAntennas.length > 1 ? 'es' : ''})
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              Q-Slice Impact (+{appliedAntennas.length} Site
+              {appliedAntennas.length > 1 ? 's' : ''})
             </span>
             {lastComputeMs !== null && (
-              <span className="text-[10px] font-normal text-slate-400">
-                Solved in {lastComputeMs}ms
-              </span>
+              <span className="font-normal text-slate-400">{lastComputeMs}ms</span>
             )}
           </div>
-          <div className="mt-1 grid grid-cols-2 gap-2 text-[10px]">
-            <div className="rounded bg-slate-950/70 px-2 py-1 border border-slate-800">
-              <div className="text-slate-400">Delivered (Optimizer)</div>
-              <div className="text-xs font-bold text-white">
-                {baseOpt.gb_delivered.toFixed(0)} →{' '}
-                <span className="text-emerald-400">
-                  {currOpt.gb_delivered.toFixed(0)} GB
-                </span>{' '}
+          <div className="mt-2 grid grid-cols-2 gap-1.5">
+            <div className="rounded hud-subpanel px-2 py-1.5">
+              <div className="text-[9px] uppercase text-slate-400">Delivered</div>
+              <div className="mt-0.5 font-bold text-white">
+                {currBest.gb_delivered.toFixed(0)} GB{' '}
                 <span className="text-emerald-300">
-                  (+{deltaDeliveredGb.toFixed(0)} GB)
+                  (+{deltaDeliveredGb.toFixed(0)})
                 </span>
               </div>
             </div>
-            <div className="rounded bg-slate-950/70 px-2 py-1 border border-slate-800">
-              <div className="text-slate-400">Buffer Overflow Spilled</div>
-              <div className="text-xs font-bold text-white">
-                {baseOpt.overflow_gb.toFixed(0)} →{' '}
-                <span className="text-sky-300">
-                  {currOpt.overflow_gb.toFixed(0)} GB
-                </span>{' '}
-                <span className="text-emerald-300">
-                  ({deltaOverflowGb.toFixed(0)} GB)
-                </span>
+            <div className="rounded hud-subpanel px-2 py-1.5">
+              <div className="text-[9px] uppercase text-slate-400">Overflow</div>
+              <div className="mt-0.5 font-bold text-white">
+                {currBest.overflow_gb.toFixed(0)} GB{' '}
+                <span className="text-sky-300">({deltaOverflowGb.toFixed(0)})</span>
               </div>
             </div>
           </div>

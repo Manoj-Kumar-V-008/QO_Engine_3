@@ -76,10 +76,12 @@ export interface BufferPoint {
   level_gb: number;
 }
 
+export type ScheduleMethod = 'greedy' | 'optimizer' | 'qslice';
+
 export interface ScheduleDocument {
   schema_version: string;
   scenario_id: string;
-  method: 'greedy' | 'optimizer';
+  method: ScheduleMethod;
   assignments: AssignmentRecord[];
   buffer_timeline: Record<string, BufferPoint[]>;
   summary: {

@@ -1,0 +1,1621 @@
+{
+  "schema_version": "0.1",
+  "scenario_id": "demo-001",
+  "method": "qslice",
+  "assignments": [
+    {
+      "pass_id": "qs001",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T01:06:15Z",
+      "end_utc": "2026-11-09T01:14:15Z",
+      "planned_gb": 11.5
+    },
+    {
+      "pass_id": "qs002",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T01:16:45Z",
+      "end_utc": "2026-11-09T01:24:15Z",
+      "planned_gb": 10.5
+    },
+    {
+      "pass_id": "qs003",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T02:49:15Z",
+      "end_utc": "2026-11-09T02:55:30Z",
+      "planned_gb": 6.6
+    },
+    {
+      "pass_id": "qs004",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T02:59:45Z",
+      "end_utc": "2026-11-09T03:05:45Z",
+      "planned_gb": 6.3
+    },
+    {
+      "pass_id": "qs005",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T04:31:30Z",
+      "end_utc": "2026-11-09T04:37:45Z",
+      "planned_gb": 6.6
+    },
+    {
+      "pass_id": "qs006",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T04:41:30Z",
+      "end_utc": "2026-11-09T04:48:15Z",
+      "planned_gb": 7.1
+    },
+    {
+      "pass_id": "qs007",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T06:12:30Z",
+      "end_utc": "2026-11-09T06:21:00Z",
+      "planned_gb": 13.9
+    },
+    {
+      "pass_id": "qs008",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T06:23:00Z",
+      "end_utc": "2026-11-09T06:31:15Z",
+      "planned_gb": 13.9
+    },
+    {
+      "pass_id": "qs009",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T07:52:45Z",
+      "end_utc": "2026-11-09T08:01:00Z",
+      "planned_gb": 17.8
+    },
+    {
+      "pass_id": "qs010",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T08:01:15Z",
+      "end_utc": "2026-11-09T08:06:15Z",
+      "planned_gb": 8.9
+    },
+    {
+      "pass_id": "qs011",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T08:03:00Z",
+      "end_utc": "2026-11-09T08:10:30Z",
+      "planned_gb": 17.3
+    },
+    {
+      "pass_id": "qs012",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "matera-1",
+      "start_utc": "2026-11-09T08:06:30Z",
+      "end_utc": "2026-11-09T08:12:30Z",
+      "planned_gb": 6.3
+    },
+    {
+      "pass_id": "qs013",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T08:10:45Z",
+      "end_utc": "2026-11-09T08:16:45Z",
+      "planned_gb": 12.6
+    },
+    {
+      "pass_id": "qs014",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "matera-1",
+      "start_utc": "2026-11-09T08:17:00Z",
+      "end_utc": "2026-11-09T08:23:30Z",
+      "planned_gb": 10.8
+    },
+    {
+      "pass_id": "qs015",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T09:33:00Z",
+      "end_utc": "2026-11-09T09:40:45Z",
+      "planned_gb": 23.4
+    },
+    {
+      "pass_id": "qs016",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T09:41:00Z",
+      "end_utc": "2026-11-09T09:45:30Z",
+      "planned_gb": 17.6
+    },
+    {
+      "pass_id": "qs017",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T09:43:15Z",
+      "end_utc": "2026-11-09T09:51:00Z",
+      "planned_gb": 24.2
+    },
+    {
+      "pass_id": "qs018",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "matera-1",
+      "start_utc": "2026-11-09T09:45:45Z",
+      "end_utc": "2026-11-09T09:54:30Z",
+      "planned_gb": 31.5
+    },
+    {
+      "pass_id": "qs019",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T09:51:15Z",
+      "end_utc": "2026-11-09T09:56:15Z",
+      "planned_gb": 18.4
+    },
+    {
+      "pass_id": "qs020",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "matera-1",
+      "start_utc": "2026-11-09T09:56:30Z",
+      "end_utc": "2026-11-09T10:05:45Z",
+      "planned_gb": 30.7
+    },
+    {
+      "pass_id": "qs021",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T11:13:00Z",
+      "end_utc": "2026-11-09T11:21:15Z",
+      "planned_gb": 26.5
+    },
+    {
+      "pass_id": "qs022",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T11:21:30Z",
+      "end_utc": "2026-11-09T11:26:30Z",
+      "planned_gb": 16.8
+    },
+    {
+      "pass_id": "qs023",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T11:23:15Z",
+      "end_utc": "2026-11-09T11:32:00Z",
+      "planned_gb": 29.4
+    },
+    {
+      "pass_id": "qs024",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "matera-1",
+      "start_utc": "2026-11-09T11:26:45Z",
+      "end_utc": "2026-11-09T11:32:15Z",
+      "planned_gb": 9.7
+    },
+    {
+      "pass_id": "qs025",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T11:32:15Z",
+      "end_utc": "2026-11-09T11:37:00Z",
+      "planned_gb": 13.9
+    },
+    {
+      "pass_id": "qs026",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "matera-1",
+      "start_utc": "2026-11-09T11:37:15Z",
+      "end_utc": "2026-11-09T11:41:30Z",
+      "planned_gb": 6
+    },
+    {
+      "pass_id": "qs027",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T12:52:45Z",
+      "end_utc": "2026-11-09T13:01:45Z",
+      "planned_gb": 29.9
+    },
+    {
+      "pass_id": "qs028",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T13:02:00Z",
+      "end_utc": "2026-11-09T13:05:45Z",
+      "planned_gb": 7.4
+    },
+    {
+      "pass_id": "qs029",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T13:03:45Z",
+      "end_utc": "2026-11-09T13:15:30Z",
+      "planned_gb": 36.2
+    },
+    {
+      "pass_id": "qs030",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T14:32:15Z",
+      "end_utc": "2026-11-09T14:43:45Z",
+      "planned_gb": 35.7
+    },
+    {
+      "pass_id": "qs031",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T14:43:30Z",
+      "end_utc": "2026-11-09T14:45:30Z",
+      "planned_gb": 2.9
+    },
+    {
+      "pass_id": "qs032",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T14:45:45Z",
+      "end_utc": "2026-11-09T14:54:45Z",
+      "planned_gb": 29.9
+    },
+    {
+      "pass_id": "qs033",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T16:11:30Z",
+      "end_utc": "2026-11-09T16:24:00Z",
+      "planned_gb": 36.8
+    },
+    {
+      "pass_id": "qs034",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T16:21:15Z",
+      "end_utc": "2026-11-09T16:25:45Z",
+      "planned_gb": 8.9
+    },
+    {
+      "pass_id": "qs035",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T16:26:00Z",
+      "end_utc": "2026-11-09T16:34:00Z",
+      "planned_gb": 26.3
+    },
+    {
+      "pass_id": "qs036",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T17:49:15Z",
+      "end_utc": "2026-11-09T17:56:30Z",
+      "planned_gb": 21.8
+    },
+    {
+      "pass_id": "qs037",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T17:56:45Z",
+      "end_utc": "2026-11-09T18:03:30Z",
+      "planned_gb": 21
+    },
+    {
+      "pass_id": "qs038",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T17:59:15Z",
+      "end_utc": "2026-11-09T18:06:45Z",
+      "planned_gb": 23.4
+    },
+    {
+      "pass_id": "qs039",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T18:07:00Z",
+      "end_utc": "2026-11-09T18:13:30Z",
+      "planned_gb": 19.9
+    },
+    {
+      "pass_id": "qs040",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "matera-1",
+      "start_utc": "2026-11-09T19:23:15Z",
+      "end_utc": "2026-11-09T19:30:15Z",
+      "planned_gb": 12.9
+    },
+    {
+      "pass_id": "qs041",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T19:30:30Z",
+      "end_utc": "2026-11-09T19:37:00Z",
+      "planned_gb": 26.3
+    },
+    {
+      "pass_id": "qs042",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "matera-1",
+      "start_utc": "2026-11-09T19:32:45Z",
+      "end_utc": "2026-11-09T19:40:15Z",
+      "planned_gb": 14.2
+    },
+    {
+      "pass_id": "qs043",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T19:37:15Z",
+      "end_utc": "2026-11-09T19:43:15Z",
+      "planned_gb": 17.3
+    },
+    {
+      "pass_id": "qs044",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T19:40:30Z",
+      "end_utc": "2026-11-09T19:47:00Z",
+      "planned_gb": 26.3
+    },
+    {
+      "pass_id": "qs045",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T19:47:15Z",
+      "end_utc": "2026-11-09T19:53:15Z",
+      "planned_gb": 17.6
+    },
+    {
+      "pass_id": "qs046",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "matera-1",
+      "start_utc": "2026-11-09T21:00:30Z",
+      "end_utc": "2026-11-09T21:09:45Z",
+      "planned_gb": 30.5
+    },
+    {
+      "pass_id": "qs047",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T21:10:00Z",
+      "end_utc": "2026-11-09T21:15:30Z",
+      "planned_gb": 18.4
+    },
+    {
+      "pass_id": "qs048",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "matera-1",
+      "start_utc": "2026-11-09T21:11:45Z",
+      "end_utc": "2026-11-09T21:21:30Z",
+      "planned_gb": 32.8
+    },
+    {
+      "pass_id": "qs049",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T21:15:45Z",
+      "end_utc": "2026-11-09T21:23:15Z",
+      "planned_gb": 22.3
+    },
+    {
+      "pass_id": "qs050",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T21:21:45Z",
+      "end_utc": "2026-11-09T21:25:45Z",
+      "planned_gb": 13.4
+    },
+    {
+      "pass_id": "qs051",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T21:26:00Z",
+      "end_utc": "2026-11-09T21:33:15Z",
+      "planned_gb": 21.5
+    },
+    {
+      "pass_id": "qs052",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "matera-1",
+      "start_utc": "2026-11-09T22:45:00Z",
+      "end_utc": "2026-11-09T22:49:15Z",
+      "planned_gb": 4.5
+    },
+    {
+      "pass_id": "qs053",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T22:51:30Z",
+      "end_utc": "2026-11-09T22:56:45Z",
+      "planned_gb": 8.7
+    },
+    {
+      "pass_id": "qs054",
+      "satellite_id": "sentinel-2b",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T22:57:00Z",
+      "end_utc": "2026-11-09T23:02:30Z",
+      "planned_gb": 13.4
+    },
+    {
+      "pass_id": "qs055",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "kiruna-1",
+      "start_utc": "2026-11-09T23:02:00Z",
+      "end_utc": "2026-11-09T23:04:15Z",
+      "planned_gb": 2.4
+    },
+    {
+      "pass_id": "qs056",
+      "satellite_id": "sentinel-2a",
+      "antenna_id": "svalbard-1",
+      "start_utc": "2026-11-09T23:04:30Z",
+      "end_utc": "2026-11-09T23:13:30Z",
+      "planned_gb": 18.4
+    }
+  ],
+  "buffer_timeline": {
+    "sentinel-2a": [
+      {
+        "t_utc": "2026-11-09T00:10:00Z",
+        "level_gb": 10.42
+      },
+      {
+        "t_utc": "2026-11-09T00:20:00Z",
+        "level_gb": 20.83
+      },
+      {
+        "t_utc": "2026-11-09T00:30:00Z",
+        "level_gb": 31.25
+      },
+      {
+        "t_utc": "2026-11-09T00:40:00Z",
+        "level_gb": 41.67
+      },
+      {
+        "t_utc": "2026-11-09T00:50:00Z",
+        "level_gb": 52.08
+      },
+      {
+        "t_utc": "2026-11-09T01:00:00Z",
+        "level_gb": 62.5
+      },
+      {
+        "t_utc": "2026-11-09T01:10:00Z",
+        "level_gb": 72.92
+      },
+      {
+        "t_utc": "2026-11-09T01:20:00Z",
+        "level_gb": 78.78
+      },
+      {
+        "t_utc": "2026-11-09T01:30:00Z",
+        "level_gb": 83.25
+      },
+      {
+        "t_utc": "2026-11-09T01:40:00Z",
+        "level_gb": 93.67
+      },
+      {
+        "t_utc": "2026-11-09T01:50:00Z",
+        "level_gb": 104.08
+      },
+      {
+        "t_utc": "2026-11-09T02:00:00Z",
+        "level_gb": 114.5
+      },
+      {
+        "t_utc": "2026-11-09T02:10:00Z",
+        "level_gb": 124.92
+      },
+      {
+        "t_utc": "2026-11-09T02:20:00Z",
+        "level_gb": 135.33
+      },
+      {
+        "t_utc": "2026-11-09T02:30:00Z",
+        "level_gb": 145.75
+      },
+      {
+        "t_utc": "2026-11-09T02:40:00Z",
+        "level_gb": 156.17
+      },
+      {
+        "t_utc": "2026-11-09T02:50:00Z",
+        "level_gb": 166.58
+      },
+      {
+        "t_utc": "2026-11-09T03:00:00Z",
+        "level_gb": 176.74
+      },
+      {
+        "t_utc": "2026-11-09T03:10:00Z",
+        "level_gb": 181.12
+      },
+      {
+        "t_utc": "2026-11-09T03:20:00Z",
+        "level_gb": 191.53
+      },
+      {
+        "t_utc": "2026-11-09T03:30:00Z",
+        "level_gb": 201.95
+      },
+      {
+        "t_utc": "2026-11-09T03:40:00Z",
+        "level_gb": 212.37
+      },
+      {
+        "t_utc": "2026-11-09T03:50:00Z",
+        "level_gb": 222.78
+      },
+      {
+        "t_utc": "2026-11-09T04:00:00Z",
+        "level_gb": 233.2
+      },
+      {
+        "t_utc": "2026-11-09T04:10:00Z",
+        "level_gb": 243.62
+      },
+      {
+        "t_utc": "2026-11-09T04:20:00Z",
+        "level_gb": 254.03
+      },
+      {
+        "t_utc": "2026-11-09T04:30:00Z",
+        "level_gb": 264.45
+      },
+      {
+        "t_utc": "2026-11-09T04:40:00Z",
+        "level_gb": 274.87
+      },
+      {
+        "t_utc": "2026-11-09T04:50:00Z",
+        "level_gb": 278.18
+      },
+      {
+        "t_utc": "2026-11-09T05:00:00Z",
+        "level_gb": 288.6
+      },
+      {
+        "t_utc": "2026-11-09T05:10:00Z",
+        "level_gb": 299.02
+      },
+      {
+        "t_utc": "2026-11-09T05:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T05:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T05:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T05:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T06:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T06:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T06:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T06:30:00Z",
+        "level_gb": 295.5
+      },
+      {
+        "t_utc": "2026-11-09T06:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T06:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T07:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T07:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T07:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T07:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T07:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T07:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T08:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T08:10:00Z",
+        "level_gb": 291.15
+      },
+      {
+        "t_utc": "2026-11-09T08:20:00Z",
+        "level_gb": 282.82
+      },
+      {
+        "t_utc": "2026-11-09T08:30:00Z",
+        "level_gb": 287.43
+      },
+      {
+        "t_utc": "2026-11-09T08:40:00Z",
+        "level_gb": 297.84
+      },
+      {
+        "t_utc": "2026-11-09T08:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T09:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T09:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T09:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T09:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T09:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T09:50:00Z",
+        "level_gb": 286.21
+      },
+      {
+        "t_utc": "2026-11-09T10:00:00Z",
+        "level_gb": 263.49
+      },
+      {
+        "t_utc": "2026-11-09T10:10:00Z",
+        "level_gb": 254.83
+      },
+      {
+        "t_utc": "2026-11-09T10:20:00Z",
+        "level_gb": 265.24
+      },
+      {
+        "t_utc": "2026-11-09T10:30:00Z",
+        "level_gb": 275.66
+      },
+      {
+        "t_utc": "2026-11-09T10:40:00Z",
+        "level_gb": 286.08
+      },
+      {
+        "t_utc": "2026-11-09T10:50:00Z",
+        "level_gb": 296.49
+      },
+      {
+        "t_utc": "2026-11-09T11:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T11:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T11:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T11:30:00Z",
+        "level_gb": 284.61
+      },
+      {
+        "t_utc": "2026-11-09T11:40:00Z",
+        "level_gb": 270.53
+      },
+      {
+        "t_utc": "2026-11-09T11:50:00Z",
+        "level_gb": 278.83
+      },
+      {
+        "t_utc": "2026-11-09T12:00:00Z",
+        "level_gb": 289.24
+      },
+      {
+        "t_utc": "2026-11-09T12:10:00Z",
+        "level_gb": 299.66
+      },
+      {
+        "t_utc": "2026-11-09T12:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T12:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T12:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T12:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T13:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T13:10:00Z",
+        "level_gb": 287.76
+      },
+      {
+        "t_utc": "2026-11-09T13:20:00Z",
+        "level_gb": 281.24
+      },
+      {
+        "t_utc": "2026-11-09T13:30:00Z",
+        "level_gb": 291.65
+      },
+      {
+        "t_utc": "2026-11-09T13:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T13:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T14:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T14:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T14:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T14:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T14:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T14:50:00Z",
+        "level_gb": 289.96
+      },
+      {
+        "t_utc": "2026-11-09T15:00:00Z",
+        "level_gb": 284.59
+      },
+      {
+        "t_utc": "2026-11-09T15:10:00Z",
+        "level_gb": 295.01
+      },
+      {
+        "t_utc": "2026-11-09T15:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T15:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T15:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T15:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T16:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T16:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T16:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T16:30:00Z",
+        "level_gb": 287.33
+      },
+      {
+        "t_utc": "2026-11-09T16:40:00Z",
+        "level_gb": 284.59
+      },
+      {
+        "t_utc": "2026-11-09T16:50:00Z",
+        "level_gb": 295.01
+      },
+      {
+        "t_utc": "2026-11-09T17:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T17:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T17:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T17:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T17:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T17:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T18:00:00Z",
+        "level_gb": 298.7
+      },
+      {
+        "t_utc": "2026-11-09T18:10:00Z",
+        "level_gb": 278.87
+      },
+      {
+        "t_utc": "2026-11-09T18:20:00Z",
+        "level_gb": 278.58
+      },
+      {
+        "t_utc": "2026-11-09T18:30:00Z",
+        "level_gb": 288.99
+      },
+      {
+        "t_utc": "2026-11-09T18:40:00Z",
+        "level_gb": 299.41
+      },
+      {
+        "t_utc": "2026-11-09T18:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T19:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T19:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T19:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T19:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T19:40:00Z",
+        "level_gb": 294.04
+      },
+      {
+        "t_utc": "2026-11-09T19:50:00Z",
+        "level_gb": 269.62
+      },
+      {
+        "t_utc": "2026-11-09T20:00:00Z",
+        "level_gb": 270.5
+      },
+      {
+        "t_utc": "2026-11-09T20:10:00Z",
+        "level_gb": 280.92
+      },
+      {
+        "t_utc": "2026-11-09T20:20:00Z",
+        "level_gb": 291.33
+      },
+      {
+        "t_utc": "2026-11-09T20:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T20:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T20:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T21:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T21:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T21:20:00Z",
+        "level_gb": 281.42
+      },
+      {
+        "t_utc": "2026-11-09T21:30:00Z",
+        "level_gb": 261.53
+      },
+      {
+        "t_utc": "2026-11-09T21:40:00Z",
+        "level_gb": 262.31
+      },
+      {
+        "t_utc": "2026-11-09T21:50:00Z",
+        "level_gb": 272.72
+      },
+      {
+        "t_utc": "2026-11-09T22:00:00Z",
+        "level_gb": 283.14
+      },
+      {
+        "t_utc": "2026-11-09T22:10:00Z",
+        "level_gb": 293.56
+      },
+      {
+        "t_utc": "2026-11-09T22:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T22:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T22:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T22:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T23:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T23:10:00Z",
+        "level_gb": 294.69
+      },
+      {
+        "t_utc": "2026-11-09T23:20:00Z",
+        "level_gb": 297.95
+      },
+      {
+        "t_utc": "2026-11-09T23:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T23:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T23:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-10T00:00:00Z",
+        "level_gb": 300
+      }
+    ],
+    "sentinel-2b": [
+      {
+        "t_utc": "2026-11-09T00:10:00Z",
+        "level_gb": 10.42
+      },
+      {
+        "t_utc": "2026-11-09T00:20:00Z",
+        "level_gb": 20.83
+      },
+      {
+        "t_utc": "2026-11-09T00:30:00Z",
+        "level_gb": 31.25
+      },
+      {
+        "t_utc": "2026-11-09T00:40:00Z",
+        "level_gb": 41.67
+      },
+      {
+        "t_utc": "2026-11-09T00:50:00Z",
+        "level_gb": 52.08
+      },
+      {
+        "t_utc": "2026-11-09T01:00:00Z",
+        "level_gb": 62.5
+      },
+      {
+        "t_utc": "2026-11-09T01:10:00Z",
+        "level_gb": 67.53
+      },
+      {
+        "t_utc": "2026-11-09T01:20:00Z",
+        "level_gb": 71.83
+      },
+      {
+        "t_utc": "2026-11-09T01:30:00Z",
+        "level_gb": 82.25
+      },
+      {
+        "t_utc": "2026-11-09T01:40:00Z",
+        "level_gb": 92.67
+      },
+      {
+        "t_utc": "2026-11-09T01:50:00Z",
+        "level_gb": 103.08
+      },
+      {
+        "t_utc": "2026-11-09T02:00:00Z",
+        "level_gb": 113.5
+      },
+      {
+        "t_utc": "2026-11-09T02:10:00Z",
+        "level_gb": 123.92
+      },
+      {
+        "t_utc": "2026-11-09T02:20:00Z",
+        "level_gb": 134.33
+      },
+      {
+        "t_utc": "2026-11-09T02:30:00Z",
+        "level_gb": 144.75
+      },
+      {
+        "t_utc": "2026-11-09T02:40:00Z",
+        "level_gb": 155.17
+      },
+      {
+        "t_utc": "2026-11-09T02:50:00Z",
+        "level_gb": 164.79
+      },
+      {
+        "t_utc": "2026-11-09T03:00:00Z",
+        "level_gb": 169.4
+      },
+      {
+        "t_utc": "2026-11-09T03:10:00Z",
+        "level_gb": 179.82
+      },
+      {
+        "t_utc": "2026-11-09T03:20:00Z",
+        "level_gb": 190.23
+      },
+      {
+        "t_utc": "2026-11-09T03:30:00Z",
+        "level_gb": 200.65
+      },
+      {
+        "t_utc": "2026-11-09T03:40:00Z",
+        "level_gb": 211.07
+      },
+      {
+        "t_utc": "2026-11-09T03:50:00Z",
+        "level_gb": 221.48
+      },
+      {
+        "t_utc": "2026-11-09T04:00:00Z",
+        "level_gb": 231.9
+      },
+      {
+        "t_utc": "2026-11-09T04:10:00Z",
+        "level_gb": 242.32
+      },
+      {
+        "t_utc": "2026-11-09T04:20:00Z",
+        "level_gb": 252.73
+      },
+      {
+        "t_utc": "2026-11-09T04:30:00Z",
+        "level_gb": 263.15
+      },
+      {
+        "t_utc": "2026-11-09T04:40:00Z",
+        "level_gb": 266.97
+      },
+      {
+        "t_utc": "2026-11-09T04:50:00Z",
+        "level_gb": 277.38
+      },
+      {
+        "t_utc": "2026-11-09T05:00:00Z",
+        "level_gb": 287.8
+      },
+      {
+        "t_utc": "2026-11-09T05:10:00Z",
+        "level_gb": 298.22
+      },
+      {
+        "t_utc": "2026-11-09T05:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T05:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T05:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T05:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T06:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T06:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T06:20:00Z",
+        "level_gb": 295.84
+      },
+      {
+        "t_utc": "2026-11-09T06:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T06:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T06:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T07:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T07:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T07:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T07:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T07:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T07:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T08:00:00Z",
+        "level_gb": 292.19
+      },
+      {
+        "t_utc": "2026-11-09T08:10:00Z",
+        "level_gb": 287.87
+      },
+      {
+        "t_utc": "2026-11-09T08:20:00Z",
+        "level_gb": 295.66
+      },
+      {
+        "t_utc": "2026-11-09T08:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T08:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T08:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T09:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T09:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T09:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T09:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T09:40:00Z",
+        "level_gb": 286.16
+      },
+      {
+        "t_utc": "2026-11-09T09:50:00Z",
+        "level_gb": 261.41
+      },
+      {
+        "t_utc": "2026-11-09T10:00:00Z",
+        "level_gb": 255.63
+      },
+      {
+        "t_utc": "2026-11-09T10:10:00Z",
+        "level_gb": 266.04
+      },
+      {
+        "t_utc": "2026-11-09T10:20:00Z",
+        "level_gb": 276.46
+      },
+      {
+        "t_utc": "2026-11-09T10:30:00Z",
+        "level_gb": 286.88
+      },
+      {
+        "t_utc": "2026-11-09T10:40:00Z",
+        "level_gb": 297.29
+      },
+      {
+        "t_utc": "2026-11-09T10:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T11:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T11:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T11:20:00Z",
+        "level_gb": 284.81
+      },
+      {
+        "t_utc": "2026-11-09T11:30:00Z",
+        "level_gb": 268.68
+      },
+      {
+        "t_utc": "2026-11-09T11:40:00Z",
+        "level_gb": 275.13
+      },
+      {
+        "t_utc": "2026-11-09T11:50:00Z",
+        "level_gb": 285.54
+      },
+      {
+        "t_utc": "2026-11-09T12:00:00Z",
+        "level_gb": 295.96
+      },
+      {
+        "t_utc": "2026-11-09T12:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T12:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T12:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T12:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T12:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T13:00:00Z",
+        "level_gb": 284.04
+      },
+      {
+        "t_utc": "2026-11-09T13:10:00Z",
+        "level_gb": 281.24
+      },
+      {
+        "t_utc": "2026-11-09T13:20:00Z",
+        "level_gb": 291.66
+      },
+      {
+        "t_utc": "2026-11-09T13:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T13:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T13:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T14:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T14:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T14:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T14:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T14:40:00Z",
+        "level_gb": 284.27
+      },
+      {
+        "t_utc": "2026-11-09T14:50:00Z",
+        "level_gb": 283.05
+      },
+      {
+        "t_utc": "2026-11-09T15:00:00Z",
+        "level_gb": 293.47
+      },
+      {
+        "t_utc": "2026-11-09T15:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T15:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T15:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T15:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T15:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T16:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T16:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T16:20:00Z",
+        "level_gb": 284.35
+      },
+      {
+        "t_utc": "2026-11-09T16:30:00Z",
+        "level_gb": 282.99
+      },
+      {
+        "t_utc": "2026-11-09T16:40:00Z",
+        "level_gb": 293.41
+      },
+      {
+        "t_utc": "2026-11-09T16:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T17:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T17:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T17:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T17:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T17:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T17:50:00Z",
+        "level_gb": 298.79
+      },
+      {
+        "t_utc": "2026-11-09T18:00:00Z",
+        "level_gb": 279.55
+      },
+      {
+        "t_utc": "2026-11-09T18:10:00Z",
+        "level_gb": 279.08
+      },
+      {
+        "t_utc": "2026-11-09T18:20:00Z",
+        "level_gb": 289.49
+      },
+      {
+        "t_utc": "2026-11-09T18:30:00Z",
+        "level_gb": 299.91
+      },
+      {
+        "t_utc": "2026-11-09T18:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T18:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T19:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T19:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T19:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T19:30:00Z",
+        "level_gb": 294.85
+      },
+      {
+        "t_utc": "2026-11-09T19:40:00Z",
+        "level_gb": 270.58
+      },
+      {
+        "t_utc": "2026-11-09T19:50:00Z",
+        "level_gb": 271.63
+      },
+      {
+        "t_utc": "2026-11-09T20:00:00Z",
+        "level_gb": 282.04
+      },
+      {
+        "t_utc": "2026-11-09T20:10:00Z",
+        "level_gb": 292.46
+      },
+      {
+        "t_utc": "2026-11-09T20:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T20:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T20:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T20:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T21:00:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T21:10:00Z",
+        "level_gb": 279.92
+      },
+      {
+        "t_utc": "2026-11-09T21:20:00Z",
+        "level_gb": 259.3
+      },
+      {
+        "t_utc": "2026-11-09T21:30:00Z",
+        "level_gb": 260.05
+      },
+      {
+        "t_utc": "2026-11-09T21:40:00Z",
+        "level_gb": 270.47
+      },
+      {
+        "t_utc": "2026-11-09T21:50:00Z",
+        "level_gb": 280.88
+      },
+      {
+        "t_utc": "2026-11-09T22:00:00Z",
+        "level_gb": 291.3
+      },
+      {
+        "t_utc": "2026-11-09T22:10:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T22:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T22:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T22:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T22:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T23:00:00Z",
+        "level_gb": 293.15
+      },
+      {
+        "t_utc": "2026-11-09T23:10:00Z",
+        "level_gb": 297.48
+      },
+      {
+        "t_utc": "2026-11-09T23:20:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T23:30:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T23:40:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-09T23:50:00Z",
+        "level_gb": 300
+      },
+      {
+        "t_utc": "2026-11-10T00:00:00Z",
+        "level_gb": 300
+      }
+    ]
+  },
+  "summary": {
+    "gb_delivered": 999.2,
+    "overflow_gb": 1400.8,
+    "overflow_events": 25,
+    "passes_used": 56,
+    "passes_available": 61,
+    "conflicts": 63
+  }
+}

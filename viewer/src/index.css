@@ -1,17 +1,145 @@
 @import "tailwindcss";
 
-html, body, #root {
+:root {
+  --qo-void: #030712;
+  --qo-surface: rgba(5, 10, 20, 0.86);
+  --qo-surface-strong: rgba(5, 10, 20, 0.90);
+  --qo-border: rgba(148, 163, 184, 0.16);
+  --qo-s2a: #38bdf8;
+  --qo-s2b: #a78bfa;
+  --qo-emerald: #10b981;
+  --qo-amber: #f59e0b;
+  --qo-crimson: #f43f5e;
+  --qo-font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --qo-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html,
+body,
+#root {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
-  background-color: #020617;
-  color: #f8fafc;
-  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  background-color: #05070a;
+  color: #e2e8f0;
+  font-family: var(--qo-font-display);
+}
+
+.font-display {
+  font-family: var(--qo-font-display);
+}
+
+.font-mono-tabular {
+  font-family: var(--qo-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Completely flicker-free matte obsidian HUD panel over live WebGL canvas */
+.hud-panel-clean {
+  background-color: #060c18;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
+}
+
+.hud-panel-stable {
+  background-color: #060c18;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55);
+}
+
+.hud-glass {
+  background: var(--qo-surface);
+  border: 1px solid var(--qo-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+  transform: translateZ(0);
+}
+
+.hud-glass-strong {
+  background: var(--qo-surface-strong);
+  border: 1px solid var(--qo-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 20px 50px rgba(0, 0, 0, 0.55);
+  transform: translateZ(0);
+}
+
+.hud-subpanel {
+  background: rgba(9, 15, 28, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* Subtle 6px Aerospace Corner Reticles */
+.hud-reticle {
+  position: relative;
+}
+.hud-reticle::before,
+.hud-reticle::after {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  pointer-events: none;
+  opacity: 0.42;
+}
+.hud-reticle::before {
+  top: -1px;
+  left: -1px;
+  border-top: 1.5px solid #38bdf8;
+  border-left: 1.5px solid #38bdf8;
+}
+.hud-reticle::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 1.5px solid #38bdf8;
+  border-right: 1.5px solid #38bdf8;
+}
+
+/* Precision Aerospace Micro-Scrollbars */
+.hud-scroll::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.hud-scroll::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.4);
+}
+.hud-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.28);
+  border-radius: 2px;
+}
+.hud-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.5);
+}
+
+.hud-transition {
+  transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .cesium-viewer-bottom {
-  opacity: 0.35;
+  opacity: 0.28;
   pointer-events: none;
+  transform: scale(0.85);
+  transform-origin: bottom left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse,
+  .animate-ping,
+  .animate-spin {
+    animation: none !important;
+  }
+  .hud-transition {
+    transition: none !important;
+  }
 }

@@ -1,6 +1,6 @@
 {
   "scenario_id": "demo-001",
-  "generated_gb": 3000.0,
+  "generated_gb": 3000,
   "methods": [
     {
       "method": "greedy",
@@ -8,7 +8,7 @@
       "gb_delivered": 691.4,
       "overflow_gb": 1708.6,
       "overflow_events": 24,
-      "share_of_generated_pct": 23.0
+      "share_of_generated_pct": 23
     },
     {
       "method": "optimizer",
@@ -17,8 +17,16 @@
       "overflow_gb": 1704.2,
       "overflow_events": 25,
       "share_of_generated_pct": 23.2
+    },
+    {
+      "method": "qslice",
+      "passes_used": 56,
+      "gb_delivered": 999.2,
+      "overflow_gb": 1400.8,
+      "overflow_events": 25,
+      "share_of_generated_pct": 33.3
     }
   ],
-  "gain_gb": 4.4,
-  "gain_pct": 0.6
+  "gain_gb": 307.8,
+  "gain_pct": 44.5
 }

@@ -11,6 +11,7 @@ from engine.celestrak import fetch_tle
 from engine.conflicts import find_conflicts
 from engine.greedy import greedy_schedule
 from engine.optimizer import optimize_schedule
+from engine.qslice_optimizer import optimize_qslice_handover
 from engine.pass_finder import find_all_passes, iso_z, tle_epoch_utc
 from engine.schedule import evaluate_schedule
 from engine.scoreboard import build_scoreboard, format_scoreboard
@@ -100,7 +101,11 @@ def main(scenario_path, output_path):
     print(f"\nConflicting pass pairs: {len(conflicts)} {by_reason}")
 
     schedules = []
-    for method, choose in (("greedy", greedy_schedule), ("optimizer", optimize_schedule)):
+    for method, choose in (
+        ("greedy", lambda sc, ps: greedy_schedule(sc, ps)),
+        ("optimizer", lambda sc, ps: optimize_schedule(sc, ps)),
+        ("qslice", lambda sc, _ps: optimize_qslice_handover(sc, tles)),
+    ):
         chosen = choose(scenario, document["passes"])
         schedule = evaluate_schedule(scenario, document["passes"], chosen, method)
         schedule_path = output.parent / f"schedule_{method}.json"

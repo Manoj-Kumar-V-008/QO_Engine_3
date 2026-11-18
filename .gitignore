@@ -10,3 +10,7 @@ data/cache/
 viewer/node_modules/
 viewer/dist/
 .DS_Store
+
+.agents
+.opencode
+skills

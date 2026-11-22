@@ -254,11 +254,11 @@ export default function TopMissionBar({
 
         <button
           onClick={onOpenLanding}
-          title="Open Project Overview & Interactive 3D Guide (/landing-page)"
+          title="Open Project Overview & Presentation Briefing (/)"
           className="hud-transition flex items-center gap-1 rounded-md border border-sky-500/40 bg-sky-500/12 px-2 py-1 font-mono-tabular text-[10px] font-bold uppercase tracking-wider text-sky-300 hover:bg-sky-500/24 cursor-pointer"
         >
           <BookOpen className="w-3 h-3" />
-          Guide
+          Briefing
         </button>
 
         <button

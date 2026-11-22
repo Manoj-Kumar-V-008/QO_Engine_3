@@ -8,23 +8,23 @@ import {
 
 interface NotFoundPageProps {
   onGoHome: () => void;
-  onGoLanding: () => void;
+  onGoConsole: () => void;
 }
 
-export default function NotFoundPage({ onGoHome, onGoLanding }: NotFoundPageProps) {
+export default function NotFoundPage({ onGoHome, onGoConsole }: NotFoundPageProps) {
   return (
     <div className="lp-root flex flex-col justify-between min-h-screen">
       <header className="lp-topbar">
         <div className="lp-container lp-topbar-inner">
           <button
             type="button"
-            onClick={onGoLanding}
+            onClick={onGoHome}
             className="lp-brand bg-transparent border-0 p-0 cursor-pointer"
           >
             <OrbitalMark size={16} />
             <span>QOE3</span>
           </button>
-          <button type="button" onClick={onGoHome} className="lp-nav-console">
+          <button type="button" onClick={onGoConsole} className="lp-nav-console">
             <span className="lp-nav-dot" aria-hidden="true" />
             <span>Open Console</span>
             <ArrowRightIcon />
@@ -46,11 +46,11 @@ export default function NotFoundPage({ onGoHome, onGoLanding }: NotFoundPageProp
         </p>
 
         <div className="mt-9 flex flex-wrap items-center gap-8">
-          <PrimaryLaunchButton onClick={onGoHome}>
-            Run the 24-hour scenario
+          <PrimaryLaunchButton onClick={onGoConsole}>
+            Launch 3D Console (/console)
           </PrimaryLaunchButton>
-          <QuietActionLink onClick={onGoLanding} direction="right">
-            Open mission document (/landing-page)
+          <QuietActionLink onClick={onGoHome} direction="right">
+            Open mission document (/)
           </QuietActionLink>
         </div>
       </main>

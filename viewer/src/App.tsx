@@ -804,7 +804,7 @@ function MissionConsole({ onNavigate }: { onNavigate: (path: string) => void }) 
             onToggleHdMode={() => setHdMode((v) => !v)}
             analyticsOpen={analyticsOpen}
             onToggleAnalytics={() => setAnalyticsOpen((v) => !v)}
-            onOpenLanding={() => onNavigate('/landing-page')}
+            onOpenLanding={() => onNavigate('/')}
             onEnterCinematic={() => setCinematicMode(true)}
             onOpenHelp={() => setIsHelpOpen(true)}
           />
@@ -1225,41 +1225,56 @@ function MissionConsole({ onNavigate }: { onNavigate: (path: string) => void }) 
 
 /**
  * Lightweight SPA Router:
- *  - `/`             -> 3D Mission Control Console
- *  - `/landing-page` -> Project Landing Page & Interactive 3D Explainer
- *  - any other path  -> Custom Branded 404 Page
+ *  - `/`                 -> Project Landing Page & Interactive 3D Explainer
+ *  - `/landing-page`     -> Project Landing Page (backward compatibility)
+ *  - `/console`, `/app`  -> 3D Mission Control Console
+ *  - `?view=console`     -> 3D Mission Control Console (same-page toggle)
+ *  - any other path      -> Custom Branded 404 Page
  */
 export default function App() {
-  const [pathname, setPathname] = useState<string>(() => window.location.pathname);
+  const [currentUrl, setCurrentUrl] = useState<string>(
+    () => window.location.pathname + window.location.search
+  );
 
   useEffect(() => {
-    const onPopState = () => setPathname(window.location.pathname);
+    const onPopState = () => setCurrentUrl(window.location.pathname + window.location.search);
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
   const navigate = useCallback((nextPath: string) => {
-    if (window.location.pathname !== nextPath) {
+    if (window.location.pathname + window.location.search !== nextPath) {
       window.history.pushState({}, '', nextPath);
-      setPathname(nextPath);
+      setCurrentUrl(nextPath);
       window.scrollTo({ top: 0, behavior: 'auto' });
     }
   }, []);
 
+  const pathname = currentUrl.split('?')[0];
+  const search = currentUrl.includes('?') ? currentUrl.substring(currentUrl.indexOf('?')) : '';
+  const searchParams = new URLSearchParams(search);
   const normalized = pathname.replace(/\/+$/, '') || '/';
 
-  if (normalized === '/landing-page') {
-    return <LandingPage onLaunchConsole={() => navigate('/')} />;
+  // Support same-page query param toggle (?view=console or ?tab=console) OR dedicated route (/console, /app)
+  const isConsoleRoute =
+    normalized === '/console' ||
+    normalized === '/app' ||
+    normalized === '/mission-control' ||
+    searchParams.get('view') === 'console' ||
+    searchParams.get('tab') === 'console';
+
+  if (isConsoleRoute) {
+    return <MissionConsole onNavigate={navigate} />;
   }
 
-  if (normalized === '/') {
-    return <MissionConsole onNavigate={navigate} />;
+  if (normalized === '/' || normalized === '/landing-page' || normalized === '/landing') {
+    return <LandingPage onLaunchConsole={() => navigate('/console')} />;
   }
 
   return (
     <NotFoundPage
       onGoHome={() => navigate('/')}
-      onGoLanding={() => navigate('/landing-page')}
+      onGoConsole={() => navigate('/console')}
     />
   );
 }

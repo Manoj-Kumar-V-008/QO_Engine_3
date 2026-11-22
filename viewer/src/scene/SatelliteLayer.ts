@@ -40,6 +40,10 @@ const scratchTimeB = new Cesium.JulianDate();
 const scratchCarto = new Cesium.Cartographic();
 const scratchCross = new Cesium.Cartesian3();
 const scratchSubSat = new Cesium.Cartesian3();
+const scratchAlongOffset = new Cesium.Cartesian3();
+const scratchCrossOffset = new Cesium.Cartesian3();
+const scratchCornerPt = new Cesium.Cartesian3();
+const scratchGroundCenter = new Cesium.Cartesian3();
 
 /**
  * Computes exact Local-Vertical Local-Horizontal (LVLH) orientation quaternion:
@@ -118,25 +122,17 @@ function computeSwathFootprintPositions(
 
   // Project spacecraft nadir point onto WGS84 ellipsoid
   const carto = Cesium.Cartographic.fromCartesian(pos, Cesium.Ellipsoid.WGS84, scratchCarto);
-  const groundCenter = Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, 1500);
+  Cesium.Cartesian3.fromRadians(carto.longitude, carto.latitude, 1500, Cesium.Ellipsoid.WGS84, scratchGroundCenter);
 
   const halfCross = SENTINEL2_SWATH_WIDTH_M * 0.5; // 145 km each side (290 km total!)
   const halfAlong = 135_000; // 270 km instantaneous imaging frame footprint
 
   const makeCorner = (alongSign: number, crossSign: number) => {
-    const pt = new Cesium.Cartesian3();
-    Cesium.Cartesian3.add(
-      groundCenter,
-      Cesium.Cartesian3.multiplyByScalar(scratchX, alongSign * halfAlong, new Cesium.Cartesian3()),
-      pt
-    );
-    Cesium.Cartesian3.add(
-      pt,
-      Cesium.Cartesian3.multiplyByScalar(scratchCross, crossSign * halfCross, new Cesium.Cartesian3()),
-      pt
-    );
-    // Clamp gently back onto Earth's surface
-    const c = Cesium.Cartographic.fromCartesian(pt);
+    Cesium.Cartesian3.multiplyByScalar(scratchX, alongSign * halfAlong, scratchAlongOffset);
+    Cesium.Cartesian3.multiplyByScalar(scratchCross, crossSign * halfCross, scratchCrossOffset);
+    Cesium.Cartesian3.add(scratchGroundCenter, scratchAlongOffset, scratchCornerPt);
+    Cesium.Cartesian3.add(scratchCornerPt, scratchCrossOffset, scratchCornerPt);
+    const c = Cesium.Cartographic.fromCartesian(scratchCornerPt, Cesium.Ellipsoid.WGS84, scratchCarto);
     return Cesium.Cartesian3.fromRadians(c.longitude, c.latitude, 2000);
   };
 

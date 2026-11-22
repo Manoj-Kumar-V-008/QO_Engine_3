@@ -93,7 +93,7 @@ function MissionConsole({ onNavigate }: { onNavigate: (path: string) => void }) 
   const [rightTab, setRightTab] = useState<'scoreboard' | 'whatif'>('scoreboard');
   const [analyticsOpen, setAnalyticsOpen] = useState<boolean>(false);
   const [cinematicMode, setCinematicMode] = useState<boolean>(false);
-  const [hdMode, setHdMode] = useState<boolean>(true);
+  const [hdMode, setHdMode] = useState<boolean>(false);
   const [showSwaths, setShowSwaths] = useState<boolean>(true);
   const [showConflicts3D, setShowConflicts3D] = useState<boolean>(true);
   const [ghostFilter, setGhostFilter] = useState<'all' | 'sentinel-2a' | 'sentinel-2b' | 'off'>('all');
@@ -323,7 +323,7 @@ function MissionConsole({ onNavigate }: { onNavigate: (path: string) => void }) 
       startUtc: baseScenario.start_utc,
       durationHours: baseScenario.duration_hours,
       initialSpeed: 60,
-      hdMode: true,
+      hdMode: false,
     });
     viewerRef.current = viewer;
 

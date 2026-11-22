@@ -14,13 +14,13 @@ export interface SceneInitOptions {
  * or Perf 60fps fallback smoothly without destroying the Cesium Viewer.
  */
 export function applyQualityProfile(viewer: Cesium.Viewer, hdMode: boolean): void {
-  const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
-  viewer.resolutionScale = hdMode ? Math.min(dpr, 1.5) : 0.85;
-  viewer.scene.globe.maximumScreenSpaceError = hdMode ? 1.5 : 2.2;
+  // Use native 1.0 (or 0.95) to prevent extreme supersampling lag on Retina / high-DPI laptop displays
+  viewer.resolutionScale = hdMode ? 1.0 : 0.95;
+  viewer.scene.globe.maximumScreenSpaceError = hdMode ? 2.0 : 2.5;
   viewer.scene.highDynamicRange = hdMode;
 
   const stages = viewer.scene.postProcessStages;
-  stages.fxaa.enabled = !hdMode;
+  stages.fxaa.enabled = true; // Fast, lightweight screen anti-aliasing
 
   if (hdMode) {
     try {
@@ -94,7 +94,7 @@ export function initCesiumScene(options: SceneInitOptions): Cesium.Viewer {
     fullscreenButton: false,
     infoBox: false,
     selectionIndicator: false,
-    msaaSamples: 4,
+    msaaSamples: 1, // 1 sample + FXAA gives crisp, silky-smooth 60fps without GPU fillrate choke
     baseLayer: dayLayer,
   });
 
@@ -134,7 +134,9 @@ export function initCesiumScene(options: SceneInitOptions): Cesium.Viewer {
   scene.globe.atmosphereBrightnessShift = 0.08;
   scene.globe.nightFadeInDistance = 4.5e7;
   scene.globe.nightFadeOutDistance = 1.8e7;
-  scene.globe.tileCacheSize = 150;
+  scene.globe.tileCacheSize = 100;
+  scene.globe.preloadAncestors = false;
+  scene.globe.preloadSiblings = false;
 
   if (scene.skyAtmosphere) {
     scene.skyAtmosphere.show = true;

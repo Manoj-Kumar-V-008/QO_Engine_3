@@ -118,68 +118,6 @@ export function buildActiveLinkLayer(
     });
     createdIds.push(beamId);
 
-    // 1B. Translucent Volumetric RF Downlink Envelope Cone (connects spacecraft -> dish)
-    const coneId = `active-beam-cone-${sat.id}`;
-    viewer.entities.add({
-      id: coneId,
-      show: new Cesium.CallbackProperty((time?: Cesium.JulianDate) => {
-        if (!time) return false;
-        const ms = Cesium.JulianDate.toDate(time).getTime();
-        return findActiveWinner(ms) !== null;
-      }, false) as unknown as boolean,
-      position: new Cesium.CallbackProperty((time?: Cesium.JulianDate) => {
-        if (!time) return Cesium.Cartesian3.ZERO;
-        const ms = Cesium.JulianDate.toDate(time).getTime();
-        const match = findActiveWinner(ms);
-        if (!match) return Cesium.Cartesian3.ZERO;
-        const antPos = antPositions[match.assignment.antenna_id];
-        const satPos = positionProp.getValue(time);
-        if (!antPos || !satPos) return Cesium.Cartesian3.ZERO;
-        return Cesium.Cartesian3.midpoint(antPos, satPos, new Cesium.Cartesian3());
-      }, false) as unknown as Cesium.PositionProperty,
-      orientation: new Cesium.CallbackProperty((time?: Cesium.JulianDate) => {
-        if (!time) return Cesium.Quaternion.IDENTITY;
-        const ms = Cesium.JulianDate.toDate(time).getTime();
-        const match = findActiveWinner(ms);
-        if (!match) return Cesium.Quaternion.IDENTITY;
-        const antPos = antPositions[match.assignment.antenna_id];
-        const satPos = positionProp.getValue(time);
-        if (!antPos || !satPos) return Cesium.Quaternion.IDENTITY;
-        // Cylinder local +Z points from antenna toward satellite
-        Cesium.Cartesian3.subtract(satPos, antPos, scratchDir);
-        const len = Cesium.Cartesian3.magnitude(scratchDir);
-        if (len < 1) return Cesium.Quaternion.IDENTITY;
-        Cesium.Cartesian3.divideByScalar(scratchDir, len, scratchDir);
-        const dot = Cesium.Cartesian3.dot(scratchUp, scratchDir);
-        if (dot > 0.99999) return Cesium.Quaternion.IDENTITY;
-        if (dot < -0.99999) {
-          return Cesium.Quaternion.fromAxisAngle(Cesium.Cartesian3.UNIT_X, Math.PI, new Cesium.Quaternion());
-        }
-        const axis = Cesium.Cartesian3.cross(scratchUp, scratchDir, new Cesium.Cartesian3());
-        Cesium.Cartesian3.normalize(axis, axis);
-        const angle = Math.acos(Math.min(1, Math.max(-1, dot)));
-        return Cesium.Quaternion.fromAxisAngle(axis, angle, scratchQuat).clone();
-      }, false) as unknown as Cesium.Property,
-      cylinder: {
-        length: new Cesium.CallbackProperty((time?: Cesium.JulianDate) => {
-          if (!time) return 1;
-          const ms = Cesium.JulianDate.toDate(time).getTime();
-          const match = findActiveWinner(ms);
-          if (!match) return 1;
-          const antPos = antPositions[match.assignment.antenna_id];
-          const satPos = positionProp.getValue(time);
-          if (!antPos || !satPos) return 1;
-          return Math.max(100, Cesium.Cartesian3.distance(antPos, satPos));
-        }, false),
-        topRadius: 16_000,
-        bottomRadius: 42_000,
-        slices: 20,
-        material: color.withAlpha(0.085),
-        outline: false,
-      },
-    });
-    createdIds.push(coneId);
-
     // 2A. Contested / Dropped Conflict Link (Pulsing Crimson Interruption Shader)
     const conflictBeamId = `active-conflict-beam-${sat.id}`;
     const conflictMat = new ConflictClashMaterialProperty(crimson.withAlpha(0.9));

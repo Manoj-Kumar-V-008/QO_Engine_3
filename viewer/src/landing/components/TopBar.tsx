@@ -8,23 +8,25 @@ import { ArrowRightIcon, PrimaryLaunchButton } from './LandingButton';
 
 interface TopBarProps {
   onLaunchConsole: () => void;
+  onToggleCaseStudy?: () => void;
+  showCaseStudy?: boolean;
 }
 
-const NAV_ITEMS: { id: ActId; shortLabel: string; title: string }[] = [
-  { id: '01', shortLabel: 'Loss', title: 'The wasted pass' },
-  { id: '02', shortLabel: 'Ceiling', title: 'The binary ceiling' },
-  { id: '03', shortLabel: 'Ledger', title: 'The 15-second decision' },
-  { id: '04', shortLabel: 'Proof', title: 'Proof on paper' },
-  { id: '05', shortLabel: 'Lab', title: 'What-If station lab' },
+const OVERVIEW_NAV: { id: string; shortLabel: string; title: string; href: string }[] = [
+  { id: 'problem', shortLabel: 'Problem', title: 'Why satellite downlinks fail', href: '#problem' },
+  { id: 'solution', shortLabel: '15s Engine', title: '15-second time-slicing concept', href: '#interactive-demo' },
+  { id: 'benchmarks', shortLabel: 'Benchmark', title: 'Proven 24-hour benchmark', href: '#benchmarks' },
+  { id: 'stations', shortLabel: 'Stations', title: 'Ground station infrastructure', href: '#stations' },
+  { id: 'case-study', shortLabel: 'Case Study', title: 'Full academic case study & math', href: '#case-study' },
 ];
 
-const DRAWER_SECTIONS: { id: ActId; title: string }[] = [
-  { id: '00', title: 'Overview' },
-  { id: '01', title: 'The wasted pass' },
-  { id: '02', title: 'The binary ceiling' },
-  { id: '03', title: 'The 15-second decision' },
-  { id: '04', title: 'Proof on paper' },
-  { id: '05', title: 'What-If station lab' },
+const DRAWER_ITEMS = [
+  { id: 'overview', title: 'Mission Overview', href: '#overview' },
+  { id: 'problem', title: '01 // The Problem', href: '#problem' },
+  { id: 'solution', title: '02 // 15s Slicing Engine', href: '#interactive-demo' },
+  { id: 'benchmarks', title: '03 // Benchmark Results', href: '#benchmarks' },
+  { id: 'stations', title: '04 // Ground Network', href: '#stations' },
+  { id: 'case-study', title: '05 // Academic Case Study', href: '#case-study' },
 ];
 
 export function OrbitalMark({ size = 18 }: { size?: number }) {
@@ -56,14 +58,18 @@ export function OrbitalMark({ size = 18 }: { size?: number }) {
   );
 }
 
-export default function TopBar({ onLaunchConsole }: TopBarProps) {
-  const [activeAct, setActiveAct] = useState<ActId>('00');
+export default function TopBar({
+  onLaunchConsole,
+  onToggleCaseStudy,
+  showCaseStudy,
+}: TopBarProps) {
+  const [activeAct, setActiveAct] = useState<string>('overview');
   const [scrolled, setScrolled] = useState<boolean>(false);
   const [surface, setSurface] = useState<HeaderSurface>('void');
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
   const navRef = useRef<HTMLElement>(null);
-  const itemRefs = useRef<Partial<Record<ActId, HTMLAnchorElement | null>>>({});
+  const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const railRef = useRef<HTMLSpanElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
 
@@ -74,7 +80,6 @@ export default function TopBar({ onLaunchConsole }: TopBarProps) {
 
   // Subscribe to scroll store (discrete state changes + zero-render progress hairline)
   useEffect(() => {
-    const unsubAct = scrollStore.subscribeAct(setActiveAct);
     const unsubScrolled = scrollStore.subscribeScrolled(setScrolled);
     const unsubSurface = scrollStore.subscribeHeaderSurface(setSurface);
     const unsubProgress = scrollStore.subscribePageProgress((p) => {
@@ -83,7 +88,6 @@ export default function TopBar({ onLaunchConsole }: TopBarProps) {
       }
     });
     return () => {
-      unsubAct();
       unsubScrolled();
       unsubSurface();
       unsubProgress();
@@ -95,7 +99,7 @@ export default function TopBar({ onLaunchConsole }: TopBarProps) {
     const updateRail = () => {
       const rail = railRef.current;
       if (!rail) return;
-      const activeEl = activeAct !== '00' ? itemRefs.current[activeAct] : null;
+      const activeEl = itemRefs.current[activeAct];
       if (!activeEl) {
         rail.style.opacity = '0';
         return;
@@ -158,7 +162,7 @@ export default function TopBar({ onLaunchConsole }: TopBarProps) {
       >
         <div className="lp-container lp-topbar-inner">
           {/* Left slot (1fr, justify-self: start) */}
-          <a href="#act-00" className="lp-brand">
+          <a href="#overview" className="lp-brand">
             <OrbitalMark size={18} />
             <span className="lp-brand-wordmark">QOE3</span>
             <span className="lp-brand-sep" aria-hidden="true" />
@@ -169,9 +173,9 @@ export default function TopBar({ onLaunchConsole }: TopBarProps) {
           <nav
             ref={navRef}
             className="lp-nav-index"
-            aria-label="Mission document index"
+            aria-label="Presentation index"
           >
-            {NAV_ITEMS.map((item) => {
+            {OVERVIEW_NAV.map((item) => {
               const isActive = activeAct === item.id;
               return (
                 <a
@@ -179,13 +183,18 @@ export default function TopBar({ onLaunchConsole }: TopBarProps) {
                   ref={(el) => {
                     itemRefs.current[item.id] = el;
                   }}
-                  href={`#act-${item.id}`}
+                  href={item.href}
+                  onClick={() => {
+                    setActiveAct(item.id);
+                    if (item.id === 'case-study' && !showCaseStudy && onToggleCaseStudy) {
+                      onToggleCaseStudy();
+                    }
+                  }}
                   data-active={isActive ? 'true' : 'false'}
                   aria-current={isActive ? 'location' : undefined}
                   className="lp-nav-item"
-                  title={`${item.id} — ${item.title}`}
+                  title={item.title}
                 >
-                  <span className="lp-nav-num lp-mono">{item.id}</span>
                   <span className="lp-nav-label">{item.shortLabel}</span>
                 </a>
               );
@@ -269,13 +278,19 @@ export default function TopBar({ onLaunchConsole }: TopBarProps) {
           </div>
 
           <nav className="mt-4 flex flex-col" aria-label="Mobile sections">
-            {DRAWER_SECTIONS.map((s, idx) => {
+            {DRAWER_ITEMS.map((s, idx) => {
               const isActive = activeAct === s.id;
               return (
                 <a
                   key={s.id}
-                  href={`#act-${s.id}`}
-                  onClick={() => setDrawerOpen(false)}
+                  href={s.href}
+                  onClick={() => {
+                    setDrawerOpen(false);
+                    setActiveAct(s.id);
+                    if (s.id === 'case-study' && !showCaseStudy && onToggleCaseStudy) {
+                      onToggleCaseStudy();
+                    }
+                  }}
                   className="lp-drawer-link"
                   data-active={isActive ? 'true' : 'false'}
                   style={{
@@ -285,12 +300,6 @@ export default function TopBar({ onLaunchConsole }: TopBarProps) {
                   }}
                 >
                   <span>{s.title}</span>
-                  <span
-                    className="lp-mono text-[12px]"
-                    style={{ color: 'var(--amber-paper)' }}
-                  >
-                    {s.id}
-                  </span>
                 </a>
               );
             })}

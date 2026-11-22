@@ -1,10 +1,5 @@
 import './styles/landing.css';
-import { OrbitalMark } from './components/TopBar';
-import {
-  ArrowRightIcon,
-  PrimaryLaunchButton,
-  QuietActionLink,
-} from './components/LandingButton';
+import { ArrowUpRight, OrbitMark } from './components/TopBar';
 
 interface NotFoundPageProps {
   onGoHome: () => void;
@@ -13,59 +8,61 @@ interface NotFoundPageProps {
 
 export default function NotFoundPage({ onGoHome, onGoConsole }: NotFoundPageProps) {
   return (
-    <div className="lp-root flex flex-col justify-between min-h-screen">
-      <header className="lp-topbar">
-        <div className="lp-container lp-topbar-inner">
+    <div className="q-root">
+      <header className="q-top q-top--void">
+        <div className="q-top__inner">
           <button
             type="button"
+            className="q-brand"
             onClick={onGoHome}
-            className="lp-brand bg-transparent border-0 p-0 cursor-pointer"
+            style={{ background: 'none', border: 0, cursor: 'pointer', padding: 0 }}
           >
-            <OrbitalMark size={16} />
-            <span>QOE3</span>
+            <span className="q-brand__mark">
+              <OrbitMark />
+            </span>
+            <span className="q-brand__name">QOE3</span>
           </button>
-          <button type="button" onClick={onGoConsole} className="lp-nav-console">
-            <span className="lp-nav-dot" aria-hidden="true" />
-            <span>Open Console</span>
-            <ArrowRightIcon />
-          </button>
+          <div className="q-top__tools">
+            <button type="button" className="q-top__console" onClick={onGoConsole}>
+              Open console <ArrowUpRight />
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className="lp-container flex-1 flex flex-col justify-center py-28">
-        <div className="lp-act-tag">
-          <span className="lp-act-num">404</span>
-          <span>LOSS OF SIGNAL · ROUTE NOT FOUND</span>
+      <main
+        className="q-container"
+        style={{ paddingTop: 'calc(var(--topbar) + 16vh)', paddingBottom: '16vh', minHeight: '82vh' }}
+      >
+        <div className="q-act__index" style={{ marginBottom: 22 }}>
+          <span className="q-act__index-num">404</span>
+          <span className="q-micro">LOSS OF SIGNAL / ROUTE NOT FOUND</span>
         </div>
-        <h1 className="lp-display max-w-[16ch]" style={{ color: 'var(--ink-void)' }}>
-          No pass scheduled at this coordinate.
+        <h1 className="q-h2" style={{ fontSize: 'clamp(2.8rem, 7vw, 6.2rem)', maxWidth: '15ch' }}>
+          No pass scheduled
+          <br />
+          at this coordinate.
         </h1>
-        <p className="lp-lead mt-6 max-w-[52ch]">
-          The requested path does not match an active QOE3 route. Return to the
-          24-hour mission briefing or open the live 3D CesiumJS console directly.
+        <p className="q-lead" style={{ marginTop: 24, maxWidth: '56ch' }}>
+          The requested path does not match an active QOE3 route. Return to the 24-hour mission
+          document, or open the live 3D CesiumJS console directly.
         </p>
-
-        <div className="mt-9 flex flex-wrap items-center gap-8">
-          <PrimaryLaunchButton onClick={onGoConsole}>
-            Launch 3D Console (/console)
-          </PrimaryLaunchButton>
-          <QuietActionLink onClick={onGoHome} direction="right">
-            Open mission document (/)
-          </QuietActionLink>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 18, marginTop: 34 }}>
+          <button type="button" className="q-btn q-btn--light" onClick={onGoHome}>
+            Return to mission document <ArrowUpRight />
+          </button>
+          <button type="button" className="q-btn q-btn--dark" onClick={onGoConsole}>
+            Launch 3D console (/console)
+          </button>
         </div>
       </main>
 
-      <footer
-        className="lp-mono text-[11px] py-5"
-        style={{
-          background: 'var(--plate)',
-          borderTop: '1px solid var(--rule-void)',
-          color: 'var(--ink-void-3)',
-        }}
-      >
-        <div className="lp-container flex flex-wrap justify-between gap-2">
-          <span>QOE3 · SCENARIO DEMO-001</span>
-          <span>SVALBARD · KIRUNA · MATERA</span>
+      <footer className="q-colophon">
+        <div className="q-container">
+          <div className="q-colophon__bottom">
+            <span>QOE3 · SCENARIO DEMO-001</span>
+            <span>SVALBARD · KIRUNA · MATERA</span>
+          </div>
         </div>
       </footer>
     </div>

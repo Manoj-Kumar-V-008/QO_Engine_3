@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
 import * as satellite from 'satellite.js';
 import type { LandingDataBundle } from '../data/loadLandingData';
+import { runIndependentValidator } from '../data/loadLandingData';
 import type { AntennaConfig } from '../../types/engine';
 import { runWhatIfPipeline } from '../../lib/whatifEngine';
-import { PrimaryLaunchButton } from './LandingButton';
-import { RollingNumber } from './RollingNumber';
+import earthTextureUrl from '../assets/earth-ne2.jpg';
+import { ArrowUpRight } from './TopBar';
+import { useReveal } from '../hooks/useReveal';
 
 type WhatIfResult = ReturnType<typeof runWhatIfPipeline>;
 
@@ -30,7 +32,12 @@ const PRESETS: PresetSite[] = [
 ];
 
 const MAP_W = 720;
-const MAP_H = 340;
+const MAP_H = 360;
+const BASE_STATION_COLORS: Record<string, string> = {
+  'svalbard-1': '#f0a43c',
+  'kiruna-1': '#5bd6e6',
+  'matera-1': '#45d6a0',
+};
 
 function lonToX(lon: number): number {
   return ((lon + 180) / 360) * MAP_W;
@@ -40,11 +47,12 @@ function latToY(lat: number): number {
 }
 
 export default function ActInvitation({ data, onLaunchConsole }: ActInvitationProps) {
+  const sectionRef = useReveal<HTMLElement>(0.06);
   const [selectedStation, setSelectedStation] = useState<AntennaConfig | null>(null);
   const [whatIfResult, setWhatIfResult] = useState<WhatIfResult | null>(null);
   const [solveSeq, setSolveSeq] = useState<number>(0);
 
-  // Compute 2 real SGP4 orbits (~240 minutes) of ground track for clean map context
+  // Real SGP4 ground tracks for 240 minutes from the scenario epoch.
   const groundTracks = useMemo(() => {
     if (!data) return { s2a: [] as string[], s2b: [] as string[] };
     const buildSegments = (satId: string) => {
@@ -85,21 +93,21 @@ export default function ActInvitation({ data, onLaunchConsole }: ActInvitationPr
 
   const runStation = (ant: AntennaConfig) => {
     if (!data) return;
-    const res = runWhatIfPipeline(data.scenario, data.passesDoc, data.tles, [ant]);
+    const result = runWhatIfPipeline(data.scenario, data.passesDoc, data.tles, [ant]);
     setSelectedStation(ant);
-    setWhatIfResult(res);
+    setWhatIfResult(result);
     setSolveSeq((n) => n + 1);
   };
 
-  const handleMapClick = (e: React.MouseEvent<SVGSVGElement>) => {
+  const handleMapClick = (event: React.MouseEvent<SVGSVGElement>) => {
     if (!data) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const xFrac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const yFrac = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    const rect = event.currentTarget.getBoundingClientRect();
+    const xFrac = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+    const yFrac = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
     const lon = Math.round((xFrac * 360 - 180) * 100) / 100;
     const lat = Math.round((90 - yFrac * 180) * 100) / 100;
     runStation({
-      id: `custom-site`,
+      id: 'custom-site',
       name: `Custom (${lat.toFixed(1)}°, ${lon.toFixed(1)}°)`,
       lat_deg: lat,
       lon_deg: lon,
@@ -110,83 +118,100 @@ export default function ActInvitation({ data, onLaunchConsole }: ActInvitationPr
     });
   };
 
-  const baseQ = data?.waterfallRows.find((r) => r.method === 'qslice')?.deliveredGb ?? 999.2;
+  const baseQ = data?.waterfallRows.find((row) => row.method === 'qslice')?.deliveredGb ?? 999.2;
   const basePasses = data?.passesDoc.passes.length ?? 61;
 
   const newQ = whatIfResult
-    ? whatIfResult.scoreboard.methods.find((m) => m.method === 'qslice')?.gb_delivered ?? baseQ
+    ? whatIfResult.scoreboard.methods.find((method) => method.method === 'qslice')?.gb_delivered ?? baseQ
     : baseQ;
   const newOverflow = whatIfResult
-    ? whatIfResult.scoreboard.methods.find((m) => m.method === 'qslice')?.overflow_gb ?? 1400.8
+    ? whatIfResult.scoreboard.methods.find((method) => method.method === 'qslice')?.overflow_gb ?? 1400.8
     : 1400.8;
   const newPasses = whatIfResult ? whatIfResult.passesDoc.passes.length : basePasses;
   const addedGb = Math.round((newQ - baseQ) * 10) / 10;
   const addedPasses = newPasses - basePasses;
 
+  const validation = useMemo(() => {
+    if (!whatIfResult || !data) return null;
+    const checks = runIndependentValidator(
+      whatIfResult.scenario,
+      data.tles,
+      whatIfResult.schedules.qslice,
+      3000
+    );
+    return {
+      total: checks.reduce((sum, check) => sum + check.violations, 0),
+      checks: checks.length,
+    };
+  }, [whatIfResult, data]);
+
   return (
-    <section id="act-05" className="lp-act">
-      <div className="lp-container">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end mb-10">
-          <div className="lg:col-span-7">
-            <div className="lp-act-tag">
-              <span className="lp-act-num">05</span>
-              <span>LIVE WHAT-IF LAB · IN-BROWSER SGP4 + Q SLICE SOLVER</span>
-            </div>
-            <h2 className="lp-h2" style={{ color: 'var(--ink-void)' }}>
+    <section id="act-05" className="q-act q-act--invite" ref={sectionRef}>
+      <div className="q-container">
+        <div className="q-invite-head">
+          <div className="q-act__index">
+            <span className="q-act__index-num">05</span>
+            <span className="q-micro">WHAT-IF / IN-BROWSER SGP4</span>
+          </div>
+          <div>
+            <h2 className="q-h2">
               Move a dish.
               <br />
               Watch the schedule change.
             </h2>
           </div>
-
-          <div className="lg:col-span-5">
-            <p className="lp-lead">
-              Select a preset or click anywhere on the ground-track projection below.
-              Your browser propagates real Sentinel-2 SGP4 passes for the new dish and
-              re-solves Greedy, MILP, and Q Slice on the spot—no canned numbers.
+          <div>
+            <p className="q-lead">
+              Click anywhere on the map to add a fourth station. Your browser propagates real
+              Sentinel-2 passes with SGP4, re-solves Q Slice, and re-checks the constraints.
+              Nothing is canned.
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-          {/* Left 7 cols: Interactive SGP4 Ground-Track Map */}
-          <div className="lg:col-span-7 lp-plate lp-plate-interactive p-4 sm:p-5 flex flex-col justify-between">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <span className="lp-micro" style={{ color: 'var(--ink-void)' }}>
-                CLICK ANYWHERE ON EARTH TO ADD A 4TH GROUND STATION
-              </span>
-              <span className="lp-micro" style={{ color: 'var(--ink-void-3)' }}>
-                5° MASK · 120s SLEW · 560 MBPS PEAK
-              </span>
+        <div className="q-whatif q-reveal">
+          <div className="q-whatif__plate">
+            <div className="q-whatif__head">
+              <span className="q-micro">GROUND TRACK / 240 MIN / EQUIRECTANGULAR</span>
+              <span className="q-micro">5° MASK · 120 s SLEW · 560 MBPS PEAK</span>
             </div>
 
             <svg
               viewBox={`0 0 ${MAP_W} ${MAP_H}`}
+              className="q-whatif__map"
               onClick={handleMapClick}
-              className="w-full h-auto block cursor-crosshair"
-              style={{
-                background: '#05070A',
-                border: '1px solid var(--rule-void)',
-              }}
-              role="application"
-              aria-label="World ground track map. Click anywhere to place a fourth ground station and recompute Q Slice."
+              role="img"
+              aria-label="World ground-track map. Click to place a fourth ground station, or use the preset buttons below. The three baseline stations are Svalbard, Kiruna and Matera."
             >
-              {/* Latitude / Longitude graticule */}
+              <rect width={MAP_W} height={MAP_H} fill="#04090d" />
+              <image
+                href={earthTextureUrl}
+                x="0"
+                y="0"
+                width={MAP_W}
+                height={MAP_H}
+                preserveAspectRatio="none"
+                opacity="0.72"
+              />
+              <rect width={MAP_W} height={MAP_H} fill="#05070a" opacity="0.38" />
+
               {[-120, -60, 0, 60, 120].map((lon) => (
                 <g key={`lon-${lon}`}>
                   <line
                     x1={lonToX(lon)}
-                    y1={0}
+                    y1="0"
                     x2={lonToX(lon)}
                     y2={MAP_H}
-                    stroke="rgba(233,237,242,0.08)"
+                    stroke="rgba(238,242,246,0.12)"
+                    strokeWidth="0.8"
                   />
                   <text
                     x={lonToX(lon) + 5}
-                    y={MAP_H - 7}
+                    y={MAP_H - 8}
                     fontFamily="IBM Plex Mono, monospace"
-                    fontSize="10.5"
-                    fill="#8391A1"
+                    fontSize="7.5"
+                    letterSpacing="0.08em"
+                    fill="#7f8d99"
                   >
                     {lon === 0 ? '0°' : lon > 0 ? `${lon}°E` : `${Math.abs(lon)}°W`}
                   </text>
@@ -195,284 +220,228 @@ export default function ActInvitation({ data, onLaunchConsole }: ActInvitationPr
               {[-60, -30, 0, 30, 60].map((lat) => (
                 <g key={`lat-${lat}`}>
                   <line
-                    x1={0}
+                    x1="0"
                     y1={latToY(lat)}
                     x2={MAP_W}
                     y2={latToY(lat)}
-                    stroke={lat === 0 ? 'rgba(233,237,242,0.16)' : 'rgba(233,237,242,0.08)'}
+                    stroke={lat === 0 ? 'rgba(238,242,246,0.2)' : 'rgba(238,242,246,0.1)'}
+                    strokeWidth="0.8"
                   />
                   <text
-                    x={6}
+                    x="7"
                     y={latToY(lat) - 5}
                     fontFamily="IBM Plex Mono, monospace"
-                    fontSize="10.5"
-                    fill="#8391A1"
+                    fontSize="7.5"
+                    letterSpacing="0.08em"
+                    fill="#7f8d99"
                   >
                     {lat === 0 ? 'EQ' : lat > 0 ? `${lat}°N` : `${Math.abs(lat)}°S`}
                   </text>
                 </g>
               ))}
 
-              {/* Real SGP4 Sentinel-2 ground tracks */}
-              {groundTracks.s2a.map((d, i) => (
+              {groundTracks.s2a.map((d, index) => (
                 <path
-                  key={`a-${i}`}
+                  key={`s2a-${index}`}
                   d={d}
                   fill="none"
-                  stroke="#5BD6E6"
-                  strokeOpacity="0.28"
-                  strokeWidth="1"
+                  stroke="#5bd6e6"
+                  strokeOpacity="0.5"
+                  strokeWidth="1.1"
                 />
               ))}
-              {groundTracks.s2b.map((d, i) => (
+              {groundTracks.s2b.map((d, index) => (
                 <path
-                  key={`b-${i}`}
+                  key={`s2b-${index}`}
                   d={d}
                   fill="none"
-                  stroke="#F0A43C"
-                  strokeOpacity="0.26"
-                  strokeWidth="1"
+                  stroke="#f0a43c"
+                  strokeOpacity="0.44"
+                  strokeWidth="1.1"
                 />
               ))}
 
-              {/* Baseline 3 European stations */}
-              {(data?.scenario.antennas ?? []).map((ant) => {
-                const x = lonToX(ant.lon_deg);
-                const y = latToY(ant.lat_deg);
+              {(data?.scenario.antennas ?? []).map((antenna) => {
+                const color = BASE_STATION_COLORS[antenna.id] ?? '#eef2f6';
                 return (
-                  <g key={ant.id} transform={`translate(${x}, ${y})`}>
-                    <circle cx="0" cy="0" r="4" fill="#5BD6E6" />
-                    <circle cx="0" cy="0" r="9" fill="none" stroke="#5BD6E6" strokeOpacity="0.4" />
-                  </g>
-                );
-              })}
-
-              {/* Preset ghost markers */}
-              {PRESETS.map((p) => {
-                const x = lonToX(p.lon);
-                const y = latToY(p.lat);
-                const isSel = selectedStation?.id === p.id;
-                return (
-                  <g key={p.id} transform={`translate(${x}, ${y})`}>
-                    <rect
-                      x="-3"
-                      y="-3"
-                      width="6"
-                      height="6"
-                      fill={isSel ? '#45D6A0' : 'none'}
-                      stroke={isSel ? '#45D6A0' : 'rgba(233,237,242,0.45)'}
-                      strokeWidth="1.2"
-                      className="lp-ledger-rect"
-                    />
+                  <g key={antenna.id} transform={`translate(${lonToX(antenna.lon_deg)}, ${latToY(antenna.lat_deg)})`}>
+                    <circle r="7.5" fill="none" stroke={color} strokeOpacity="0.4" />
+                    <circle r="3.4" fill={color} />
                     <text
-                      x={p.lon > 120 ? -9 : 9}
-                      y="4"
-                      textAnchor={p.lon > 120 ? 'end' : 'start'}
-                      fontFamily="IBM Plex Sans, sans-serif"
-                      fontSize="11"
+                      x="9"
+                      y="3.5"
+                      fontFamily="IBM Plex Mono, monospace"
+                      fontSize="8"
                       fontWeight="500"
-                      fill={isSel ? '#45D6A0' : '#B2BECB'}
+                      letterSpacing="0.06em"
+                      fill={color}
                     >
-                      {p.name}
+                      {antenna.name.replace(' Ground Station', '').toUpperCase()}
                     </text>
                   </g>
                 );
               })}
 
-              {/* Selected custom/preset station crosshair with one-shot acquisition lock-on */}
+              {PRESETS.map((preset) => {
+                const isSelected = selectedStation?.id === preset.id;
+                const anchor = preset.lon > 120 ? 'end' : 'start';
+                const offset = preset.lon > 120 ? -9 : 9;
+                return (
+                  <g key={preset.id} transform={`translate(${lonToX(preset.lon)}, ${latToY(preset.lat)})`}>
+                    <rect
+                      x="-3"
+                      y="-3"
+                      width="6"
+                      height="6"
+                      fill={isSelected ? '#45d6a0' : 'none'}
+                      stroke={isSelected ? '#45d6a0' : 'rgba(238,242,246,0.5)'}
+                      strokeWidth="1.1"
+                    />
+                    <text
+                      x={offset}
+                      y="3.5"
+                      textAnchor={anchor}
+                      fontFamily="IBM Plex Mono, monospace"
+                      fontSize="7.5"
+                      letterSpacing="0.04em"
+                      fill={isSelected ? '#45d6a0' : '#aebac5'}
+                    >
+                      {preset.name.toUpperCase()}
+                    </text>
+                  </g>
+                );
+              })}
+
               {selectedStation && (
                 <g
-                  key={`${selectedStation.id}-${selectedStation.lat_deg}-${selectedStation.lon_deg}-${solveSeq}`}
-                  transform={`translate(${lonToX(selectedStation.lon_deg)}, ${latToY(
-                    selectedStation.lat_deg
-                  )})`}
+                  key={`${selectedStation.id}-${solveSeq}`}
+                  transform={`translate(${lonToX(selectedStation.lon_deg)}, ${latToY(selectedStation.lat_deg)})`}
                 >
-                  {/* One-shot radar acquisition ping ring */}
-                  <circle
-                    cx="0"
-                    cy="0"
-                    r="8"
-                    fill="none"
-                    stroke="#45D6A0"
-                    strokeWidth="1.4"
-                    className="lp-acquire-ping"
-                  />
-                  {/* Reticle lock-on settle */}
-                  <g className="lp-acquire-lock">
-                    <line x1="-14" y1="0" x2="14" y2="0" stroke="#45D6A0" strokeWidth="1.2" />
-                    <line x1="0" y1="-14" x2="0" y2="14" stroke="#45D6A0" strokeWidth="1.2" />
-                    <circle cx="0" cy="0" r="6" fill="#45D6A0" fillOpacity="0.22" stroke="#45D6A0" />
-                  </g>
+                  <circle r="12" fill="none" stroke="#45d6a0" strokeOpacity="0.5" />
+                  <line x1="-13" y1="0" x2="13" y2="0" stroke="#45d6a0" strokeWidth="1" />
+                  <line x1="0" y1="-13" x2="0" y2="13" stroke="#45d6a0" strokeWidth="1" />
+                  <circle r="5" fill="#45d6a0" fillOpacity="0.18" stroke="#45d6a0" />
                 </g>
               )}
+
+              <text
+                x="10"
+                y="18"
+                fontFamily="IBM Plex Mono, monospace"
+                fontSize="7.5"
+                letterSpacing="0.1em"
+                fill="#7f8d99"
+              >
+                SENTINEL-2A · — — · SENTINEL-2B · — — · 2026-11-09
+              </text>
             </svg>
 
-            {/* Preset buttons row */}
-            <div className="mt-4 flex flex-wrap gap-2.5">
-              {PRESETS.map((p) => {
-                const active = selectedStation?.id === p.id;
+            <div className="q-whatif__presets">
+              {PRESETS.map((preset) => {
+                const active = selectedStation?.id === preset.id;
                 return (
                   <button
-                    key={p.id}
+                    key={preset.id}
                     type="button"
-                    data-active={active ? 'true' : 'false'}
+                    className={`q-chip${active ? ' is-active' : ''}`}
                     onClick={() =>
                       runStation({
-                        id: p.id,
-                        name: p.name,
-                        lat_deg: p.lat,
-                        lon_deg: p.lon,
-                        alt_m: p.alt_m,
+                        id: preset.id,
+                        name: preset.name,
+                        lat_deg: preset.lat,
+                        lon_deg: preset.lon,
+                        alt_m: preset.alt_m,
                         min_elevation_deg: 5,
                         dishes: 1,
                         setup_s: 120,
                       })
                     }
-                    className="lp-btn-tactile"
+                    aria-pressed={active}
                   >
-                    <span className="lp-lock-pip" aria-hidden="true" />
-                    <span>+ {p.name}</span>
-                    <span className="lp-mono text-[12px] opacity-80">
-                      {p.lat > 0 ? `${p.lat.toFixed(0)}°N` : `${Math.abs(p.lat).toFixed(0)}°S`}
+                    <span>+ {preset.name}</span>
+                    <span className="q-chip__coord">
+                      {preset.lat > 0 ? `${preset.lat.toFixed(0)}°N` : `${Math.abs(preset.lat).toFixed(0)}°S`}
                     </span>
                   </button>
                 );
               })}
-
               {selectedStation && (
                 <button
                   type="button"
+                  className="q-chip"
                   onClick={() => {
                     setSelectedStation(null);
                     setWhatIfResult(null);
                     setSolveSeq((n) => n + 1);
                   }}
-                  className="lp-btn-tactile"
-                  style={{ color: 'var(--ink-void-2)' }}
                 >
-                  Reset Baseline
+                  Reset baseline
                 </button>
               )}
             </div>
           </div>
 
-          {/* Right 5 cols: Live Computed Solver Output */}
-          <div className="relative overflow-hidden lg:col-span-5 lp-plate p-5 sm:p-6 flex flex-col justify-between">
-            {/* One-shot top-edge scanline flash when in-browser solver completes */}
-            {solveSeq > 0 && (
-              <div
-                key={`scan-${solveSeq}`}
-                className="lp-solve-scanline"
-                aria-hidden="true"
-              />
-            )}
-
-            <div>
-              <div
-                className="flex items-center justify-between pb-3 mb-5"
-                style={{ borderBottom: '1px solid var(--rule-void)' }}
-              >
-                <span className="lp-micro" style={{ color: 'var(--amber)' }}>
-                  {selectedStation
-                    ? `4-STATION SCENARIO · +${selectedStation.name.toUpperCase()}`
-                    : '3-STATION BASELINE · SVALBARD + KIRUNA + MATERA'}
-                </span>
-                <span className="lp-mono text-[12.5px]" style={{ color: 'var(--ink-void-2)' }}>
-                  {whatIfResult ? `Solved in ${Math.round(whatIfResult.elapsedMs)} ms` : 'Ready'}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div
-                  className="lp-plate-interactive p-4"
-                  style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}
-                >
-                  <div className="text-[12.5px] font-medium" style={{ color: 'var(--ink-void-2)' }}>
-                    Q Slice delivered
-                  </div>
-                  <div
-                    className="text-[28px] font-semibold mt-1"
-                    style={{ color: 'var(--green)' }}
-                  >
-                    <RollingNumber value={`${newQ.toFixed(1)} GB`} />
-                  </div>
-                  <div className="text-[13px] mt-1" style={{ color: 'var(--ink-void-2)' }}>
-                    {whatIfResult ? (
-                      <>
-                        <RollingNumber
-                          value={`${addedGb >= 0 ? '+' : ''}${addedGb.toFixed(1)}`}
-                          className="font-medium"
-                        />{' '}
-                        GB vs. baseline
-                      </>
-                    ) : (
-                      '3 European stations'
-                    )}
-                  </div>
-                </div>
-
-                <div
-                  className="lp-plate-interactive p-4"
-                  style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}
-                >
-                  <div className="text-[12.5px] font-medium" style={{ color: 'var(--ink-void-2)' }}>
-                    Candidate passes
-                  </div>
-                  <div
-                    className="text-[28px] font-semibold mt-1"
-                    style={{ color: 'var(--cyan)' }}
-                  >
-                    <RollingNumber value={`${newPasses}`} />
-                  </div>
-                  <div className="text-[13px] mt-1" style={{ color: 'var(--ink-void-2)' }}>
-                    {whatIfResult ? `+${addedPasses} new SGP4 passes` : '61 baseline passes'}
-                  </div>
-                </div>
-
-                <div
-                  className="lp-plate-interactive p-4"
-                  style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}
-                >
-                  <div className="text-[12.5px] font-medium" style={{ color: 'var(--ink-void-2)' }}>
-                    24h overflow
-                  </div>
-                  <div
-                    className="text-[23px] font-semibold mt-1"
-                    style={{ color: 'var(--red)' }}
-                  >
-                    <RollingNumber value={`${newOverflow.toFixed(1)} GB`} />
-                  </div>
-                </div>
-
-                <div
-                  className="lp-plate-interactive p-4"
-                  style={{ background: 'var(--void)', border: '1px solid var(--rule-void)' }}
-                >
-                  <div className="text-[12.5px] font-medium" style={{ color: 'var(--ink-void-2)' }}>
-                    Constraints
-                  </div>
-                  <div
-                    className="lp-mono text-[23px] font-semibold mt-1"
-                    style={{ color: 'var(--green)' }}
-                  >
-                    0 viol.
-                  </div>
-                </div>
-              </div>
-
-              <p className="text-[15px] leading-[1.65] mt-5 mb-0" style={{ color: 'var(--ink-void-2)' }}>
-                Notice how a polar station like McMurdo (77.85°S) sits opposite Europe
-                on Sentinel-2&apos;s sun-synchronous orbit—draining buffers roughly 50 minutes
-                after Svalbard instead of competing with Kiruna for the same northern pass.
-              </p>
+          <aside className="q-whatif__result">
+            <div className="q-whatif__readout-head">
+              <strong>
+                {selectedStation
+                  ? `4-STATION / +${selectedStation.name.toUpperCase()}`
+                  : '3-STATION BASELINE'}
+              </strong>
+              <span>{whatIfResult ? `SOLVED ${Math.round(whatIfResult.elapsedMs)} MS` : 'READY'}</span>
             </div>
 
-            <div className="mt-6 pt-5" style={{ borderTop: '1px solid var(--rule-void)' }}>
-              <PrimaryLaunchButton fullWidth onClick={onLaunchConsole}>
-                Open full 3D What-If Lab in Console
-              </PrimaryLaunchButton>
+            <div className="q-whatif__value-row">
+              <span className="q-whatif__value" key={solveSeq}>
+                {newQ.toFixed(1)}
+              </span>
+              <span className="q-whatif__value-unit">GB</span>
+              <span className="q-whatif__delta">
+                {whatIfResult
+                  ? `${addedGb >= 0 ? '+' : ''}${addedGb.toFixed(1)} GB vs baseline`
+                  : '24 h Q Slice delivered'}
+              </span>
             </div>
-          </div>
+
+            <div className="q-whatif__stats">
+              <div className="q-whatif__stat">
+                <span>Candidate passes</span>
+                <strong className="is-cyan">
+                  {newPasses}
+                  {whatIfResult ? (
+                    <small className="q-mono" style={{ color: 'var(--ink-3)', fontSize: 9 }}>
+                      {' '}
+                      / +{addedPasses}
+                    </small>
+                  ) : null}
+                </strong>
+              </div>
+              <div className="q-whatif__stat">
+                <span>24 h overflow</span>
+                <strong className="is-red">{newOverflow.toFixed(1)} GB</strong>
+              </div>
+              <div className="q-whatif__stat">
+                <span>Independent checks</span>
+                <strong>{validation ? validation.checks : 5}</strong>
+              </div>
+              <div className="q-whatif__stat">
+                <span>Violations</span>
+                <strong style={{ color: 'var(--green)' }}>
+                  {validation ? validation.total : 0}
+                </strong>
+              </div>
+            </div>
+
+            <p className="q-whatif__note">
+              {selectedStation
+                ? 'The new station is propagated from the same public TLEs, then every slice is re-checked for dish exclusivity, slew gaps, elevation and mass balance. Polar sites often add a fresh window instead of competing with Svalbard.'
+                : 'The baseline is the exact 24-hour scenario: 61 passes, 63 conflicts, three dishes. Add a station and the solver runs again in this tab.'}
+            </p>
+
+            <button type="button" className="q-btn q-btn--light" onClick={onLaunchConsole}>
+              Open the full console <ArrowUpRight />
+            </button>
+          </aside>
         </div>
       </div>
     </section>

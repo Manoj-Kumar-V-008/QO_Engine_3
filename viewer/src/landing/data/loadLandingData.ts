@@ -105,7 +105,7 @@ function formatUtcHm(ms: number): string {
 /**
  * Independent 5-rule physics verification directly on the scheduled Q Slice output.
  */
-function runIndependentValidator(
+export function runIndependentValidator(
   scenario: ScenarioData,
   tles: TlesMap,
   schedule: ScheduleDocument,

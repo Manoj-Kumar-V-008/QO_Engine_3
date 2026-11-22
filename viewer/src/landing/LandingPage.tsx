@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import './styles/landing.css';
+import './styles/enhancements.css';
 import { loadLandingData, type LandingDataBundle } from './data/loadLandingData';
-import { scrollStore } from './data/scrollStore';
+import { useSmoothScroll } from './hooks/useSmoothScroll';
 import TopBar from './components/TopBar';
-import PresentationOverview from './components/PresentationOverview';
 import Hero from './components/Hero';
-import ActWastedPass from './components/ActWastedPass';
-import ActBinaryCeiling from './components/ActBinaryCeiling';
-import ActContactLedger from './components/ActContactLedger';
+import ActLoss from './components/ActLoss';
+import ActCeiling from './components/ActCeiling';
+import ActMechanism from './components/ActMechanism';
 import ActProof from './components/ActProof';
 import ActInvitation from './components/ActInvitation';
+import EarthExplainer from './components/EarthExplainer';
 import MissionNotes from './components/MissionNotes';
+import FinalCTA from './components/FinalCTA';
 import Colophon from './components/Colophon';
 
 interface LandingPageProps {
@@ -20,12 +22,9 @@ interface LandingPageProps {
 export default function LandingPage({ onLaunchConsole }: LandingPageProps) {
   const [data, setData] = useState<LandingDataBundle | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [showCaseStudy, setShowCaseStudy] = useState<boolean>(false);
+  const [surface, setSurface] = useState<'void' | 'paper'>('void');
 
-  useEffect(() => {
-    const unmountScroll = scrollStore.mount();
-    return unmountScroll;
-  }, []);
+  useSmoothScroll(true);
 
   useEffect(() => {
     let active = true;
@@ -33,94 +32,66 @@ export default function LandingPage({ onLaunchConsole }: LandingPageProps) {
       .then((bundle) => {
         if (active) setData(bundle);
       })
-      .catch((err) => {
-        if (active) setLoadError(err instanceof Error ? err.message : 'Failed to load data');
+      .catch((error) => {
+        if (active) {
+          setLoadError(error instanceof Error ? error.message : 'Failed to load telemetry');
+        }
       });
     return () => {
       active = false;
     };
   }, []);
 
-  const handleToggleCaseStudy = () => {
-    setShowCaseStudy((prev) => {
-      const next = !prev;
-      if (next) {
-        setTimeout(() => {
-          const el = document.getElementById('case-study-details');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-      }
-      return next;
-    });
-  };
+  // The fixed header takes the surface of the act beneath it.
+  useEffect(() => {
+    let raf = 0;
+    const measure = () => {
+      raf = 0;
+      const proof = document.getElementById('act-04');
+      if (!proof) return;
+      const rect = proof.getBoundingClientRect();
+      const topbar = document.querySelector<HTMLElement>('.q-top')?.offsetHeight ?? 64;
+      const next = rect.top <= topbar && rect.bottom > topbar ? 'paper' : 'void';
+      setSurface((previous) => (previous === next ? previous : next));
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(measure);
+    };
+    measure();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
 
   return (
-    <div className="lp-root">
-      <a href="#main-content" className="lp-skip">
-        Skip to presentation overview
+    <div className="q-root">
+      <a href="#main-content" className="q-skip">
+        Skip to the mission document
       </a>
 
-      <TopBar
-        onLaunchConsole={onLaunchConsole}
-        onToggleCaseStudy={handleToggleCaseStudy}
-        showCaseStudy={showCaseStudy}
-      />
+      <TopBar onLaunchConsole={onLaunchConsole} surface={surface} />
+
+      {loadError && (
+        <div className="q-error" role="alert">
+          TELEMETRY LOAD WARNING: {loadError}
+        </div>
+      )}
 
       <main id="main-content">
-        {loadError && (
-          <div
-            className="lp-container py-3 lp-mono text-[12px]"
-            style={{
-              marginTop: 'var(--topbar-h)',
-              color: 'var(--red)',
-              borderBottom: '1px solid var(--rule-void)',
-            }}
-            role="alert"
-          >
-            TELEMETRY LOAD WARNING: {loadError}
-          </div>
-        )}
-
-        {/* High-Impact Presentation Briefing (Clean, visual, effortless to explain to teachers) */}
-        <PresentationOverview
-          data={data}
-          onLaunchConsole={onLaunchConsole}
-          onToggleCaseStudy={handleToggleCaseStudy}
-          showCaseStudy={showCaseStudy}
-        />
-
-        {/* Collapsible Deep Academic Case Study (Acts 1-5, Contact Ledger, & Mathematical Proofs) */}
-        {showCaseStudy ? (
-          <div id="case-study-details" className="border-t border-slate-800 bg-[#05070a] transition-all">
-            <div className="lp-container py-8 border-b border-slate-800/80 flex items-center justify-between">
-              <div>
-                <span className="text-xs font-mono text-sky-400 uppercase tracking-widest font-semibold">
-                  DEEP ACADEMIC RESEARCH · ACTS 01–05
-                </span>
-                <h3 className="text-2xl font-bold text-white font-display mt-1">
-                  Full Mathematical Formulation & Telemetry Ledger
-                </h3>
-              </div>
-              <button
-                onClick={handleToggleCaseStudy}
-                className="text-xs font-mono text-slate-300 hover:text-white px-4 py-2 rounded-lg border border-slate-700 bg-slate-900 cursor-pointer hover:border-slate-500 transition"
-              >
-                Close Case Study ▲
-              </button>
-            </div>
-
-            <Hero data={data} onLaunchConsole={onLaunchConsole} />
-            <ActWastedPass data={data} />
-            <ActBinaryCeiling data={data} />
-            <ActContactLedger data={data} />
-            <ActProof data={data} onLaunchConsole={onLaunchConsole} />
-            <ActInvitation data={data} onLaunchConsole={onLaunchConsole} />
-            <MissionNotes />
-            <Colophon onLaunchConsole={onLaunchConsole} />
-          </div>
-        ) : (
-          <Colophon onLaunchConsole={onLaunchConsole} />
-        )}
+        <Hero data={data} onLaunchConsole={onLaunchConsole} />
+        <EarthExplainer />
+        <ActLoss data={data} />
+        <ActCeiling data={data} />
+        <ActMechanism data={data} onLaunchConsole={onLaunchConsole} />
+        <ActProof data={data} onLaunchConsole={onLaunchConsole} />
+        <ActInvitation data={data} onLaunchConsole={onLaunchConsole} />
+        <MissionNotes />
+        <FinalCTA onLaunchConsole={onLaunchConsole} />
+        <Colophon onLaunchConsole={onLaunchConsole} />
       </main>
     </div>
   );

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#05070A"/>
+      <stop offset="100%" stop-color="#0D1527"/>
+    </linearGradient>
+    <linearGradient id="orbit" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="60%" stop-color="#2DD4BF"/>
+      <stop offset="100%" stop-color="#34D399"/>
+    </linearGradient>
+    <linearGradient id="sat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="earth" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284C7" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#082F49" stop-opacity="0.3"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Base with Rounded Corners -->
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <rect width="64" height="64" rx="14" stroke="rgba(56, 189, 248, 0.35)" stroke-width="1.5"/>
+
+  <!-- Earth Limb Horizon in Lower Corner -->
+  <path d="M-6 70 A 48 48 0 0 1 70 70 Z" fill="url(#earth)"/>
+  <path d="M-6 70 A 48 48 0 0 1 70 70" stroke="#38BDF8" stroke-width="2" filter="url(#glow)"/>
+
+  <!-- 3D Elliptical Orbit Ring -->
+  <ellipse cx="32" cy="31" rx="23" ry="11" transform="rotate(-28 32 31)" fill="none" stroke="url(#orbit)" stroke-width="2.5" stroke-dasharray="36 5" filter="url(#glow)"/>
+
+  <!-- RF Downlink Carrier Beam (Satellite -> Ground) -->
+  <line x1="45" y1="18" x2="26" y2="48" stroke="#38BDF8" stroke-width="1.5" stroke-dasharray="2 2" stroke-opacity="0.85"/>
+
+  <!-- Ground Station Dish Marker -->
+  <circle cx="26" cy="48" r="2.5" fill="#34D399"/>
+  <circle cx="26" cy="48" r="5.5" fill="none" stroke="#34D399" stroke-width="1" opacity="0.6"/>
+
+  <!-- Spacecraft (Sentinel-2 with Solar Wings) at Upper Right Orbit Apex -->
+  <rect x="36.5" y="16.5" width="6" height="2.5" rx="0.5" transform="rotate(-28 39.5 17.75)" fill="#38BDF8"/>
+  <rect x="42.5" y="15" width="4.5" height="5.5" rx="1" transform="rotate(-28 44.75 17.75)" fill="url(#sat)"/>
+  <rect x="47" y="16.5" width="6" height="2.5" rx="0.5" transform="rotate(-28 50 17.75)" fill="#38BDF8"/>
+
+  <!-- Bright Specular Optical Glint -->
+  <circle cx="44.5" cy="17.5" r="1.5" fill="#FFFFFF"/>
+</svg>

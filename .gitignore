@@ -15,3 +15,8 @@ viewer/dist/
 .opencode
 skills
 .motion
+
+# Legacy Landing Page Archive
+viewer/src/landing_legacy/
+viewer/src/landing_old/
+viewer/legacy_landing/

@@ -8,11 +8,18 @@ import path from 'node:path';
 const cesiumSource = 'node_modules/cesium/Build/Cesium';
 const cesiumBaseUrl = 'cesiumStatic';
 
-// Serves viewer/data/*.json at /data/*.json in dev and copies it on build
+// Serves viewer/data/*.json at /data/*.json in dev and rewrites /console to /console.html
 function serveEngineDataPlugin(): Plugin {
   return {
     name: 'serve-engine-data',
     configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = (req.url || '').split('?')[0];
+        if (url === '/console' || url === '/app' || url === '/mission-control') {
+          req.url = '/console.html';
+        }
+        next();
+      });
       server.middlewares.use('/data', (req, res, next) => {
         const cleanUrl = (req.url || '').split('?')[0].replace(/^\/+/, '');
         const filePath = path.resolve(__dirname, 'data', cleanUrl);
@@ -45,4 +52,12 @@ export default defineConfig({
       ],
     }),
   ],
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        console: path.resolve(__dirname, 'console.html'),
+      },
+    },
+  },
 });

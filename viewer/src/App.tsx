@@ -55,8 +55,6 @@ import ScoreboardPanel from './components/ScoreboardPanel';
 import AnalyticsDrawer from './components/AnalyticsDrawer';
 import HowToReadModal from './components/HowToReadModal';
 import WhatIfPanel, { type PresetStation } from './components/WhatIfPanel';
-import LandingPage from './landing/LandingPage';
-import NotFoundPage from './landing/NotFoundPage';
 
 type SchedulesBundle = Record<ScheduleMethod, ScheduleDocument>;
 
@@ -1243,6 +1241,10 @@ export default function App() {
   }, []);
 
   const navigate = useCallback((nextPath: string) => {
+    if (nextPath === '/' || nextPath === '/landing' || nextPath === '/landing-page') {
+      window.location.href = '/';
+      return;
+    }
     if (window.location.pathname + window.location.search !== nextPath) {
       window.history.pushState({}, '', nextPath);
       setCurrentUrl(nextPath);
@@ -1255,26 +1257,10 @@ export default function App() {
   const searchParams = new URLSearchParams(search);
   const normalized = pathname.replace(/\/+$/, '') || '/';
 
-  // Support same-page query param toggle (?view=console or ?tab=console) OR dedicated route (/console, /app)
-  const isConsoleRoute =
-    normalized === '/console' ||
-    normalized === '/app' ||
-    normalized === '/mission-control' ||
-    searchParams.get('view') === 'console' ||
-    searchParams.get('tab') === 'console';
-
-  if (isConsoleRoute) {
-    return <MissionConsole onNavigate={navigate} />;
-  }
-
   if (normalized === '/' || normalized === '/landing-page' || normalized === '/landing') {
-    return <LandingPage onLaunchConsole={() => navigate('/console')} />;
+    window.location.href = '/';
+    return null;
   }
 
-  return (
-    <NotFoundPage
-      onGoHome={() => navigate('/')}
-      onGoConsole={() => navigate('/console')}
-    />
-  );
+  return <MissionConsole onNavigate={navigate} />;
 }

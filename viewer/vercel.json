@@ -2,10 +2,23 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/console",
+      "destination": "/console.html"
+    },
+    {
+      "source": "/console/(.*)",
+      "destination": "/console.html"
+    },
+    {
+      "source": "/app",
+      "destination": "/console.html"
+    },
+    {
+      "source": "/mission-control",
+      "destination": "/console.html"
     }
   ]
 }

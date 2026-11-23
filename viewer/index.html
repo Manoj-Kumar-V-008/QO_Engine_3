@@ -1,35 +1,708 @@
-<!doctype html>
-<html lang="en" class="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QOE3 — 44.5% more satellite data. Same three dishes.</title>
-    <meta
-      name="description"
-      content="QOE3 schedules Sentinel-2 downlinks in 15-second slices instead of whole passes. 999.2 GB delivered vs 691.4 GB greedy (+44.5%) across Svalbard, Kiruna and Matera, with zero physics violations."
-    />
-    <meta property="og:title" content="QOE3 — 44.5% more satellite data. Same three dishes." />
-    <meta
-      property="og:description"
-      content="A 24-hour satellite scheduling benchmark: 15-second contact slices deliver 999.2 GB instead of 691.4 GB, with zero physics violations."
-    />
-    <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#05070A" />
-    <meta name="color-scheme" content="dark" />
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2305070A'/%3E%3Cpath d='M3 25 A18 18 0 0 1 29 25' fill='none' stroke='%235BD6E6' stroke-width='2'/%3E%3Cline x1='8' y1='17' x2='24' y2='9' stroke='%23E9EDF2' stroke-width='1.8'/%3E%3Ccircle cx='24' cy='9' r='2.5' fill='%23F0A43C'/%3E%3C/svg%3E"
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body class="bg-[#05070A] text-[#E9EDF2] antialiased">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quantum Orbit Engine 3 — Autonomous Satellite Mission Control</title>
+  <meta name="description" content="Autonomous 15-second Q-Slice dynamic handover engine for Earth-observation satellites. +44.5% more imagery delivered (+307.8 GB/day) on the exact same ground antennas." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Ambient Deep-Space Nebula Color Washes + Subtle Film Grain -->
+  <div class="nebula-wash" aria-hidden="true"></div>
+  <div class="grain-layer" aria-hidden="true"></div>
+
+  <!-- Ambient Comets & Roaming Satellites Canvas (Header + Webpage) -->
+  <canvas id="ambient-cosmos-canvas" aria-hidden="true"></canvas>
+
+  <!-- Custom Magnetic Orbital Cursor (Morphs into Mini Earth + Revolving Satellites when idle 2s) -->
+  <div class="cursor-dot" id="cursor-dot" aria-hidden="true">
+    <span class="mini-earth-surface"></span>
+  </div>
+  <div class="cursor-ring" id="cursor-ring" aria-hidden="true">
+    <span class="cursor-label mono" id="cursor-label"></span>
+    <div class="idle-orbit-system" id="idle-orbit-system">
+      <div class="idle-track track-1">
+        <span class="idle-sat sat-cyan"></span>
+      </div>
+      <div class="idle-track track-2">
+        <span class="idle-sat sat-violet"></span>
+      </div>
+      <div class="idle-track track-3">
+        <span class="idle-sat sat-amber"></span>
+      </div>
+    </div>
+  </div>
+  <canvas id="cursor-trail" aria-hidden="true"></canvas>
+
+  <!-- Fast Cinematic Orbital Boot Screen -->
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader-core">
+      <div class="preloader-orbit"></div>
+      <div class="preloader-meta mono">
+        <span class="pre-brand">QO-3 // SENTINEL-2</span>
+        <span class="pre-status" id="pre-status">ACQUIRING EPHEMERIS...</span>
+      </div>
+      <div class="preloader-bar"><div class="preloader-fill" id="pre-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- Full-Viewport Interactive WebGL Multi-Satellite Engine -->
+  <canvas id="orbital-canvas" aria-label="Interactive 3D Earth and multi-satellite orbital simulation"></canvas>
+  <div class="atmosphere-vignette" aria-hidden="true"></div>
+
+  <!-- Floating Architectural Header -->
+  <header class="site-header" id="site-header">
+    <a href="#hero" class="header-logo magnetic" data-cursor="TOP">
+      <span class="logo-mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="8.5" stroke="rgba(241,245,249,0.28)" stroke-width="1.2" stroke-dasharray="2.5 2.5" />
+          <ellipse class="logo-ring" cx="12" cy="12" rx="10.5" ry="4" transform="rotate(-26 12 12)" stroke="#38bdf8" stroke-width="1.4" />
+          <circle cx="12" cy="12" r="2.2" fill="#fbbf24" />
+        </svg>
+      </span>
+      <span class="logo-text">
+        <span class="logo-title">QUANTUM ORBIT</span>
+        <span class="logo-ver mono">ENGINE 03</span>
+      </span>
+    </a>
+
+    <nav class="header-dock" id="header-dock" aria-label="Primary Navigation">
+      <div class="header-orbit-stage" aria-hidden="true">
+        <span class="hdr-sat hdr-sat-a"></span>
+        <span class="hdr-sat hdr-sat-b"></span>
+      </div>
+      <a href="#story" class="dock-link magnetic" data-cursor="READ">
+        <span class="dock-sat-dot dot-amber"></span>The Bottleneck
+      </a>
+      <a href="#engine" class="dock-link magnetic" data-cursor="TEST">
+        <span class="dock-sat-dot dot-emerald"></span>Q-Slice Engine
+      </a>
+      <a href="#network" class="dock-link magnetic" data-cursor="FLY">
+        <span class="dock-sat-dot dot-violet"></span>Constellation
+      </a>
+      <a href="#whatif" class="dock-link magnetic" data-cursor="SIM">
+        <span class="dock-sat-dot dot-cyan"></span>What-If Lab
+      </a>
+    </nav>
+
+    <div class="header-right">
+      <div class="telemetry-ticker mono" title="Live Simulated RF Link">
+        <span class="ticker-dot" id="ticker-dot"></span>
+        <span id="nav-link-rate">560 MBPS LOCK</span>
+      </div>
+      <a href="https://3sora.vercel.app/console" target="_blank" rel="noopener noreferrer" class="sat-cta sat-cta-sm magnetic" data-cursor="LAUNCH">
+        <span class="sat-orbit-border" aria-hidden="true"></span>
+        <span class="sat-scan-beam" aria-hidden="true"></span>
+        <span class="sat-cta-content">
+          <span class="sat-icon" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/>
+            </svg>
+          </span>
+          <span>Open Console</span>
+        </span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <!-- =========================================================
+         HERO: RICH AURORA TELEMETRY + MULTI-SAT 3D STAGE
+         ========================================================= -->
+    <section id="hero" class="section hero-section" data-camera="hero">
+      <div class="container hero-layout">
+        <div class="hero-copy">
+          <div class="meta-line mono reveal-up">
+            <span class="meta-dot"></span>
+            <span class="text-amber">ESA SENTINEL-2 CONSTELLATION</span>
+            <span class="meta-sep">/</span>
+            <span>786 KM SUN-SYNCHRONOUS LEO</span>
+          </div>
+
+          <h1 class="hero-headline">
+            <span class="line-mask"><span class="line-inner">Every second in orbit,</span></span>
+            <span class="line-mask"><span class="line-inner">satellites lose <em class="accent-glow">gigabytes</em></span></span>
+            <span class="line-mask"><span class="line-inner">of Earth imagery.</span></span>
+          </h1>
+
+          <p class="hero-lead reveal-up">
+            Earth-watching satellites film our planet nonstop, but can only send data home when flying over a few ground antennas.
+            <strong>Quantum Orbit Engine 3</strong> splits passes into <strong>15-second slices</strong> and hands links off mid-flight—rescuing <strong>+307.8 GB every day</strong> without building a single new dish.
+          </p>
+
+          <div class="hero-actions reveal-up">
+            <a href="https://3sora.vercel.app/console" target="_blank" rel="noopener noreferrer" class="sat-cta sat-cta-primary magnetic" data-cursor="ENTER 3D">
+              <span class="sat-orbit-border" aria-hidden="true"></span>
+              <span class="sat-scan-beam" aria-hidden="true"></span>
+              <span class="sat-cta-content">
+                <span class="sat-icon" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/>
+                  </svg>
+                </span>
+                <span>Launch Live 3D Console</span>
+                <svg class="arrow-slide" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </span>
+            </a>
+
+            <a href="#engine" class="sat-cta sat-cta-ghost magnetic" data-cursor="EXPLORE">
+              <span class="sat-scan-beam" aria-hidden="true"></span>
+              <span class="sat-cta-content">
+                <span>See Q-Slice in Action</span>
+              </span>
+            </a>
+          </div>
+
+          <!-- Multi-Tone Telemetry Metric Strip -->
+          <div class="metric-rail reveal-up">
+            <div class="metric-item metric-emerald tilt-card" data-cursor="DATA">
+              <div class="card-spotlight"></div>
+              <span class="metric-num mono text-emerald">+44.5%</span>
+              <span class="metric-cap">More Imagery Delivered</span>
+            </div>
+            <div class="metric-item metric-amber tilt-card" data-cursor="SAVED">
+              <div class="card-spotlight"></div>
+              <span class="metric-num mono text-amber">+307.8 GB</span>
+              <span class="metric-cap">Rescued Every Day</span>
+            </div>
+            <div class="metric-item metric-violet tilt-card" data-cursor="SLICE">
+              <div class="card-spotlight"></div>
+              <span class="metric-num mono text-violet">15 sec</span>
+              <span class="metric-cap">Handover Quantum</span>
+            </div>
+            <div class="metric-item metric-cyan tilt-card" data-cursor="SAFE">
+              <div class="card-spotlight"></div>
+              <span class="metric-num mono text-cyan">Zero</span>
+              <span class="metric-cap">Antenna Collisions</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subtle Globe Legend -->
+        <div class="hero-orbit-cue reveal-up">
+          <div class="orbit-tag mono">
+            <span class="dot-c"></span> S2A &nbsp;·&nbsp; <span class="dot-v"></span> S2B &nbsp;·&nbsp; <span class="dot-e"></span> SVB / KIR / MAT
+          </div>
+          <div class="orbit-hint mono">CLICK ANYWHERE FOR RF TELEMETRY BURST · DRAG EARTH</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         SECTION 1: SIMPLE EXPLANATION OF THE PROBLEM
+         ========================================================= -->
+    <section id="story" class="section" data-camera="europe">
+      <div class="container">
+        <div class="section-intro reveal-up">
+          <span class="eyebrow-index mono text-amber">01 — THE PROBLEM IN PLAIN ENGLISH</span>
+          <h2>Like filming 4K video all day with only 3 Wi-Fi spots on Earth.</h2>
+          <p>
+            Two satellites circle Earth every 100 minutes. Over oceans they can't upload, so their onboard memory fills up—and when both reach Europe together, they fight over the same three ground dishes.
+          </p>
+        </div>
+
+        <div class="story-layout">
+          <div class="story-steps">
+            <article class="bento-card card-accent-cyan tilt-card reveal-up" data-cursor="STEP 01">
+              <div class="card-spotlight"></div>
+              <div class="step-head">
+                <span class="step-num mono text-cyan">01</span>
+                <span class="step-pill mono text-cyan">300 GB MEMORY LIMIT</span>
+              </div>
+              <h3>The camera never turns off</h3>
+              <p>
+                Sentinel-2A and 2B sweep a <strong>290 km-wide strip</strong> of Earth nonstop, generating <strong>62.5 GB/hour</strong> each. Their onboard recorder caps at <strong>300 GB</strong>—once full, new imagery overwrites and is lost forever.
+              </p>
+            </article>
+
+            <article class="bento-card card-accent-coral tilt-card reveal-up" data-cursor="STEP 02">
+              <div class="card-spotlight"></div>
+              <div class="step-head">
+                <span class="step-num mono text-coral">02</span>
+                <span class="step-pill mono text-coral">TRAFFIC JAM OVER EUROPE</span>
+              </div>
+              <h3>Two satellites, three clustered dishes</h3>
+              <p>
+                When both spacecraft reach Europe's ground stations (<strong>Svalbard, Kiruna, Matera</strong>) at once, two real-world physics limits cause clashes:
+              </p>
+              <div class="clash-pills">
+                <div class="clash-row">
+                  <span class="tag-coral mono">SAME_ANTENNA</span>
+                  <span>One dish can't track two satellites—and needs <strong>120s</strong> to physically slew.</span>
+                </div>
+                <div class="clash-row">
+                  <span class="tag-amber mono">SAME_SAT</span>
+                  <span>One satellite only has one radio beam, so it can't talk to two dishes at once.</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="bento-card card-accent-violet tilt-card reveal-up" data-cursor="STEP 03">
+              <div class="card-spotlight"></div>
+              <div class="step-head">
+                <span class="step-num mono text-violet">03</span>
+                <span class="step-pill mono text-violet">ALL-OR-NOTHING SCHEDULERS</span>
+              </div>
+              <h3>Old software throws whole passes away</h3>
+              <p>
+                Traditional <strong>Greedy</strong> schedulers lock a dish for a full 10-minute pass and drop any overlapping pass completely. Even heavy <strong>Binary MILP</strong> math barely helps (<strong>+0.6%</strong>) because it still treats passes as unbreakable blocks.
+              </p>
+            </article>
+          </div>
+
+          <!-- Interactive Live Onboard Memory Overflow Simulator -->
+          <div class="bento-card sim-panel tilt-card reveal-up" data-cursor="INTERACT">
+            <div class="card-spotlight"></div>
+            <div class="sim-top">
+              <div>
+                <span class="mono text-xs text-amber">LIVE MEMORY BUFFER SIMULATOR</span>
+                <h3>Watch the 300 GB Overflow</h3>
+              </div>
+              <span class="sim-state mono state-spill" id="sim-status-tag">SPILL</span>
+            </div>
+
+            <p class="sim-sub">Switch schedulers below to watch the 3D satellites &amp; onboard buffers react live.</p>
+
+            <div class="gauge-stack">
+              <div class="gauge-block">
+                <div class="gauge-label mono">
+                  <span class="text-cyan">SENTINEL-2A</span>
+                  <span id="sim-s2a-val">262 / 300 GB</span>
+                </div>
+                <div class="gauge-track">
+                  <div class="gauge-bar bar-cyan" id="sim-s2a-bar" style="width: 87%"></div>
+                  <div class="gauge-cap"></div>
+                </div>
+              </div>
+
+              <div class="gauge-block">
+                <div class="gauge-label mono">
+                  <span class="text-violet">SENTINEL-2B</span>
+                  <span id="sim-s2b-val">184 / 300 GB</span>
+                </div>
+                <div class="gauge-track">
+                  <div class="gauge-bar bar-violet" id="sim-s2b-bar" style="width: 61%"></div>
+                  <div class="gauge-cap"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sim-switch" id="problem-sim-toggle">
+              <button class="switch-opt active magnetic" data-sim="greedy" data-cursor="GREEDY">
+                Greedy Baseline
+                <span class="mono">Overflows</span>
+              </button>
+              <button class="switch-opt magnetic" data-sim="qslice" data-cursor="Q-SLICE">
+                Q-Slice Handover
+                <span class="mono">Drains Fast</span>
+              </button>
+            </div>
+
+            <div class="sim-explain" id="sim-caption">
+              <strong>Greedy mode:</strong> S2A waits for a busy antenna, hits 300 GB, and permanently erases incoming Earth imagery.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         SECTION 2: Q-SLICE INTERACTIVE ENGINE
+         ========================================================= -->
+    <section id="engine" class="section" data-camera="qslice">
+      <div class="container">
+        <div class="section-intro reveal-up">
+          <span class="eyebrow-index mono text-emerald">02 — THE BREAKTHROUGH</span>
+          <h2>Slice passes into 15-second blocks. Hand off mid-sky.</h2>
+          <p>
+            Instead of locking one dish for 10 whole minutes, <strong>Quantum Orbit Engine 3</strong> cuts time into 15-second slices. When a satellite is high overhead (peak <strong>560 Mbps</strong>), it downloads—then hands off to another dish the moment a better angle opens.
+          </p>
+        </div>
+
+        <div class="bento-card workbench-card reveal-up" data-cursor="COMPARE">
+          <div class="workbench-top">
+            <div class="algo-selector" role="tablist" aria-label="Compare Scheduling Algorithms">
+              <button class="algo-btn magnetic" role="tab" data-method="greedy" data-cursor="GREEDY">
+                <span class="algo-name">Greedy</span>
+                <span class="algo-val mono">691.4 GB</span>
+              </button>
+              <button class="algo-btn magnetic" role="tab" data-method="milp" data-cursor="MILP">
+                <span class="algo-name">Binary MILP</span>
+                <span class="algo-val mono">695.8 GB (+0.6%)</span>
+              </button>
+              <button class="algo-btn active magnetic" role="tab" data-method="qslice" data-cursor="Q-SLICE">
+                <span class="algo-name">Q-Slice Engine</span>
+                <span class="algo-val mono text-emerald">999.2 GB (+44.5%)</span>
+              </button>
+            </div>
+
+            <div class="delta-pill mono" id="qslice-lift-badge">
+              +307.8 GB SAVED / DAY
+            </div>
+          </div>
+
+          <div class="canvas-stage">
+            <canvas id="qslice-canvas" width="1040" height="310"></canvas>
+          </div>
+
+          <div class="workbench-bottom">
+            <p class="algo-explain" id="method-description">
+              <strong>How Q-Slice wins:</strong> Cuts overlapping European passes into 15-second quanta and runs a joint dynamic-programming solver. Downloads at peak <strong>560 Mbps</strong> inside the 30° sky cone while obeying real <strong>120s dish-slew</strong> and <strong>15s radio re-lock</strong> physics.
+            </p>
+
+            <div class="score-quad">
+              <div class="score-cell">
+                <span class="mono text-xs text-muted">DELIVERED</span>
+                <strong class="mono text-emerald" id="m-delivered">999.2 GB</strong>
+              </div>
+              <div class="score-cell">
+                <span class="mono text-xs text-muted">OVERFLOW LOST</span>
+                <strong class="mono text-coral" id="m-lost">1,400.8 GB</strong>
+              </div>
+              <div class="score-cell">
+                <span class="mono text-xs text-muted">WINDOWS USED</span>
+                <strong class="mono text-amber" id="m-passes">56 slices</strong>
+              </div>
+              <div class="score-cell">
+                <span class="mono text-xs text-muted">EXTRA HARDWARE</span>
+                <strong class="mono text-violet">$0 (Same 3)</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simple 3-Ring Signal Speed Guide -->
+        <div class="rings-row">
+          <div class="bento-card ring-card tilt-card reveal-up" data-cursor="5 DEG">
+            <div class="card-spotlight"></div>
+            <div class="radar-glyph r-outer"><span>5°</span></div>
+            <h4>Horizon Lock (AOS)</h4>
+            <p>The satellite rises above the horizon. Below 5°, terrain and atmosphere block reliable radio reception.</p>
+          </div>
+          <div class="bento-card ring-card tilt-card reveal-up" data-cursor="15 DEG">
+            <div class="card-spotlight"></div>
+            <div class="radar-glyph r-mid"><span>15°</span></div>
+            <h4>Mid-Speed Zone</h4>
+            <p>As the dish tilts upward, the signal clears and transmission steps up to 50%–75% of maximum speed.</p>
+          </div>
+          <div class="bento-card ring-card tilt-card reveal-up" data-cursor="30 DEG">
+            <div class="card-spotlight"></div>
+            <div class="radar-glyph r-core"><span>30°</span></div>
+            <h4>Full 560 Mbps Core</h4>
+            <p>High overhead with the shortest path through air. Q-Slice hands links here to drain memory at max speed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         SECTION 3: CONSTELLATION & SLEWING DISHES
+         Hovering each card launches an animated Flying Satellite
+         or Articulated Slewing Radar Dish + flies the 3D Globe!
+         ========================================================= -->
+    <section id="network" class="section" data-camera="constellation">
+      <div class="container">
+        <div class="section-intro reveal-up">
+          <span class="eyebrow-index mono text-violet">03 — REAL ORBITS &amp; GROUND STATIONS</span>
+          <h2>Hover any satellite or dish to watch it deploy &amp; fly.</h2>
+          <p>
+            Every spacecraft in the console follows real CelesTrak ephemeris via <strong>SGP4 astrodynamics</strong>, while 3D dishes physically slew to track each overhead pass.
+          </p>
+        </div>
+
+        <div class="constellation-grid">
+          <!-- SATELLITE CARD: S2A -->
+          <article class="bento-card node-tile node-sat node-s2a tilt-card interactive-node reveal-up" data-focus="s2a" data-cursor="FLY S2A">
+            <div class="card-spotlight"></div>
+
+            <!-- Hover-Deployed Flying Satellite Visual -->
+            <div class="hover-rig sat-rig" aria-hidden="true">
+              <div class="rig-orbit-track"></div>
+              <div class="rig-flyer">
+                <svg class="sat-craft-svg" width="54" height="54" viewBox="0 0 64 64" fill="none">
+                  <!-- Solar Panels -->
+                  <rect x="4" y="25" width="18" height="14" rx="2" fill="rgba(56,189,248,0.28)" stroke="#38bdf8" stroke-width="1.5"/>
+                  <line x1="10" y1="25" x2="10" y2="39" stroke="#38bdf8" stroke-width="0.9"/>
+                  <line x1="16" y1="25" x2="16" y2="39" stroke="#38bdf8" stroke-width="0.9"/>
+                  <rect x="42" y="25" width="18" height="14" rx="2" fill="rgba(56,189,248,0.28)" stroke="#38bdf8" stroke-width="1.5"/>
+                  <line x1="48" y1="25" x2="48" y2="39" stroke="#38bdf8" stroke-width="0.9"/>
+                  <line x1="54" y1="25" x2="54" y2="39" stroke="#38bdf8" stroke-width="0.9"/>
+                  <!-- Bus Body -->
+                  <rect x="24" y="21" width="16" height="22" rx="3" fill="#0f172a" stroke="#f8fafc" stroke-width="1.6"/>
+                  <circle cx="32" cy="32" r="3" fill="#38bdf8"/>
+                  <!-- Optical Swath Cone -->
+                  <path class="swath-cone" d="M27 43 L14 62 L50 62 L37 43 Z" fill="url(#swathCyan)" />
+                  <defs>
+                    <linearGradient id="swathCyan" x1="32" y1="43" x2="32" y2="62" gradientUnits="userSpaceOnUse">
+                      <stop stop-color="#38bdf8" stop-opacity="0.55"/>
+                      <stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+
+            <div class="tile-top">
+              <span class="tile-code mono text-cyan">S2A</span>
+              <span class="tile-badge mono">SPACECRAFT</span>
+            </div>
+            <h3>Sentinel-2A</h3>
+            <p>Flies at <strong>786 km altitude</strong> on a 98.6° polar orbit, completing one lap every 100 minutes while pointing straight down (LVLH nadir).</p>
+            <div class="tile-tags mono"><span>290 km Swath</span><span>+62.5 GB/hr</span></div>
+          </article>
+
+          <!-- SATELLITE CARD: S2B -->
+          <article class="bento-card node-tile node-sat node-s2b tilt-card interactive-node reveal-up" data-focus="s2b" data-cursor="FLY S2B">
+            <div class="card-spotlight"></div>
+
+            <!-- Hover-Deployed Flying Satellite Visual (Violet) -->
+            <div class="hover-rig sat-rig" aria-hidden="true">
+              <div class="rig-orbit-track track-violet"></div>
+              <div class="rig-flyer">
+                <svg class="sat-craft-svg" width="54" height="54" viewBox="0 0 64 64" fill="none">
+                  <rect x="4" y="25" width="18" height="14" rx="2" fill="rgba(192,132,252,0.28)" stroke="#c084fc" stroke-width="1.5"/>
+                  <line x1="10" y1="25" x2="10" y2="39" stroke="#c084fc" stroke-width="0.9"/>
+                  <line x1="16" y1="25" x2="16" y2="39" stroke="#c084fc" stroke-width="0.9"/>
+                  <rect x="42" y="25" width="18" height="14" rx="2" fill="rgba(192,132,252,0.28)" stroke="#c084fc" stroke-width="1.5"/>
+                  <line x1="48" y1="25" x2="48" y2="39" stroke="#c084fc" stroke-width="0.9"/>
+                  <line x1="54" y1="25" x2="54" y2="39" stroke="#c084fc" stroke-width="0.9"/>
+                  <rect x="24" y="21" width="16" height="22" rx="3" fill="#0f172a" stroke="#f8fafc" stroke-width="1.6"/>
+                  <circle cx="32" cy="32" r="3" fill="#c084fc"/>
+                  <path class="swath-cone" d="M27 43 L14 62 L50 62 L37 43 Z" fill="url(#swathViolet)" />
+                  <defs>
+                    <linearGradient id="swathViolet" x1="32" y1="43" x2="32" y2="62" gradientUnits="userSpaceOnUse">
+                      <stop stop-color="#c084fc" stop-opacity="0.55"/>
+                      <stop offset="1" stop-color="#c084fc" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+
+            <div class="tile-top">
+              <span class="tile-code mono text-violet">S2B</span>
+              <span class="tile-badge mono">SPACECRAFT</span>
+            </div>
+            <h3>Sentinel-2B</h3>
+            <p>Phased opposite Sentinel-2A to image Earth twice as often. Shares the exact same three European antennas—creating real-world clashes.</p>
+            <div class="tile-tags mono"><span>300 GB SSR</span><span>560 Mbps X-Band</span></div>
+          </article>
+
+          <!-- ANTENNA CARD: SVB -->
+          <article class="bento-card node-tile node-ant node-svb tilt-card interactive-node reveal-up" data-focus="svb" data-cursor="SLEW SVB">
+            <div class="card-spotlight"></div>
+
+            <!-- Hover-Deployed Slewing Parabolic Dish Visual -->
+            <div class="hover-rig dish-rig" aria-hidden="true">
+              <svg class="dish-svg" width="58" height="58" viewBox="0 0 64 64" fill="none">
+                <!-- Base Pedestal -->
+                <path d="M20 56 H44 M28 56 L31 40 H33 L36 56" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+                <!-- Slewing Dish Head -->
+                <g class="dish-head">
+                  <path d="M18 32 C22 44, 42 44, 46 32" stroke="#34d399" stroke-width="2.2" fill="rgba(52,211,153,0.16)" stroke-linecap="round"/>
+                  <line x1="32" y1="38" x2="32" y2="23" stroke="#f8fafc" stroke-width="1.6"/>
+                  <circle cx="32" cy="22" r="2.6" fill="#34d399"/>
+                  <!-- Animated RF Signal Arcs -->
+                  <path class="rf-wave w1" d="M24 17 A11 11 0 0 1 40 17" stroke="#34d399" stroke-width="1.6" stroke-linecap="round"/>
+                  <path class="rf-wave w2" d="M19 12 A17 17 0 0 1 45 12" stroke="#fbbf24" stroke-width="1.4" stroke-linecap="round"/>
+                  <path class="rf-wave w3" d="M14 7 A23 23 0 0 1 50 7" stroke="#38bdf8" stroke-width="1.2" stroke-linecap="round"/>
+                </g>
+              </svg>
+            </div>
+
+            <div class="tile-top">
+              <span class="tile-code mono text-emerald">SVB</span>
+              <span class="tile-badge mono">ARCTIC NORWAY</span>
+            </div>
+            <h3>Svalbard Dish</h3>
+            <p>Located at <strong>78.23° N</strong> near the North Pole. Because polar orbits converge here, Svalbard is the busiest and most contested antenna.</p>
+            <div class="tile-tags mono"><span>78.23°N, 15.41°E</span><span>120s Slew</span></div>
+          </article>
+
+          <!-- ANTENNA CARD: KIR -->
+          <article class="bento-card node-tile node-ant node-kir tilt-card interactive-node reveal-up" data-focus="kir" data-cursor="SLEW KIR">
+            <div class="card-spotlight"></div>
+
+            <div class="hover-rig dish-rig" aria-hidden="true">
+              <svg class="dish-svg" width="58" height="58" viewBox="0 0 64 64" fill="none">
+                <path d="M20 56 H44 M28 56 L31 40 H33 L36 56" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+                <g class="dish-head">
+                  <path d="M18 32 C22 44, 42 44, 46 32" stroke="#fbbf24" stroke-width="2.2" fill="rgba(251,191,36,0.16)" stroke-linecap="round"/>
+                  <line x1="32" y1="38" x2="32" y2="23" stroke="#f8fafc" stroke-width="1.6"/>
+                  <circle cx="32" cy="22" r="2.6" fill="#fbbf24"/>
+                  <path class="rf-wave w1" d="M24 17 A11 11 0 0 1 40 17" stroke="#fbbf24" stroke-width="1.6" stroke-linecap="round"/>
+                  <path class="rf-wave w2" d="M19 12 A17 17 0 0 1 45 12" stroke="#34d399" stroke-width="1.4" stroke-linecap="round"/>
+                  <path class="rf-wave w3" d="M14 7 A23 23 0 0 1 50 7" stroke="#38bdf8" stroke-width="1.2" stroke-linecap="round"/>
+                </g>
+              </svg>
+            </div>
+
+            <div class="tile-top">
+              <span class="tile-code mono text-amber">KIR</span>
+              <span class="tile-badge mono">SWEDEN</span>
+            </div>
+            <h3>Kiruna Dish</h3>
+            <p>Sub-Arctic hub at <strong>67.86° N</strong>. Its sky view overlaps Svalbard's—making it the ideal partner for seamless mid-pass Q-Slice handovers.</p>
+            <div class="tile-tags mono"><span>67.86°N, 20.96°E</span><span>5°/15°/30°</span></div>
+          </article>
+
+          <!-- ANTENNA CARD: MAT -->
+          <article class="bento-card node-tile node-ant node-mat tilt-card interactive-node reveal-up" data-focus="mat" data-cursor="SLEW MAT">
+            <div class="card-spotlight"></div>
+
+            <div class="hover-rig dish-rig" aria-hidden="true">
+              <svg class="dish-svg" width="58" height="58" viewBox="0 0 64 64" fill="none">
+                <path d="M20 56 H44 M28 56 L31 40 H33 L36 56" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+                <g class="dish-head">
+                  <path d="M18 32 C22 44, 42 44, 46 32" stroke="#38bdf8" stroke-width="2.2" fill="rgba(56,189,248,0.16)" stroke-linecap="round"/>
+                  <line x1="32" y1="38" x2="32" y2="23" stroke="#f8fafc" stroke-width="1.6"/>
+                  <circle cx="32" cy="22" r="2.6" fill="#38bdf8"/>
+                  <path class="rf-wave w1" d="M24 17 A11 11 0 0 1 40 17" stroke="#38bdf8" stroke-width="1.6" stroke-linecap="round"/>
+                  <path class="rf-wave w2" d="M19 12 A17 17 0 0 1 45 12" stroke="#c084fc" stroke-width="1.4" stroke-linecap="round"/>
+                  <path class="rf-wave w3" d="M14 7 A23 23 0 0 1 50 7" stroke="#34d399" stroke-width="1.2" stroke-linecap="round"/>
+                </g>
+              </svg>
+            </div>
+
+            <div class="tile-top">
+              <span class="tile-code mono text-cyan">MAT</span>
+              <span class="tile-badge mono">ITALY</span>
+            </div>
+            <h3>Matera Dish</h3>
+            <p>Mediterranean station at <strong>40.65° N</strong> catching southern European arcs before satellites head over Africa and the open ocean.</p>
+            <div class="tile-tags mono"><span>40.65°N, 16.70°E</span><span>15s Re-lock</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         SECTION 4: INTERACTIVE WHAT-IF LAB
+         ========================================================= -->
+    <section id="whatif" class="section" data-camera="whatif">
+      <div class="container">
+        <div class="bento-card whatif-shell reveal-up">
+          <div class="whatif-copy">
+            <span class="eyebrow-index mono text-amber">04 — INTERACTIVE WHAT-IF LAB</span>
+            <h2>"What if we built one more dish?"</h2>
+            <p>
+              In the live console, click anywhere on Earth to place a new ground station. The browser re-runs the entire SGP4 orbit predictor and scheduler in <strong>under 200 milliseconds</strong>. Pick a location below to watch the globe and data jump:
+            </p>
+
+            <div class="preset-grid" id="whatif-presets">
+              <button class="preset-tile active magnetic" data-preset="base" data-cursor="EUROPE">
+                <span class="p-title">Baseline (Europe Only)</span>
+                <span class="mono p-coords">SVB + KIR + MAT</span>
+              </button>
+              <button class="preset-tile magnetic" data-preset="inuvik" data-cursor="CANADA">
+                <span class="p-title">+ Inuvik, Canada</span>
+                <span class="mono p-coords">68.36° N · Arctic</span>
+              </button>
+              <button class="preset-tile magnetic" data-preset="mcmurdo" data-cursor="ANTARCTICA">
+                <span class="p-title">+ McMurdo, Antarctica</span>
+                <span class="mono p-coords">77.85° S · South Pole</span>
+              </button>
+              <button class="preset-tile magnetic" data-preset="bengaluru" data-cursor="INDIA">
+                <span class="p-title">+ Bengaluru, India</span>
+                <span class="mono p-coords">12.97° N · Asia Gap</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="whatif-meter tilt-card" data-cursor="RESULT">
+            <div class="card-spotlight"></div>
+            <div class="meter-head mono">
+              <span class="text-muted">24-HOUR DATA DELIVERED</span>
+              <span class="text-emerald" id="wi-solve-time">118 MS SOLVE</span>
+            </div>
+
+            <div class="meter-hero mono" id="wi-delivered">999.2 GB</div>
+
+            <div class="meter-bar-bg">
+              <div class="meter-bar-val" id="wi-bar" style="width: 55%"></div>
+            </div>
+
+            <div class="meter-split">
+              <div>
+                <span class="mono text-xs text-muted">OVERFLOW LOST</span>
+                <strong class="mono text-coral" id="wi-overflow">1,400.8 GB</strong>
+              </div>
+              <div>
+                <span class="mono text-xs text-muted">GAIN VS EUROPE</span>
+                <strong class="mono text-amber" id="wi-lift">Baseline Q-Slice</strong>
+              </div>
+            </div>
+
+            <p class="meter-note" id="wi-note">
+              With only 3 European dishes, satellites still cross the Pacific and Southern Hemisphere with full memory buffers.
+            </p>
+
+            <a href="https://3sora.vercel.app/console" target="_blank" rel="noopener noreferrer" class="sat-cta sat-cta-primary sat-cta-wide magnetic" data-cursor="TRY LIVE">
+              <span class="sat-orbit-border" aria-hidden="true"></span>
+              <span class="sat-scan-beam" aria-hidden="true"></span>
+              <span class="sat-cta-content">
+                <span>Place Your Own Dish in Console</span>
+                <svg class="arrow-slide" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         FINAL LAUNCH PORTAL
+         ========================================================= -->
+    <section id="launch" class="section launch-section" data-camera="portal">
+      <div class="container">
+        <div class="portal-card tilt-card reveal-up" data-cursor="LAUNCH">
+          <div class="card-spotlight"></div>
+          <div class="portal-ring" aria-hidden="true"></div>
+          <span class="eyebrow-index mono text-emerald">MISSION CONTROL IS LIVE</span>
+          <h2>Take the Controls of Quantum Orbit Engine 3</h2>
+          <p>
+            Scrub 24 hours of real Sentinel-2 orbits at up to 300x speed, inspect 290 km optical swaths, compare Greedy vs. MILP vs. Q-Slice, and test your own global ground network.
+          </p>
+          <a href="https://3sora.vercel.app/console" target="_blank" rel="noopener noreferrer" class="sat-cta sat-cta-primary sat-cta-xl magnetic" data-cursor="3SORA">
+            <span class="sat-orbit-border" aria-hidden="true"></span>
+            <span class="sat-scan-beam" aria-hidden="true"></span>
+            <span class="sat-cta-content">
+              <span class="sat-icon" aria-hidden="true">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/>
+                </svg>
+              </span>
+              <span>Open 3sora.vercel.app/console</span>
+              <svg class="arrow-slide" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+            </span>
+          </a>
+          <div class="stack-strip mono">
+            <span>SGP4 Orbits</span>
+            <span>CelesTrak TLE</span>
+            <span>Cesium 3D Globe</span>
+            <span>LVLH 60 FPS</span>
+            <span>15s Q-Slice DP</span>
+            <span>&lt;200ms What-If</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-row mono">
+      <span>QUANTUM ORBIT ENGINE 3 &mdash; AUTONOMOUS MISSION SCHEDULING</span>
+      <a href="https://3sora.vercel.app/console" target="_blank" rel="noopener noreferrer" class="magnetic" data-cursor="OPEN">3sora.vercel.app/console &nearr;</a>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="js/scene4d.js"></script>
+  <script src="js/qsliceViz.js"></script>
+  <script src="js/app.js"></script>
+</body>
 </html>
